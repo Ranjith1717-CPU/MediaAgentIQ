@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rights Agent - MediaAgentIQ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body class="bg-slate-950 min-h-screen text-white">
+    <!-- Navigation -->
+    <nav class="bg-slate-900 border-b border-slate-800 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <a href="/" class="text-gray-400 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                </a>
+                <span class="text-3xl">📜</span>
+                <h1 class="text-2xl font-bold">Rights Agent</h1>
+            </div>
+            <span class="px-3 py-1 bg-orange-500/20 text-orange-400 rounded-full text-sm">
+                Avoid Legal Disputes
+            </span>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-6 py-8">
+        <!-- Actions -->
+        <div class="bg-slate-900 rounded-xl p-6 border border-slate-800 mb-8">
+            <h2 class="text-xl font-semibold mb-4">Rights Management Dashboard</h2>
+            <button onclick="checkRights()" id="check-btn" class="bg-orange-500 hover:bg-orange-600 px-6 py-3 rounded-lg font-semibold transition">
+                Check All Licenses & Rights
+            </button>
+
+            <div id="processing" class="hidden mt-6 flex items-center gap-3">
+                <div class="animate-spin w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full"></div>
+                <span class="text-gray-300">Checking licenses and scanning for violations...</span>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div id="results" class="hidden">
+            <!-- Stats -->
+            <div class="grid grid-cols-5 gap-4 mb-6">
+                <div class="bg-slate-900 rounded-xl p-4 border border-slate-800">
+                    <div class="text-3xl font-bold text-blue-400" id="stat-total">0</div>
+                    <div class="text-gray-400 text-sm">Total Licenses</div>
+                </div>
+                <div class="bg-slate-900 rounded-xl p-4 border border-slate-800">
+                    <div class="text-3xl font-bold text-green-400" id="stat-active">0</div>
+                    <div class="text-gray-400 text-sm">Active</div>
+                </div>
+                <div class="bg-slate-900 rounded-xl p-4 border border-slate-800">
+                    <div class="text-3xl font-bold text-yellow-400" id="stat-expiring">0</div>
+                    <div class="text-gray-400 text-sm">Expiring Soon</div>
+                </div>
+                <div class="bg-slate-900 rounded-xl p-4 border border-slate-800">
+                    <div class="text-3xl font-bold text-red-400" id="stat-violations">0</div>
+                    <div class="text-gray-400 text-sm">Violations</div>
+                </div>
+                <div class="bg-slate-900 rounded-xl p-4 border border-slate-800">
+                    <div class="text-xl font-bold text-purple-400" id="stat-value">$0</div>
+                    <div class="text-gray-400 text-sm">Annual Cost</div>
+                </div>
+            </div>
+
+            <!-- Alerts -->
+            <div class="bg-slate-900 rounded-xl p-6 border border-slate-800 mb-6">
+                <h3 class="text-lg font-semibold mb-4">Active Alerts</h3>
+                <div id="alerts-list" class="space-y-3">
+                    <!-- Alerts will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Licenses -->
+            <div class="bg-slate-900 rounded-xl p-6 border border-slate-800 mb-6">
+                <h3 class="text-lg font-semibold mb-4">Content Licenses</h3>
+                <div id="licenses-grid" class="space-y-3">
+                    <!-- Licenses will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Violations -->
+            <div class="bg-slate-900 rounded-xl p-6 border border-slate-800 mb-6">
+                <h3 class="text-lg font-semibold mb-4">Unauthorized Usage Detected</h3>
+                <div id="violations-grid" class="space-y-3">
+                    <!-- Violations will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Action Items -->
+            <div class="bg-slate-900 rounded-xl p-6 border border-slate-800">
+                <h3 class="text-lg font-semibold mb-4">Recommended Actions</h3>
+                <div id="actions-list" class="space-y-2">
+                    <!-- Actions will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        async function checkRights() {
+            document.getElementById('processing').classList.remove('hidden');
+            document.getElementById('results').classList.add('hidden');
+
+            try {
+                const response = await fetch('/api/rights/check', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+                const result = await response.json();
+                if (result.success) {
+                    displayResults(result.data);
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                document.getElementById('processing').classList.add('hidden');
+            }
+        }
+
+        function displayResults(data) {
+            document.getElementById('results').classList.remove('hidden');
+
+            // Stats
+            document.getElementById('stat-total').textContent = data.stats.total_licenses;
+            document.getElementById('stat-active').textContent = data.stats.active_licenses;
+            document.getElementById('stat-expiring').textContent = data.stats.expiring_30_days;
+            document.getElementById('stat-violations').textContent = data.stats.violations_detected;
+            document.getElementById('stat-value').textContent = data.stats.total_content_value;
+
+            // Alerts
+            const urgencyColors = {
+                critical: 'border-red-500 bg-red-500/10',
+                high: 'border-orange-500 bg-orange-500/10',
+                medium: 'border-yellow-500 bg-yellow-500/10'
+            };
+            document.getElementById('alerts-list').innerHTML = data.alerts.length > 0 ?
+                data.alerts.map(alert => `
+                    <div class="p-4 rounded-lg border-l-4 ${urgencyColors[alert.urgency] || 'border-blue-500 bg-blue-500/10'}">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="font-medium">${alert.title}</span>
+                            <span class="text-xs uppercase px-2 py-1 bg-slate-700 rounded">${alert.urgency}</span>
+                        </div>
+                        <p class="text-gray-400 text-sm">${alert.message}</p>
+                    </div>
+                `).join('') : '<p class="text-gray-500">No active alerts</p>';
+
+            // Licenses
+            document.getElementById('licenses-grid').innerHTML = data.licenses.map(license => `
+                <div class="p-4 bg-slate-800 rounded-lg">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-medium">${license.content_title}</span>
+                        <span class="px-2 py-1 ${license.status === 'active' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'} rounded text-xs">
+                            ${license.status}
+                        </span>
+                    </div>
+                    <div class="grid grid-cols-4 gap-4 text-sm mb-2">
+                        <div>
+                            <span class="text-gray-500">Licensor:</span>
+                            <span class="text-gray-300 ml-1">${license.licensor}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">Type:</span>
+                            <span class="text-gray-300 ml-1">${license.license_type}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">Expires:</span>
+                            <span class="text-gray-300 ml-1">${license.end_date || 'Never'}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">Cost:</span>
+                            <span class="text-gray-300 ml-1">${license.cost}</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-1 flex-wrap">
+                        ${license.rights.map(r => `<span class="px-2 py-0.5 bg-slate-700 rounded text-xs">${r}</span>`).join('')}
+                    </div>
+                </div>
+            `).join('');
+
+            // Violations
+            document.getElementById('violations-grid').innerHTML = data.violations.length > 0 ?
+                data.violations.map(v => `
+                    <div class="p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="font-medium text-red-400">${v.content_title}</span>
+                            <span class="text-xs uppercase px-2 py-1 bg-red-500/20 text-red-400 rounded">${v.severity}</span>
+                        </div>
+                        <div class="text-sm text-gray-400 mb-2">
+                            <div>Detected on: ${v.detected_on}</div>
+                            <div>Views: ${v.view_count.toLocaleString()}</div>
+                            <div>Est. Damages: ${v.estimated_damages}</div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="px-3 py-1 bg-red-500 hover:bg-red-600 rounded text-sm transition">
+                                File Takedown
+                            </button>
+                            <button class="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded text-sm transition">
+                                View Details
+                            </button>
+                        </div>
+                    </div>
+                `).join('') : '<p class="text-gray-500">No violations detected</p>';
+
+            // Action items
+            const priorityColors = {
+                high: 'text-red-400',
+                medium: 'text-yellow-400',
+                low: 'text-blue-400'
+            };
+            document.getElementById('actions-list').innerHTML = data.report.action_items.map(item => `
+                <div class="flex items-center gap-4 p-3 bg-slate-800 rounded-lg">
+                    <span class="w-2 h-2 ${item.priority === 'high' ? 'bg-red-400' : item.priority === 'medium' ? 'bg-yellow-400' : 'bg-blue-400'} rounded-full"></span>
+                    <span class="flex-1 ${priorityColors[item.priority]}">${item.action}</span>
+                    <span class="text-gray-500 text-sm">${item.deadline}</span>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>

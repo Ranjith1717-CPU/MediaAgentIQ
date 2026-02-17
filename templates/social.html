@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Publishing Agent - MediaAgentIQ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body class="bg-slate-950 min-h-screen text-white">
+    <!-- Navigation -->
+    <nav class="bg-slate-900 border-b border-slate-800 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <a href="/" class="text-gray-400 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                </a>
+                <span class="text-3xl">📱</span>
+                <h1 class="text-2xl font-bold">Social Publishing Agent</h1>
+            </div>
+            <span class="px-3 py-1 bg-pink-500/20 text-pink-400 rounded-full text-sm">
+                Always-on Social Presence
+            </span>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-6 py-8">
+        <!-- Content Input -->
+        <div class="bg-slate-900 rounded-xl p-6 border border-slate-800 mb-8">
+            <h2 class="text-xl font-semibold mb-4">Create Social Posts</h2>
+            <p class="text-gray-400 mb-4">Generate optimized posts for all major platforms from your broadcast content.</p>
+
+            <button onclick="generatePosts()" id="generate-btn" class="bg-pink-500 hover:bg-pink-600 px-6 py-3 rounded-lg font-semibold transition">
+                Generate Social Posts from Latest Highlights
+            </button>
+
+            <div id="processing" class="hidden mt-6 flex items-center gap-3">
+                <div class="animate-spin w-6 h-6 border-2 border-pink-500 border-t-transparent rounded-full"></div>
+                <span class="text-gray-300">Generating optimized posts for all platforms...</span>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div id="results" class="hidden">
+            <!-- Stats -->
+            <div class="grid grid-cols-4 gap-4 mb-6">
+                <div class="bg-slate-900 rounded-xl p-4 border border-slate-800">
+                    <div class="text-3xl font-bold text-pink-400" id="stat-posts">0</div>
+                    <div class="text-gray-400 text-sm">Posts Generated</div>
+                </div>
+                <div class="bg-slate-900 rounded-xl p-4 border border-slate-800">
+                    <div class="text-3xl font-bold text-blue-400" id="stat-platforms">0</div>
+                    <div class="text-gray-400 text-sm">Platforms</div>
+                </div>
+                <div class="bg-slate-900 rounded-xl p-4 border border-slate-800">
+                    <div class="text-3xl font-bold text-green-400" id="stat-scheduled">0</div>
+                    <div class="text-gray-400 text-sm">Scheduled</div>
+                </div>
+                <div class="bg-slate-900 rounded-xl p-4 border border-slate-800">
+                    <div class="text-2xl font-bold text-purple-400" id="stat-reach">0</div>
+                    <div class="text-gray-400 text-sm">Est. Reach</div>
+                </div>
+            </div>
+
+            <!-- Posts by Platform -->
+            <div class="grid grid-cols-3 gap-6">
+                <!-- Twitter/X -->
+                <div class="bg-slate-900 rounded-xl p-6 border border-slate-800">
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="text-2xl">𝕏</span>
+                        <h3 class="text-lg font-semibold">Twitter/X</h3>
+                    </div>
+                    <div id="twitter-posts" class="space-y-3">
+                        <!-- Posts will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Instagram -->
+                <div class="bg-slate-900 rounded-xl p-6 border border-slate-800">
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="text-2xl">📸</span>
+                        <h3 class="text-lg font-semibold">Instagram</h3>
+                    </div>
+                    <div id="instagram-posts" class="space-y-3">
+                        <!-- Posts will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- TikTok -->
+                <div class="bg-slate-900 rounded-xl p-6 border border-slate-800">
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="text-2xl">🎵</span>
+                        <h3 class="text-lg font-semibold">TikTok</h3>
+                    </div>
+                    <div id="tiktok-posts" class="space-y-3">
+                        <!-- Posts will be inserted here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Schedule -->
+            <div class="bg-slate-900 rounded-xl p-6 border border-slate-800 mt-6">
+                <h3 class="text-lg font-semibold mb-4">Posting Schedule</h3>
+                <div id="schedule-grid" class="grid grid-cols-4 gap-4">
+                    <!-- Schedule items will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Hashtag Suggestions -->
+            <div class="bg-slate-900 rounded-xl p-6 border border-slate-800 mt-6">
+                <h3 class="text-lg font-semibold mb-4">Trending Hashtags</h3>
+                <div id="hashtags" class="flex flex-wrap gap-2">
+                    <!-- Hashtags will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        async function generatePosts() {
+            document.getElementById('processing').classList.remove('hidden');
+            document.getElementById('results').classList.add('hidden');
+            document.getElementById('generate-btn').disabled = true;
+
+            try {
+                const response = await fetch('/api/social/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: 'demo' })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    displayResults(result.data);
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                document.getElementById('processing').classList.add('hidden');
+                document.getElementById('generate-btn').disabled = false;
+            }
+        }
+
+        function displayResults(data) {
+            document.getElementById('results').classList.remove('hidden');
+
+            // Stats
+            document.getElementById('stat-posts').textContent = data.stats.total_posts;
+            document.getElementById('stat-platforms').textContent = data.stats.platforms.length;
+            document.getElementById('stat-scheduled').textContent = data.stats.scheduled_count;
+            document.getElementById('stat-reach').textContent = data.stats.estimated_reach;
+
+            // Posts by platform
+            const renderPost = (post) => `
+                <div class="bg-slate-800 rounded-lg p-4">
+                    <p class="text-gray-300 text-sm mb-3 line-clamp-4">${post.content}</p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 mb-3">
+                        <span>${post.char_count} chars</span>
+                        <span>${post.best_time}</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="copyToClipboard(this, '${encodeURIComponent(post.content)}')" class="flex-1 bg-slate-700 hover:bg-slate-600 py-2 rounded text-sm transition">
+                            Copy
+                        </button>
+                        <button class="flex-1 bg-pink-500/20 text-pink-400 hover:bg-pink-500/30 py-2 rounded text-sm transition">
+                            Schedule
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('twitter-posts').innerHTML = data.posts.filter(p => p.platform === 'twitter').map(renderPost).join('');
+            document.getElementById('instagram-posts').innerHTML = data.posts.filter(p => p.platform === 'instagram').map(renderPost).join('');
+            document.getElementById('tiktok-posts').innerHTML = data.posts.filter(p => p.platform === 'tiktok').map(renderPost).join('');
+
+            // Schedule
+            document.getElementById('schedule-grid').innerHTML = data.schedule.map(item => `
+                <div class="bg-slate-800 rounded-lg p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-medium">${item.platform}</span>
+                        <span class="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs">${item.status}</span>
+                    </div>
+                    <div class="text-gray-400 text-sm">${item.scheduled_time_formatted}</div>
+                    <div class="text-gray-500 text-xs mt-1">Optimal: ${item.optimal_time}</div>
+                </div>
+            `).join('');
+
+            // Hashtags
+            document.getElementById('hashtags').innerHTML = [
+                ...data.hashtags.trending,
+                ...data.hashtags.niche
+            ].map(tag => `
+                <span class="px-3 py-1 bg-slate-800 hover:bg-slate-700 rounded-full text-sm cursor-pointer transition">${tag}</span>
+            `).join('');
+        }
+
+        function copyToClipboard(btn, encodedText) {
+            const text = decodeURIComponent(encodedText);
+            navigator.clipboard.writeText(text);
+            btn.textContent = 'Copied!';
+            setTimeout(() => btn.textContent = 'Copy', 2000);
+        }
+    </script>
+</body>
+</html>

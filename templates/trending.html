@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trending Agent - MediaAgentIQ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body class="bg-slate-950 min-h-screen text-white">
+    <!-- Navigation -->
+    <nav class="bg-slate-900 border-b border-slate-800 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <a href="/" class="text-gray-400 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                </a>
+                <span class="text-3xl">📈</span>
+                <h1 class="text-2xl font-bold">Trending Agent</h1>
+            </div>
+            <div class="flex items-center gap-4">
+                <span class="px-3 py-1 bg-yellow-500/20 text-yellow-400 rounded-full text-sm">
+                    Never Miss a Story
+                </span>
+                <span id="last-updated" class="text-gray-500 text-sm"></span>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-6 py-8">
+        <!-- Controls -->
+        <div class="flex justify-between items-center mb-6">
+            <div class="flex gap-2">
+                <button onclick="filterCategory('')" class="category-btn px-4 py-2 bg-yellow-500 text-black rounded-lg font-medium">All</button>
+                <button onclick="filterCategory('politics')" class="category-btn px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg">Politics</button>
+                <button onclick="filterCategory('business')" class="category-btn px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg">Business</button>
+                <button onclick="filterCategory('technology')" class="category-btn px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg">Technology</button>
+                <button onclick="filterCategory('entertainment')" class="category-btn px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg">Entertainment</button>
+                <button onclick="filterCategory('sports')" class="category-btn px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg">Sports</button>
+            </div>
+            <button onclick="refreshTrends()" id="refresh-btn" class="bg-yellow-500 hover:bg-yellow-600 text-black px-4 py-2 rounded-lg font-medium transition flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                Refresh
+            </button>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading" class="text-center py-12">
+            <div class="animate-spin w-12 h-12 border-4 border-yellow-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p class="text-gray-400">Monitoring trends and news feeds...</p>
+        </div>
+
+        <!-- Results -->
+        <div id="results" class="hidden">
+            <!-- Newsroom Alerts -->
+            <div class="bg-slate-900 rounded-xl p-6 border border-slate-800 mb-6">
+                <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <span class="w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
+                    Newsroom Alerts
+                </h3>
+                <div id="alerts-grid" class="space-y-3">
+                    <!-- Alerts will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Breaking News -->
+            <div class="bg-slate-900 rounded-xl p-6 border border-slate-800 mb-6">
+                <h3 class="text-lg font-semibold mb-4">🔴 Breaking News</h3>
+                <div id="breaking-grid" class="space-y-3">
+                    <!-- Breaking news will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Trending Topics -->
+            <div class="bg-slate-900 rounded-xl p-6 border border-slate-800 mb-6">
+                <h3 class="text-lg font-semibold mb-4">Trending Topics</h3>
+                <div id="trends-grid" class="grid grid-cols-2 gap-4">
+                    <!-- Trends will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Viral Content -->
+            <div class="bg-slate-900 rounded-xl p-6 border border-slate-800 mb-6">
+                <h3 class="text-lg font-semibold mb-4">🔥 Viral Content</h3>
+                <div id="viral-grid" class="grid grid-cols-2 gap-4">
+                    <!-- Viral content will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Story Suggestions -->
+            <div class="bg-slate-900 rounded-xl p-6 border border-slate-800">
+                <h3 class="text-lg font-semibold mb-4">📝 Story Suggestions</h3>
+                <div id="suggestions-grid" class="space-y-3">
+                    <!-- Suggestions will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentCategory = '';
+
+        // Load on page load
+        window.onload = () => refreshTrends();
+
+        async function refreshTrends() {
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('results').classList.add('hidden');
+
+            try {
+                const response = await fetch('/api/trending/monitor', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filters: { category: currentCategory } })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    displayResults(result.data);
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                document.getElementById('loading').classList.add('hidden');
+            }
+        }
+
+        function filterCategory(category) {
+            currentCategory = category;
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('bg-yellow-500', 'text-black');
+                btn.classList.add('bg-slate-800');
+            });
+            event.target.classList.remove('bg-slate-800');
+            event.target.classList.add('bg-yellow-500', 'text-black');
+            refreshTrends();
+        }
+
+        function displayResults(data) {
+            document.getElementById('results').classList.remove('hidden');
+            document.getElementById('last-updated').textContent = `Updated: ${new Date().toLocaleTimeString()}`;
+
+            // Alerts
+            const priorityColors = {
+                high: 'border-red-500 bg-red-500/10',
+                medium: 'border-yellow-500 bg-yellow-500/10',
+                low: 'border-blue-500 bg-blue-500/10'
+            };
+            document.getElementById('alerts-grid').innerHTML = data.alerts.slice(0, 5).map(alert => `
+                <div class="p-4 rounded-lg border-l-4 ${priorityColors[alert.priority]}">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-medium">${alert.title}</span>
+                        <span class="text-xs uppercase px-2 py-1 bg-slate-700 rounded">${alert.priority}</span>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-2">${alert.message}</p>
+                    <div class="flex items-center justify-between text-xs text-gray-500">
+                        <span>Source: ${alert.source}</span>
+                        <span>${alert.action_required}</span>
+                    </div>
+                </div>
+            `).join('') || '<p class="text-gray-500">No alerts at this time</p>';
+
+            // Breaking News
+            document.getElementById('breaking-grid').innerHTML = data.breaking_news.map(news => `
+                <div class="p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+                    <div class="flex items-center gap-2 mb-2">
+                        ${news.developing ? '<span class="px-2 py-0.5 bg-red-500 text-white text-xs rounded animate-pulse">DEVELOPING</span>' : ''}
+                        <span class="text-xs text-gray-400">${news.source}</span>
+                    </div>
+                    <h4 class="font-semibold mb-2">${news.headline}</h4>
+                    <p class="text-gray-400 text-sm mb-3">${news.summary}</p>
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        ${news.key_facts.slice(0, 2).map(fact => `<span class="text-xs bg-slate-700 px-2 py-1 rounded">• ${fact}</span>`).join('')}
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-yellow-400 text-sm">${news.coverage_recommendation}</span>
+                        <button class="px-3 py-1 bg-red-500 hover:bg-red-600 rounded text-sm transition">Cover Story</button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Trends
+            const velocityColors = {
+                exploding: 'text-red-400',
+                rising: 'text-green-400',
+                stable: 'text-blue-400'
+            };
+            document.getElementById('trends-grid').innerHTML = data.trends.map(trend => `
+                <div class="p-4 bg-slate-800 rounded-lg">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-medium">${trend.topic}</span>
+                        <span class="px-2 py-1 bg-slate-700 rounded text-xs">${trend.category}</span>
+                    </div>
+                    <div class="flex items-center gap-4 text-sm mb-3">
+                        <span class="${velocityColors[trend.velocity]}">
+                            ${trend.velocity === 'exploding' ? '🚀' : trend.velocity === 'rising' ? '📈' : '📊'} ${trend.velocity}
+                        </span>
+                        <span class="text-gray-400">${trend.volume}</span>
+                    </div>
+                    <div class="flex flex-wrap gap-1 mb-3">
+                        ${trend.related_hashtags.slice(0, 3).map(tag => `<span class="text-blue-400 text-xs">${tag}</span>`).join(' ')}
+                    </div>
+                    <div class="text-xs text-gray-500">
+                        Sentiment: <span class="${trend.sentiment === 'positive' ? 'text-green-400' : trend.sentiment === 'negative' ? 'text-red-400' : 'text-gray-400'}">${trend.sentiment}</span>
+                    </div>
+                </div>
+            `).join('');
+
+            // Viral content
+            document.getElementById('viral-grid').innerHTML = data.viral_content.map(content => `
+                <div class="p-4 bg-slate-800 rounded-lg">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-medium">${content.title}</span>
+                        <span class="text-xs bg-purple-500/20 text-purple-400 px-2 py-1 rounded">${content.platform}</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 text-sm text-gray-400 mb-3">
+                        <div>👀 ${content.views}</div>
+                        <div>🔄 ${content.shares}</div>
+                        <div>📊 ${content.engagement_rate}</div>
+                    </div>
+                    <div class="text-green-400 text-sm mb-3">${content.growth_rate}</div>
+                    ${content.content_warning ? `<div class="text-yellow-400 text-xs mb-2">⚠️ ${content.content_warning}</div>` : ''}
+                    <button class="w-full px-3 py-2 bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 rounded text-sm transition">
+                        ${content.licensing_available ? 'Request License' : 'View Content'}
+                    </button>
+                </div>
+            `).join('');
+
+            // Story suggestions
+            const priorityBadges = {
+                high: 'bg-red-500/20 text-red-400',
+                medium: 'bg-yellow-500/20 text-yellow-400',
+                low: 'bg-blue-500/20 text-blue-400'
+            };
+            document.getElementById('suggestions-grid').innerHTML = data.story_suggestions.map(story => `
+                <div class="p-4 bg-slate-800 rounded-lg">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-medium">${story.headline_suggestion}</span>
+                        <span class="px-2 py-1 ${priorityBadges[story.priority]} rounded text-xs">${story.priority}</span>
+                    </div>
+                    <div class="text-gray-400 text-sm mb-2">Based on: ${story.based_on}</div>
+                    <div class="text-gray-400 text-sm mb-3">
+                        <span class="text-gray-500">Type:</span> ${story.story_type} |
+                        <span class="text-gray-500">Deadline:</span> ${story.deadline_suggestion}
+                    </div>
+                    <div class="flex flex-wrap gap-1 mb-3">
+                        ${story.visual_suggestions.map(v => `<span class="text-xs bg-slate-700 px-2 py-1 rounded">${v}</span>`).join('')}
+                    </div>
+                    <button class="w-full px-3 py-2 bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30 rounded text-sm transition">
+                        Assign Story
+                    </button>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Localization Agent - MediaAgentIQ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body class="bg-slate-950 min-h-screen text-white">
+    <!-- Navigation -->
+    <nav class="bg-slate-900 border-b border-slate-800 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <a href="/" class="text-gray-400 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                </a>
+                <span class="text-3xl">🌍</span>
+                <h1 class="text-2xl font-bold">Localization Agent</h1>
+            </div>
+            <span class="px-3 py-1 bg-cyan-500/20 text-cyan-400 rounded-full text-sm">
+                Faster Global Distribution
+            </span>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-6 py-8">
+        <!-- Language Selection -->
+        <div class="bg-slate-900 rounded-xl p-6 border border-slate-800 mb-8">
+            <h2 class="text-xl font-semibold mb-4">Select Target Languages</h2>
+
+            <div class="grid grid-cols-4 gap-3 mb-6" id="language-grid">
+                <label class="language-option">
+                    <input type="checkbox" value="es" checked class="hidden">
+                    <div class="p-3 bg-slate-800 rounded-lg cursor-pointer hover:bg-slate-700 transition border-2 border-transparent data-checked:border-cyan-500">
+                        <span class="text-2xl">🇪🇸</span>
+                        <span class="ml-2">Spanish</span>
+                    </div>
+                </label>
+                <label class="language-option">
+                    <input type="checkbox" value="fr" checked class="hidden">
+                    <div class="p-3 bg-slate-800 rounded-lg cursor-pointer hover:bg-slate-700 transition border-2 border-transparent">
+                        <span class="text-2xl">🇫🇷</span>
+                        <span class="ml-2">French</span>
+                    </div>
+                </label>
+                <label class="language-option">
+                    <input type="checkbox" value="de" checked class="hidden">
+                    <div class="p-3 bg-slate-800 rounded-lg cursor-pointer hover:bg-slate-700 transition border-2 border-transparent">
+                        <span class="text-2xl">🇩🇪</span>
+                        <span class="ml-2">German</span>
+                    </div>
+                </label>
+                <label class="language-option">
+                    <input type="checkbox" value="zh" class="hidden">
+                    <div class="p-3 bg-slate-800 rounded-lg cursor-pointer hover:bg-slate-700 transition border-2 border-transparent">
+                        <span class="text-2xl">🇨🇳</span>
+                        <span class="ml-2">Chinese</span>
+                    </div>
+                </label>
+                <label class="language-option">
+                    <input type="checkbox" value="ja" class="hidden">
+                    <div class="p-3 bg-slate-800 rounded-lg cursor-pointer hover:bg-slate-700 transition border-2 border-transparent">
+                        <span class="text-2xl">🇯🇵</span>
+                        <span class="ml-2">Japanese</span>
+                    </div>
+                </label>
+                <label class="language-option">
+                    <input type="checkbox" value="pt" class="hidden">
+                    <div class="p-3 bg-slate-800 rounded-lg cursor-pointer hover:bg-slate-700 transition border-2 border-transparent">
+                        <span class="text-2xl">🇧🇷</span>
+                        <span class="ml-2">Portuguese</span>
+                    </div>
+                </label>
+                <label class="language-option">
+                    <input type="checkbox" value="ar" class="hidden">
+                    <div class="p-3 bg-slate-800 rounded-lg cursor-pointer hover:bg-slate-700 transition border-2 border-transparent">
+                        <span class="text-2xl">🇸🇦</span>
+                        <span class="ml-2">Arabic</span>
+                    </div>
+                </label>
+                <label class="language-option">
+                    <input type="checkbox" value="hi" class="hidden">
+                    <div class="p-3 bg-slate-800 rounded-lg cursor-pointer hover:bg-slate-700 transition border-2 border-transparent">
+                        <span class="text-2xl">🇮🇳</span>
+                        <span class="ml-2">Hindi</span>
+                    </div>
+                </label>
+            </div>
+
+            <button onclick="translateContent()" id="translate-btn" class="bg-cyan-500 hover:bg-cyan-600 px-6 py-3 rounded-lg font-semibold transition">
+                Start Localization
+            </button>
+
+            <div id="processing" class="hidden mt-6 flex items-center gap-3">
+                <div class="animate-spin w-6 h-6 border-2 border-cyan-500 border-t-transparent rounded-full"></div>
+                <span class="text-gray-300">Translating content...</span>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div id="results" class="hidden">
+            <!-- Stats -->
+            <div class="grid grid-cols-4 gap-4 mb-6">
+                <div class="bg-slate-900 rounded-xl p-4 border border-slate-800">
+                    <div class="text-3xl font-bold text-cyan-400" id="stat-languages">0</div>
+                    <div class="text-gray-400 text-sm">Languages</div>
+                </div>
+                <div class="bg-slate-900 rounded-xl p-4 border border-slate-800">
+                    <div class="text-3xl font-bold text-green-400" id="stat-segments">0</div>
+                    <div class="text-gray-400 text-sm">Segments</div>
+                </div>
+                <div class="bg-slate-900 rounded-xl p-4 border border-slate-800">
+                    <div class="text-3xl font-bold text-purple-400" id="stat-dubs">0</div>
+                    <div class="text-gray-400 text-sm">Dubs Available</div>
+                </div>
+                <div class="bg-slate-900 rounded-xl p-4 border border-slate-800">
+                    <div class="text-2xl font-bold text-blue-400" id="stat-time">0</div>
+                    <div class="text-gray-400 text-sm">Est. Time</div>
+                </div>
+            </div>
+
+            <!-- Translations -->
+            <div class="bg-slate-900 rounded-xl p-6 border border-slate-800 mb-6">
+                <h3 class="text-lg font-semibold mb-4">Translations</h3>
+                <div id="translations-grid" class="space-y-4">
+                    <!-- Translations will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Workflow -->
+            <div class="bg-slate-900 rounded-xl p-6 border border-slate-800 mb-6">
+                <h3 class="text-lg font-semibold mb-4">Localization Workflow</h3>
+                <div id="workflow-steps" class="space-y-3">
+                    <!-- Workflow will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Quality Report -->
+            <div class="bg-slate-900 rounded-xl p-6 border border-slate-800">
+                <h3 class="text-lg font-semibold mb-4">Quality Assessment</h3>
+                <div id="quality-grid" class="grid grid-cols-3 gap-4">
+                    <!-- Quality scores will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Language selection
+        document.querySelectorAll('.language-option').forEach(label => {
+            const checkbox = label.querySelector('input');
+            const div = label.querySelector('div');
+
+            if (checkbox.checked) {
+                div.classList.add('border-cyan-500');
+            }
+
+            label.addEventListener('click', () => {
+                checkbox.checked = !checkbox.checked;
+                div.classList.toggle('border-cyan-500', checkbox.checked);
+            });
+        });
+
+        async function translateContent() {
+            const languages = Array.from(document.querySelectorAll('.language-option input:checked')).map(cb => cb.value);
+
+            if (languages.length === 0) {
+                alert('Please select at least one language');
+                return;
+            }
+
+            document.getElementById('processing').classList.remove('hidden');
+            document.getElementById('results').classList.add('hidden');
+
+            try {
+                const response = await fetch('/api/localization/translate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        content: 'demo',
+                        target_languages: languages
+                    })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    displayResults(result.data);
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                document.getElementById('processing').classList.add('hidden');
+            }
+        }
+
+        function displayResults(data) {
+            document.getElementById('results').classList.remove('hidden');
+
+            // Stats
+            document.getElementById('stat-languages').textContent = data.stats.target_languages;
+            document.getElementById('stat-segments').textContent = data.stats.total_segments;
+            document.getElementById('stat-dubs').textContent = data.stats.dub_available;
+            document.getElementById('stat-time').textContent = data.stats.estimated_time;
+
+            // Translations
+            const flags = {
+                es: '🇪🇸', fr: '🇫🇷', de: '🇩🇪', zh: '🇨🇳',
+                ja: '🇯🇵', pt: '🇧🇷', ar: '🇸🇦', hi: '🇮🇳'
+            };
+
+            document.getElementById('translations-grid').innerHTML = Object.entries(data.translations).map(([lang, trans]) => `
+                <div class="bg-slate-800 rounded-lg p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="text-2xl">${flags[lang] || '🌐'}</span>
+                            <span class="font-medium">${trans.language_name}</span>
+                            <span class="text-gray-500">(${trans.native_name})</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="downloadTranslation('${lang}', 'srt')" class="px-3 py-1 bg-green-500/20 text-green-400 rounded text-sm hover:bg-green-500/30 transition">
+                                Download SRT
+                            </button>
+                            <button onclick="downloadTranslation('${lang}', 'vtt')" class="px-3 py-1 bg-blue-500/20 text-blue-400 rounded text-sm hover:bg-blue-500/30 transition">
+                                Download VTT
+                            </button>
+                        </div>
+                    </div>
+                    <div class="space-y-2 max-h-48 overflow-y-auto">
+                        ${trans.segments.slice(0, 3).map(seg => `
+                            <div class="p-2 bg-slate-700 rounded text-sm">
+                                <div class="text-gray-400 text-xs mb-1">${seg.original}</div>
+                                <div class="text-white">${seg.translated}</div>
+                            </div>
+                        `).join('')}
+                        ${trans.segments.length > 3 ? `<div class="text-gray-500 text-sm text-center">+${trans.segments.length - 3} more segments</div>` : ''}
+                    </div>
+                </div>
+            `).join('');
+
+            // Workflow
+            const statusColors = {
+                completed: 'bg-green-500',
+                pending: 'bg-slate-600'
+            };
+            document.getElementById('workflow-steps').innerHTML = data.workflow.steps.map(step => `
+                <div class="flex items-center gap-4 p-3 bg-slate-800 rounded-lg">
+                    <div class="w-8 h-8 ${statusColors[step.status]} rounded-full flex items-center justify-center text-sm font-bold">
+                        ${step.status === 'completed' ? '✓' : step.step}
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-medium">${step.name}</div>
+                        <div class="text-gray-400 text-sm">${step.details}</div>
+                    </div>
+                    <div class="text-gray-500 text-sm">${step.progress}%</div>
+                </div>
+            `).join('');
+
+            // Quality
+            document.getElementById('quality-grid').innerHTML = Object.entries(data.quality_report.language_scores).map(([lang, score]) => `
+                <div class="bg-slate-800 rounded-lg p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-medium">${score.language}</span>
+                        <span class="text-2xl font-bold ${score.overall_score >= 90 ? 'text-green-400' : score.overall_score >= 80 ? 'text-yellow-400' : 'text-red-400'}">
+                            ${score.overall_score}%
+                        </span>
+                    </div>
+                    <div class="space-y-1 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Fluency</span>
+                            <span>${score.fluency}%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Accuracy</span>
+                            <span>${score.accuracy}%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Cultural</span>
+                            <span>${score.cultural_adaptation}%</span>
+                        </div>
+                    </div>
+                    ${score.segments_needing_review > 0 ? `
+                        <div class="mt-2 p-2 bg-yellow-500/10 rounded text-yellow-400 text-xs">
+                            ${score.segments_needing_review} segments need review
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        function downloadTranslation(lang, format) {
+            alert(`Downloading ${lang.toUpperCase()} ${format.toUpperCase()} file...`);
+        }
+    </script>
+</body>
+</html>

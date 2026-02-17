@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compliance Agent - MediaAgentIQ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body class="bg-slate-950 min-h-screen text-white">
+    <!-- Navigation -->
+    <nav class="bg-slate-900 border-b border-slate-800 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <a href="/" class="text-gray-400 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                </a>
+                <span class="text-3xl">⚖️</span>
+                <h1 class="text-2xl font-bold">Compliance Agent</h1>
+            </div>
+            <span class="px-3 py-1 bg-red-500/20 text-red-400 rounded-full text-sm">
+                Avoid $500K+ Fines
+            </span>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-6 py-8">
+        <div class="grid grid-cols-3 gap-8">
+            <!-- Scan Section -->
+            <div class="col-span-2 bg-slate-900 rounded-xl p-6 border border-slate-800">
+                <h2 class="text-xl font-semibold mb-4">FCC Compliance Scan</h2>
+
+                <div class="mb-6">
+                    <div class="border-2 border-dashed border-slate-700 rounded-xl p-6 text-center hover:border-red-500 transition cursor-pointer" onclick="document.getElementById('file-input').click()">
+                        <input type="file" id="file-input" class="hidden" accept=".mp4,.mov,.avi,.mkv,.webm,.mp3,.wav">
+                        <div class="text-4xl mb-2">📁</div>
+                        <p class="text-gray-400">Upload video/audio to scan</p>
+                    </div>
+                    <div id="file-preview" class="hidden mt-2 p-3 bg-slate-800 rounded-lg flex justify-between items-center">
+                        <span id="file-name" class="text-gray-300"></span>
+                        <button onclick="clearFile()" class="text-red-400 text-sm">Remove</button>
+                    </div>
+                </div>
+
+                <div class="text-center text-gray-500 mb-4">— or —</div>
+
+                <div class="mb-6">
+                    <label class="text-gray-400 text-sm mb-2 block">Paste transcript for text-only scan</label>
+                    <textarea id="transcript-input" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-4 text-white h-32 resize-none focus:border-red-500 focus:outline-none" placeholder="Paste transcript text here..."></textarea>
+                </div>
+
+                <button id="scan-btn" onclick="runScan()" class="w-full bg-red-500 hover:bg-red-600 py-3 rounded-lg font-semibold transition">
+                    Run Compliance Scan
+                </button>
+
+                <div id="processing" class="hidden mt-6 text-center">
+                    <div class="animate-spin w-8 h-8 border-4 border-red-500 border-t-transparent rounded-full mx-auto mb-2"></div>
+                    <p class="text-gray-400">Scanning for compliance issues...</p>
+                </div>
+            </div>
+
+            <!-- Compliance Checks -->
+            <div class="bg-slate-900 rounded-xl p-6 border border-slate-800">
+                <h2 class="text-xl font-semibold mb-4">What We Check</h2>
+                <div class="space-y-3">
+                    <div class="p-3 bg-slate-800 rounded-lg">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span>🔞</span>
+                            <span class="font-medium">Profanity/Indecency</span>
+                        </div>
+                        <p class="text-gray-400 text-sm">FCC § 326 violations</p>
+                    </div>
+                    <div class="p-3 bg-slate-800 rounded-lg">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span>🗳️</span>
+                            <span class="font-medium">Political Ads</span>
+                        </div>
+                        <p class="text-gray-400 text-sm">Disclosure requirements</p>
+                    </div>
+                    <div class="p-3 bg-slate-800 rounded-lg">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span>💰</span>
+                            <span class="font-medium">Sponsor ID</span>
+                        </div>
+                        <p class="text-gray-400 text-sm">FCC § 317 compliance</p>
+                    </div>
+                    <div class="p-3 bg-slate-800 rounded-lg">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span>📺</span>
+                            <span class="font-medium">Caption Quality</span>
+                        </div>
+                        <p class="text-gray-400 text-sm">ADA accessibility</p>
+                    </div>
+                    <div class="p-3 bg-slate-800 rounded-lg">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span>🚨</span>
+                            <span class="font-medium">EAS Compliance</span>
+                        </div>
+                        <p class="text-gray-400 text-sm">Emergency alerts</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results" class="hidden mt-8">
+            <!-- Risk Score -->
+            <div class="bg-slate-900 rounded-xl p-6 border border-slate-800 mb-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-semibold">Compliance Score</h2>
+                    <div id="risk-badge" class="px-4 py-2 rounded-lg font-bold text-lg">
+                        <!-- Score will be inserted here -->
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-4 gap-4">
+                    <div class="bg-slate-800 rounded-lg p-4 text-center">
+                        <div class="text-3xl font-bold text-red-400" id="stat-critical">0</div>
+                        <div class="text-gray-400 text-sm">Critical</div>
+                    </div>
+                    <div class="bg-slate-800 rounded-lg p-4 text-center">
+                        <div class="text-3xl font-bold text-orange-400" id="stat-high">0</div>
+                        <div class="text-gray-400 text-sm">High</div>
+                    </div>
+                    <div class="bg-slate-800 rounded-lg p-4 text-center">
+                        <div class="text-3xl font-bold text-yellow-400" id="stat-medium">0</div>
+                        <div class="text-gray-400 text-sm">Medium</div>
+                    </div>
+                    <div class="bg-slate-800 rounded-lg p-4 text-center">
+                        <div class="text-3xl font-bold text-blue-400" id="stat-low">0</div>
+                        <div class="text-gray-400 text-sm">Low</div>
+                    </div>
+                </div>
+
+                <div class="mt-4 p-4 bg-slate-800 rounded-lg">
+                    <span class="text-gray-400">Potential Fines: </span>
+                    <span id="potential-fines" class="text-red-400 font-bold">$0</span>
+                </div>
+            </div>
+
+            <!-- Issues List -->
+            <div class="bg-slate-900 rounded-xl p-6 border border-slate-800 mb-6">
+                <h2 class="text-xl font-semibold mb-4">Issues Found</h2>
+                <div id="issues-list" class="space-y-3">
+                    <!-- Issues will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Compliance Checklist -->
+            <div class="bg-slate-900 rounded-xl p-6 border border-slate-800">
+                <h2 class="text-xl font-semibold mb-4">Compliance Checklist</h2>
+                <div id="checklist" class="grid grid-cols-2 gap-4">
+                    <!-- Checklist will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const fileInput = document.getElementById('file-input');
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                document.getElementById('file-name').textContent = e.target.files[0].name;
+                document.getElementById('file-preview').classList.remove('hidden');
+            }
+        });
+
+        function clearFile() {
+            fileInput.value = '';
+            document.getElementById('file-preview').classList.add('hidden');
+        }
+
+        async function runScan() {
+            document.getElementById('processing').classList.remove('hidden');
+            document.getElementById('results').classList.add('hidden');
+
+            const formData = new FormData();
+            if (fileInput.files.length) {
+                formData.append('file', fileInput.files[0]);
+            }
+            const transcript = document.getElementById('transcript-input').value;
+            if (transcript) {
+                formData.append('transcript', transcript);
+            }
+
+            try {
+                const response = await fetch('/api/compliance/scan', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                if (result.success) {
+                    displayResults(result.data);
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                document.getElementById('processing').classList.add('hidden');
+            }
+        }
+
+        function displayResults(data) {
+            document.getElementById('results').classList.remove('hidden');
+
+            // Risk score
+            const risk = data.risk_score;
+            const riskBadge = document.getElementById('risk-badge');
+            const colors = {
+                green: 'bg-green-500',
+                yellow: 'bg-yellow-500',
+                orange: 'bg-orange-500',
+                red: 'bg-red-500'
+            };
+            riskBadge.className = `px-4 py-2 rounded-lg font-bold text-lg ${colors[risk.color]}`;
+            riskBadge.textContent = `${risk.score}/100`;
+
+            // Stats
+            document.getElementById('stat-critical').textContent = data.stats.critical_count;
+            document.getElementById('stat-high').textContent = data.stats.high_count;
+            document.getElementById('stat-medium').textContent = data.stats.medium_count;
+            document.getElementById('stat-low').textContent = data.stats.low_count;
+            document.getElementById('potential-fines').textContent = data.stats.potential_fines;
+
+            // Issues
+            const severityColors = {
+                critical: 'border-red-500 bg-red-500/10',
+                high: 'border-orange-500 bg-orange-500/10',
+                medium: 'border-yellow-500 bg-yellow-500/10',
+                low: 'border-blue-500 bg-blue-500/10'
+            };
+
+            document.getElementById('issues-list').innerHTML = data.issues.map(issue => `
+                <div class="p-4 rounded-lg border-l-4 ${severityColors[issue.severity]}">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-medium">${issue.description}</span>
+                        <span class="text-xs uppercase px-2 py-1 bg-slate-700 rounded">${issue.severity}</span>
+                    </div>
+                    ${issue.timestamp_formatted ? `<div class="text-gray-400 text-sm mb-2">Timestamp: ${issue.timestamp_formatted}</div>` : ''}
+                    <div class="text-gray-400 text-sm mb-2">${issue.context || ''}</div>
+                    <div class="text-sm">
+                        <span class="text-gray-500">FCC Rule:</span>
+                        <span class="text-gray-300">${issue.fcc_rule || 'N/A'}</span>
+                    </div>
+                    <div class="text-sm">
+                        <span class="text-gray-500">Potential Fine:</span>
+                        <span class="text-red-400">${issue.potential_fine || 'N/A'}</span>
+                    </div>
+                    <div class="mt-2 p-2 bg-slate-800 rounded text-sm">
+                        💡 ${issue.recommendation}
+                    </div>
+                </div>
+            `).join('');
+
+            // Checklist
+            const statusIcons = {
+                pass: '✅',
+                warning: '⚠️',
+                info: 'ℹ️'
+            };
+            const statusColors = {
+                pass: 'text-green-400',
+                warning: 'text-yellow-400',
+                info: 'text-blue-400'
+            };
+
+            document.getElementById('checklist').innerHTML = data.report.compliance_checklist.map(item => `
+                <div class="flex items-center gap-3 p-3 bg-slate-800 rounded-lg">
+                    <span class="text-xl">${statusIcons[item.status]}</span>
+                    <span class="${statusColors[item.status]}">${item.item}</span>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>

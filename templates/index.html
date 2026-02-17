@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediaAgentIQ - AI Agent Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6366f1',
+                        secondary: '#8b5cf6',
+                        dark: '#0f172a',
+                        darker: '#020617'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-darker min-h-screen text-white">
+    <!-- Navigation -->
+    <nav class="bg-dark border-b border-gray-800 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <span class="text-3xl">🎬</span>
+                <h1 class="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
+                    MediaAgentIQ
+                </h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <span class="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm">
+                    ● All Systems Operational
+                </span>
+                <button class="p-2 hover:bg-gray-800 rounded-lg">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-6 py-8">
+        <!-- Stats Bar -->
+        <div class="grid grid-cols-4 gap-4 mb-8">
+            <div class="bg-dark rounded-xl p-4 border border-gray-800">
+                <div class="text-gray-400 text-sm">Total Jobs</div>
+                <div class="text-2xl font-bold text-white">{{ stats.total_jobs or 0 }}</div>
+            </div>
+            <div class="bg-dark rounded-xl p-4 border border-gray-800">
+                <div class="text-gray-400 text-sm">Completed</div>
+                <div class="text-2xl font-bold text-green-400">{{ stats.completed_jobs or 0 }}</div>
+            </div>
+            <div class="bg-dark rounded-xl p-4 border border-gray-800">
+                <div class="text-gray-400 text-sm">Archive Size</div>
+                <div class="text-2xl font-bold text-blue-400">{{ stats.archive_size or 0 }}</div>
+            </div>
+            <div class="bg-dark rounded-xl p-4 border border-gray-800">
+                <div class="text-gray-400 text-sm">Issues Found</div>
+                <div class="text-2xl font-bold text-orange-400">{{ stats.compliance_issues or 0 }}</div>
+            </div>
+        </div>
+
+        <!-- Hero Section -->
+        <div class="bg-gradient-to-r from-purple-900/50 to-pink-900/50 rounded-2xl p-8 mb-8 border border-purple-500/30">
+            <h2 class="text-3xl font-bold mb-4">AI-Powered Media Operations</h2>
+            <p class="text-gray-300 text-lg mb-6 max-w-2xl">
+                8 specialized AI agents working 24/7 to automate your broadcast workflow.
+                From captioning to compliance, viral clips to rights management.
+            </p>
+            <div class="flex space-x-4">
+                <a href="#agents" class="bg-primary hover:bg-primary/80 px-6 py-3 rounded-lg font-semibold transition">
+                    Explore Agents
+                </a>
+                <button class="border border-gray-600 hover:border-gray-400 px-6 py-3 rounded-lg font-semibold transition">
+                    Watch Demo
+                </button>
+            </div>
+        </div>
+
+        <!-- Agent Cards Grid -->
+        <div id="agents" class="mb-8">
+            <h3 class="text-xl font-bold mb-6">Your AI Agents</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {% for agent in agents %}
+                <a href="{{ agent.route }}" class="agent-card bg-dark rounded-xl p-6 border border-gray-800 hover:border-{{ agent.color }}-500/50 transition-all hover:transform hover:scale-[1.02] group">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-4xl">{{ agent.icon }}</span>
+                        <span class="px-2 py-1 bg-{{ agent.color }}-500/20 text-{{ agent.color }}-400 rounded text-xs">Active</span>
+                    </div>
+                    <h4 class="text-lg font-semibold mb-2 group-hover:text-{{ agent.color }}-400 transition">{{ agent.name }}</h4>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">{{ agent.description }}</p>
+                    <div class="flex items-center text-{{ agent.color }}-400 text-sm font-medium">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                        </svg>
+                        {{ agent.benefit }}
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Activity & Quick Actions -->
+        <div class="grid grid-cols-3 gap-6">
+            <!-- Recent Activity -->
+            <div class="col-span-2 bg-dark rounded-xl p-6 border border-gray-800">
+                <h3 class="text-lg font-semibold mb-4">Recent Activity</h3>
+                <div class="space-y-3" id="activity-feed">
+                    {% if activity %}
+                        {% for item in activity %}
+                        <div class="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <span class="w-2 h-2 bg-green-400 rounded-full"></span>
+                                <span class="text-gray-300">{{ item.agent_type | capitalize }} Agent</span>
+                                <span class="text-gray-500">{{ item.action }}</span>
+                            </div>
+                            <span class="text-gray-500 text-sm">{{ item.created_at }}</span>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-gray-500 text-center py-8">
+                            No activity yet. Start using an agent!
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="bg-dark rounded-xl p-6 border border-gray-800">
+                <h3 class="text-lg font-semibold mb-4">Quick Actions</h3>
+                <div class="space-y-3">
+                    <a href="/caption" class="block w-full bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 p-3 rounded-lg text-center transition">
+                        📝 Generate Captions
+                    </a>
+                    <a href="/clip" class="block w-full bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 p-3 rounded-lg text-center transition">
+                        🎬 Find Viral Clips
+                    </a>
+                    <a href="/archive" class="block w-full bg-green-500/20 hover:bg-green-500/30 text-green-400 p-3 rounded-lg text-center transition">
+                        🔍 Search Archive
+                    </a>
+                    <a href="/compliance" class="block w-full bg-red-500/20 hover:bg-red-500/30 text-red-400 p-3 rounded-lg text-center transition">
+                        ⚖️ Run Compliance Scan
+                    </a>
+                    <a href="/trending" class="block w-full bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 p-3 rounded-lg text-center transition">
+                        📈 Check Trends
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-800 mt-12 py-6">
+        <div class="max-w-7xl mx-auto px-6 text-center text-gray-500">
+            <p>MediaAgentIQ v1.0.0 | AI-Powered Media Operations Platform</p>
+        </div>
+    </footer>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caption Agent - MediaAgentIQ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body class="bg-slate-950 min-h-screen text-white">
+    <!-- Navigation -->
+    <nav class="bg-slate-900 border-b border-slate-800 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <a href="/" class="text-gray-400 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                </a>
+                <span class="text-3xl">📝</span>
+                <h1 class="text-2xl font-bold">Caption Agent</h1>
+            </div>
+            <span class="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-sm">
+                80% Cost Reduction
+            </span>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-6 py-8">
+        <!-- Upload Section -->
+        <div class="grid grid-cols-2 gap-8">
+            <div class="bg-slate-900 rounded-xl p-6 border border-slate-800">
+                <h2 class="text-xl font-semibold mb-4">Upload Media</h2>
+                <form id="caption-form" enctype="multipart/form-data">
+                    <div class="border-2 border-dashed border-slate-700 rounded-xl p-8 text-center hover:border-blue-500 transition cursor-pointer" id="drop-zone">
+                        <input type="file" id="file-input" class="hidden" accept=".mp4,.mov,.avi,.mkv,.webm,.mp3,.wav,.m4a">
+                        <div class="text-6xl mb-4">📁</div>
+                        <p class="text-gray-400 mb-2">Drag & drop your video or audio file</p>
+                        <p class="text-gray-500 text-sm">MP4, MOV, AVI, MKV, WebM, MP3, WAV, M4A</p>
+                        <button type="button" onclick="document.getElementById('file-input').click()" class="mt-4 bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-lg transition">
+                            Browse Files
+                        </button>
+                    </div>
+                    <div id="file-preview" class="hidden mt-4 p-4 bg-slate-800 rounded-lg">
+                        <div class="flex items-center justify-between">
+                            <span id="file-name" class="text-gray-300"></span>
+                            <button type="button" onclick="clearFile()" class="text-red-400 hover:text-red-300">Remove</button>
+                        </div>
+                    </div>
+                    <button type="submit" id="process-btn" class="w-full mt-4 bg-blue-500 hover:bg-blue-600 disabled:bg-slate-700 disabled:cursor-not-allowed py-3 rounded-lg font-semibold transition" disabled>
+                        Generate Captions
+                    </button>
+                </form>
+
+                <!-- Processing Status -->
+                <div id="processing" class="hidden mt-6">
+                    <div class="flex items-center space-x-3">
+                        <div class="animate-spin w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+                        <span class="text-gray-300">Processing your file...</span>
+                    </div>
+                    <div class="mt-4 space-y-2 text-sm text-gray-400">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                            <span>Extracting audio...</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></span>
+                            <span>Transcribing speech...</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></span>
+                            <span>Running QA checks...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features -->
+            <div class="bg-slate-900 rounded-xl p-6 border border-slate-800">
+                <h2 class="text-xl font-semibold mb-4">Caption Agent Features</h2>
+                <div class="space-y-4">
+                    <div class="flex items-start space-x-3">
+                        <span class="text-2xl">🎯</span>
+                        <div>
+                            <h3 class="font-medium">Auto-Transcription</h3>
+                            <p class="text-gray-400 text-sm">AI-powered speech-to-text with 99% accuracy</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-2xl">👥</span>
+                        <div>
+                            <h3 class="font-medium">Speaker Detection</h3>
+                            <p class="text-gray-400 text-sm">Automatically identifies and labels speakers</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-2xl">⏱️</span>
+                        <div>
+                            <h3 class="font-medium">Timing Optimization</h3>
+                            <p class="text-gray-400 text-sm">Perfect sync with visual and audio cues</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-2xl">✅</span>
+                        <div>
+                            <h3 class="font-medium">QA Checks</h3>
+                            <p class="text-gray-400 text-sm">Automated quality assurance and profanity detection</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-2xl">📄</span>
+                        <div>
+                            <h3 class="font-medium">Multi-Format Export</h3>
+                            <p class="text-gray-400 text-sm">Download as SRT, VTT, or plain text</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results" class="hidden mt-8">
+            <div class="bg-slate-900 rounded-xl p-6 border border-slate-800">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-semibold">Generated Captions</h2>
+                    <div class="flex space-x-2">
+                        <button onclick="downloadSRT()" class="bg-green-500/20 text-green-400 hover:bg-green-500/30 px-4 py-2 rounded-lg transition">
+                            Download SRT
+                        </button>
+                        <button onclick="downloadVTT()" class="bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 px-4 py-2 rounded-lg transition">
+                            Download VTT
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="grid grid-cols-4 gap-4 mb-6">
+                    <div class="bg-slate-800 rounded-lg p-3 text-center">
+                        <div class="text-2xl font-bold text-blue-400" id="stat-segments">0</div>
+                        <div class="text-gray-400 text-sm">Segments</div>
+                    </div>
+                    <div class="bg-slate-800 rounded-lg p-3 text-center">
+                        <div class="text-2xl font-bold text-green-400" id="stat-duration">0:00</div>
+                        <div class="text-gray-400 text-sm">Duration</div>
+                    </div>
+                    <div class="bg-slate-800 rounded-lg p-3 text-center">
+                        <div class="text-2xl font-bold text-purple-400" id="stat-words">0</div>
+                        <div class="text-gray-400 text-sm">Words</div>
+                    </div>
+                    <div class="bg-slate-800 rounded-lg p-3 text-center">
+                        <div class="text-2xl font-bold text-orange-400" id="stat-issues">0</div>
+                        <div class="text-gray-400 text-sm">QA Issues</div>
+                    </div>
+                </div>
+
+                <!-- Caption Preview -->
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="text-lg font-medium mb-3">Caption Preview</h3>
+                        <div id="caption-preview" class="bg-slate-800 rounded-lg p-4 max-h-96 overflow-y-auto space-y-2">
+                            <!-- Captions will be inserted here -->
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-medium mb-3">QA Report</h3>
+                        <div id="qa-report" class="bg-slate-800 rounded-lg p-4 max-h-96 overflow-y-auto space-y-2">
+                            <!-- QA results will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let captionData = null;
+
+        // File handling
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const filePreview = document.getElementById('file-preview');
+        const fileName = document.getElementById('file-name');
+        const processBtn = document.getElementById('process-btn');
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('border-blue-500');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('border-blue-500');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('border-blue-500');
+            const files = e.dataTransfer.files;
+            if (files.length) {
+                fileInput.files = files;
+                showFilePreview(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                showFilePreview(e.target.files[0]);
+            }
+        });
+
+        function showFilePreview(file) {
+            fileName.textContent = file.name;
+            filePreview.classList.remove('hidden');
+            processBtn.disabled = false;
+        }
+
+        function clearFile() {
+            fileInput.value = '';
+            filePreview.classList.add('hidden');
+            processBtn.disabled = true;
+        }
+
+        // Form submission
+        document.getElementById('caption-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            document.getElementById('processing').classList.remove('hidden');
+            document.getElementById('results').classList.add('hidden');
+            processBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/caption/process', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    captionData = result.data;
+                    displayResults(result.data);
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                alert('Error processing file: ' + error.message);
+            } finally {
+                document.getElementById('processing').classList.add('hidden');
+                processBtn.disabled = false;
+            }
+        });
+
+        function displayResults(data) {
+            document.getElementById('results').classList.remove('hidden');
+
+            // Update stats
+            document.getElementById('stat-segments').textContent = data.stats.total_segments;
+            document.getElementById('stat-duration').textContent = formatDuration(data.stats.total_duration);
+            document.getElementById('stat-words').textContent = data.stats.word_count;
+            document.getElementById('stat-issues').textContent = data.stats.qa_issues;
+
+            // Display captions
+            const captionPreview = document.getElementById('caption-preview');
+            captionPreview.innerHTML = data.captions.map((cap, i) => `
+                <div class="p-2 rounded ${cap.confidence < 0.9 ? 'bg-yellow-500/10 border border-yellow-500/30' : 'bg-slate-700/50'}">
+                    <div class="flex items-center justify-between text-xs text-gray-500 mb-1">
+                        <span>${formatTime(cap.start)} → ${formatTime(cap.end)}</span>
+                        <span>${cap.speaker || 'Speaker'}</span>
+                    </div>
+                    <p class="text-gray-200">${cap.text}</p>
+                </div>
+            `).join('');
+
+            // Display QA report
+            const qaReport = document.getElementById('qa-report');
+            qaReport.innerHTML = data.qa_results.map(issue => {
+                const colors = {
+                    error: 'bg-red-500/10 border-red-500/30 text-red-400',
+                    warning: 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400',
+                    info: 'bg-blue-500/10 border-blue-500/30 text-blue-400',
+                    success: 'bg-green-500/10 border-green-500/30 text-green-400'
+                };
+                return `
+                    <div class="p-3 rounded border ${colors[issue.type] || colors.info}">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-medium">${issue.issue}</span>
+                            ${issue.timestamp ? `<span class="text-xs">${issue.timestamp}</span>` : ''}
+                        </div>
+                        <p class="text-sm opacity-80">${issue.details}</p>
+                        ${issue.suggestion ? `<p class="text-xs mt-1 opacity-60">💡 ${issue.suggestion}</p>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function formatDuration(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            const ms = Math.floor((seconds % 1) * 100);
+            return `${mins}:${secs.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}`;
+        }
+
+        function downloadSRT() {
+            if (!captionData) return;
+            const blob = new Blob([captionData.srt], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'captions.srt';
+            a.click();
+        }
+
+        function downloadVTT() {
+            if (!captionData) return;
+            const blob = new Blob([captionData.vtt], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'captions.vtt';
+            a.click();
+        }
+    </script>
+</body>
+</html>

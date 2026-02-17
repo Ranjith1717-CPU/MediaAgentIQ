@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archive Agent - MediaAgentIQ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body class="bg-slate-950 min-h-screen text-white">
+    <!-- Navigation -->
+    <nav class="bg-slate-900 border-b border-slate-800 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <a href="/" class="text-gray-400 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                </a>
+                <span class="text-3xl">🔍</span>
+                <h1 class="text-2xl font-bold">Archive Agent</h1>
+            </div>
+            <span class="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm">
+                Instant Archive Access
+            </span>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-6 py-8">
+        <!-- Search Section -->
+        <div class="bg-slate-900 rounded-xl p-6 border border-slate-800 mb-8">
+            <h2 class="text-xl font-semibold mb-4">Natural Language Search</h2>
+            <div class="flex gap-4">
+                <div class="flex-1 relative">
+                    <input type="text" id="search-input"
+                        class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-green-500 focus:outline-none"
+                        placeholder="Try: 'Find all economy clips from last week' or 'Show interviews about AI technology'">
+                    <div class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
+                        Press Enter to search
+                    </div>
+                </div>
+                <button id="search-btn" onclick="performSearch()" class="bg-green-500 hover:bg-green-600 px-6 py-3 rounded-lg font-semibold transition">
+                    Search Archive
+                </button>
+            </div>
+
+            <!-- Quick Filters -->
+            <div class="flex gap-2 mt-4">
+                <span class="text-gray-400 text-sm">Quick filters:</span>
+                <button onclick="setQuery('Breaking news from today')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 rounded text-sm transition">Breaking News</button>
+                <button onclick="setQuery('Sports highlights this week')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 rounded text-sm transition">Sports</button>
+                <button onclick="setQuery('Weather reports')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 rounded text-sm transition">Weather</button>
+                <button onclick="setQuery('Political interviews from Q3')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 rounded text-sm transition">Politics</button>
+                <button onclick="setQuery('Tech industry coverage')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 rounded text-sm transition">Technology</button>
+            </div>
+
+            <!-- Example Queries -->
+            <div class="mt-4 p-4 bg-slate-800/50 rounded-lg">
+                <p class="text-gray-400 text-sm mb-2">💡 Example natural language queries:</p>
+                <ul class="text-gray-500 text-sm space-y-1">
+                    <li>• "Find all Biden economy clips from Q3"</li>
+                    <li>• "Show me interviews with tech CEOs about AI"</li>
+                    <li>• "Get weather reports from December"</li>
+                    <li>• "Breaking news stories from this week"</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading" class="hidden text-center py-12">
+            <div class="animate-spin w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p class="text-gray-400">Searching archive...</p>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results" class="hidden">
+            <!-- Search Insights -->
+            <div class="bg-slate-900 rounded-xl p-4 border border-slate-800 mb-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <span id="result-count" class="text-green-400 font-semibold">0 results</span>
+                        <span id="search-time" class="text-gray-500 text-sm">in 0ms</span>
+                    </div>
+                    <div id="parsed-query" class="text-gray-400 text-sm">
+                        <!-- Parsed query info -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Grid -->
+            <div id="results-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Results will be inserted here -->
+            </div>
+
+            <!-- Insights Panel -->
+            <div id="insights-panel" class="mt-6 bg-slate-900 rounded-xl p-6 border border-slate-800">
+                <h3 class="text-lg font-semibold mb-4">Search Insights</h3>
+                <div id="insights-content" class="grid grid-cols-3 gap-4">
+                    <!-- Insights will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="text-center py-16">
+            <div class="text-8xl mb-4">📚</div>
+            <h3 class="text-xl font-semibold mb-2">Your Media Archive</h3>
+            <p class="text-gray-400 max-w-md mx-auto">
+                Search through your entire media archive using natural language.
+                Just describe what you're looking for!
+            </p>
+        </div>
+    </main>
+
+    <script>
+        const searchInput = document.getElementById('search-input');
+
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') performSearch();
+        });
+
+        function setQuery(query) {
+            searchInput.value = query;
+            performSearch();
+        }
+
+        async function performSearch() {
+            const query = searchInput.value.trim();
+            if (!query) return;
+
+            document.getElementById('empty-state').classList.add('hidden');
+            document.getElementById('results').classList.add('hidden');
+            document.getElementById('loading').classList.remove('hidden');
+
+            try {
+                const response = await fetch('/api/archive/search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    displayResults(result.data);
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                document.getElementById('loading').classList.add('hidden');
+            }
+        }
+
+        function displayResults(data) {
+            document.getElementById('results').classList.remove('hidden');
+
+            // Update counts
+            document.getElementById('result-count').textContent = `${data.results.length} results`;
+            document.getElementById('search-time').textContent = `in ${data.stats.search_time_ms}ms`;
+
+            // Show parsed query
+            const parsed = data.parsed_query;
+            document.getElementById('parsed-query').innerHTML = `
+                ${parsed.topics?.length ? `Topics: ${parsed.topics.join(', ')}` : ''}
+                ${parsed.speakers?.length ? ` | Speakers: ${parsed.speakers.join(', ')}` : ''}
+                ${parsed.date_filters?.time_period ? ` | Period: ${parsed.date_filters.time_period}` : ''}
+            `;
+
+            // Display results
+            const resultsGrid = document.getElementById('results-grid');
+            resultsGrid.innerHTML = data.results.map(item => `
+                <div class="bg-slate-900 rounded-xl overflow-hidden border border-slate-800 hover:border-green-500/50 transition">
+                    <div class="aspect-video bg-slate-800 flex items-center justify-center relative">
+                        <span class="text-6xl">📺</span>
+                        <span class="absolute bottom-2 right-2 bg-black/70 px-2 py-1 rounded text-xs">
+                            ${item.duration_formatted || '00:00'}
+                        </span>
+                        <span class="absolute top-2 right-2 bg-green-500/80 px-2 py-1 rounded text-xs">
+                            ${Math.round((item.relevance_score || 0) * 100)}% match
+                        </span>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-medium mb-1 line-clamp-2">${item.title}</h3>
+                        <p class="text-gray-400 text-sm mb-2 line-clamp-2">${item.description || ''}</p>
+                        <div class="flex items-center justify-between text-xs text-gray-500">
+                            <span>${item.speaker || 'Unknown'}</span>
+                            <span>${item.date_recorded || ''}</span>
+                        </div>
+                        <div class="flex gap-1 mt-2 flex-wrap">
+                            ${(item.tags || '').split(',').slice(0, 3).map(tag =>
+                                `<span class="px-2 py-0.5 bg-slate-700 rounded text-xs">${tag.trim()}</span>`
+                            ).join('')}
+                        </div>
+                        <div class="flex gap-2 mt-3">
+                            <button class="flex-1 bg-green-500/20 text-green-400 py-2 rounded text-sm hover:bg-green-500/30 transition">
+                                Preview
+                            </button>
+                            <button class="flex-1 bg-blue-500/20 text-blue-400 py-2 rounded text-sm hover:bg-blue-500/30 transition">
+                                Export
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Display insights
+            const insights = data.insights;
+            document.getElementById('insights-content').innerHTML = `
+                <div class="bg-slate-800 rounded-lg p-4">
+                    <div class="text-gray-400 text-sm mb-1">Summary</div>
+                    <div class="text-white">${insights.summary}</div>
+                </div>
+                <div class="bg-slate-800 rounded-lg p-4">
+                    <div class="text-gray-400 text-sm mb-1">Speakers Found</div>
+                    <div class="text-white">${(insights.speakers || []).join(', ') || 'Various'}</div>
+                </div>
+                <div class="bg-slate-800 rounded-lg p-4">
+                    <div class="text-gray-400 text-sm mb-1">Top Tags</div>
+                    <div class="flex gap-1 flex-wrap">
+                        ${(insights.top_tags || []).map(tag =>
+                            `<span class="px-2 py-0.5 bg-slate-700 rounded text-xs">${tag}</span>`
+                        ).join('')}
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
