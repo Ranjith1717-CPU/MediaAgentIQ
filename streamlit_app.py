@@ -694,6 +694,95 @@ if page == "Dashboard":
     st.title("MediaAgentIQ Dashboard")
     st.markdown("**AI-Powered Media Operations Platform** | Real-time Broadcast Intelligence")
 
+    # Autonomous Agent Status Section
+    st.markdown("---")
+    col1, col2 = st.columns([2, 1])
+
+    with col1:
+        st.subheader("🤖 Autonomous Agent Orchestrator")
+        st.markdown("Agents can run **autonomously in the background** - monitoring, processing, and alerting without manual intervention.")
+
+    with col2:
+        # Initialize session state for orchestrator
+        if "orchestrator_running" not in st.session_state:
+            st.session_state.orchestrator_running = False
+
+        if st.session_state.orchestrator_running:
+            if st.button("⏹️ Stop Autonomous Mode", type="secondary", use_container_width=True):
+                st.session_state.orchestrator_running = False
+                st.rerun()
+        else:
+            if st.button("▶️ Start Autonomous Mode", type="primary", use_container_width=True):
+                st.session_state.orchestrator_running = True
+                st.rerun()
+
+    if st.session_state.orchestrator_running:
+        st.success("🟢 **Autonomous Mode ACTIVE** - All agents running in background")
+
+        # Show running status
+        col1, col2, col3, col4 = st.columns(4)
+        col1.metric("Queue Size", "3 tasks")
+        col2.metric("Processing", "1 active")
+        col3.metric("Completed", "47 today")
+        col4.metric("Uptime", "2h 34m")
+
+        # Scheduled Jobs
+        with st.expander("📅 **Scheduled Background Jobs** (Click to expand)", expanded=True):
+            scheduled_jobs = [
+                {"agent": "📈 Trending Agent", "interval": "Every 5 min", "last_run": "2 min ago", "status": "✅ Active"},
+                {"agent": "⚖️ Compliance Agent", "interval": "Every 10 min", "last_run": "7 min ago", "status": "✅ Active"},
+                {"agent": "📜 Rights Agent", "interval": "Every 1 hour", "last_run": "34 min ago", "status": "✅ Active"},
+                {"agent": "🔍 Archive Agent", "interval": "Every 6 hours", "last_run": "2h ago", "status": "✅ Active"},
+            ]
+
+            for job in scheduled_jobs:
+                col1, col2, col3, col4 = st.columns([2, 1, 1, 1])
+                col1.write(job["agent"])
+                col2.write(job["interval"])
+                col3.write(job["last_run"])
+                col4.write(job["status"])
+
+        # Event System
+        with st.expander("⚡ **Event-Driven Triggers** (Click to expand)"):
+            st.markdown("""
+            When events occur, agents are **automatically triggered**:
+
+            | Event | Triggers |
+            |-------|----------|
+            | 📁 New Content Uploaded | Caption, Clip, Compliance, Archive |
+            | 📝 Captions Complete | Localization, Social Publishing |
+            | 🎬 Viral Clip Detected | Social Publishing |
+            | 🚨 Compliance Alert | Social (post notice) |
+            | 📈 Trending Spike | Social, Archive |
+            | ⚠️ License Expiring | Rights Agent |
+            | 🔴 Breaking News | Social, Trending |
+            """)
+
+        # Recent Autonomous Activity
+        with st.expander("📋 **Recent Autonomous Activity**", expanded=True):
+            auto_activity = [
+                {"time": "Just now", "event": "📈 Trending Agent detected #NashvilleFire spike", "action": "Triggered Social Publishing"},
+                {"time": "2 min ago", "event": "⚖️ Compliance scan completed", "action": "No issues found"},
+                {"time": "5 min ago", "event": "📝 Caption Agent auto-processed new upload", "action": "Triggered Localization"},
+                {"time": "8 min ago", "event": "🎬 Clip Agent found viral moment (94%)", "action": "Triggered Social Publishing"},
+                {"time": "15 min ago", "event": "📜 Rights Agent license check", "action": "Alert: 2 licenses expiring soon"},
+            ]
+
+            for act in auto_activity:
+                st.markdown(f"**{act['time']}** - {act['event']}")
+                st.caption(f"→ {act['action']}")
+
+    else:
+        st.info("🔵 **Manual Mode** - Click 'Start Autonomous Mode' to enable background agent processing")
+        st.markdown("""
+        **In Autonomous Mode, agents will:**
+        - 📈 Monitor trends every 5 minutes
+        - ⚖️ Run compliance checks every 10 minutes
+        - 📜 Check license expirations hourly
+        - ⚡ Auto-trigger on events (new content, alerts, etc.)
+        - 🔄 Chain workflows (captions → translations → social posts)
+        """)
+
     # Real-time status indicator
     col1, col2 = st.columns([3, 1])
     with col2:
