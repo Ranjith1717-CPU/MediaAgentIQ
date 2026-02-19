@@ -661,7 +661,7 @@ with st.sidebar:
 
     page = st.radio(
         "Select Agent",
-        ["Dashboard", "Caption Agent", "Clip Agent", "Archive Agent",
+        ["Dashboard", "🚀 All-in-One Workflow", "Caption Agent", "Clip Agent", "Archive Agent",
          "Compliance Agent", "Social Publishing", "Localization",
          "Rights Agent", "Trending Agent", "Integration Showcase"],
         label_visibility="collapsed"
@@ -838,6 +838,249 @@ if page == "Dashboard":
         st.progress(0.96, "API Uptime: 99.6%")
         st.progress(0.82, "Processing Queue: 18%")
         st.progress(0.45, "Storage Used: 45%")
+
+
+elif page == "🚀 All-in-One Workflow":
+    st.title("🚀 All-in-One Workflow")
+    st.caption("Process content through ALL 8 AI Agents simultaneously | Complete media intelligence in one click")
+
+    st.markdown("""
+    **The Complete Media Intelligence Pipeline** - Upload your content once and let all 8 AI agents
+    analyze it simultaneously. Get captions, viral clips, compliance checks, social posts,
+    translations, rights verification, and trending context - all in one workflow.
+    """)
+
+    st.divider()
+
+    # Upload Section
+    col1, col2 = st.columns([2, 1])
+
+    with col1:
+        st.subheader("📁 Upload Content")
+        uploaded_file = st.file_uploader(
+            "Upload video or audio file",
+            type=["mp4", "mov", "wav", "mp3", "m4a", "avi"],
+            help="Supported formats: MP4, MOV, WAV, MP3, M4A, AVI"
+        )
+
+        use_demo = st.checkbox("Use demo content: Morning News Broadcast (4 hrs)", value=True)
+
+        st.markdown("**Or enter content URL:**")
+        content_url = st.text_input("Content URL", placeholder="https://your-mam-system.com/asset/12345")
+
+    with col2:
+        st.subheader("⚙️ Workflow Settings")
+
+        st.markdown("**Select Agents to Run:**")
+        run_caption = st.checkbox("📝 Caption Agent", value=True)
+        run_clip = st.checkbox("🎬 Clip Agent", value=True)
+        run_compliance = st.checkbox("⚖️ Compliance Agent", value=True)
+        run_archive = st.checkbox("🔍 Archive Agent", value=True)
+        run_social = st.checkbox("📱 Social Publishing", value=True)
+        run_localization = st.checkbox("🌍 Localization", value=True)
+        run_rights = st.checkbox("📜 Rights Agent", value=True)
+        run_trending = st.checkbox("📈 Trending Agent", value=True)
+
+        target_languages = st.multiselect("Translation Languages", ["Spanish", "French", "German", "Chinese"], default=["Spanish", "French"])
+
+    st.divider()
+
+    # Run All Agents Button
+    if st.button("🚀 Run Complete Analysis", type="primary", use_container_width=True):
+        st.session_state.all_in_one_running = True
+        st.session_state.all_in_one_done = False
+
+        # Create progress tracking
+        st.subheader("📊 Processing Status")
+
+        # Agent status containers
+        agent_statuses = {}
+
+        # Create columns for parallel status display
+        col1, col2 = st.columns(2)
+
+        agents_to_run = []
+        if run_caption:
+            agents_to_run.append({"name": "Caption Agent", "icon": "📝", "steps": ["Extracting audio", "Detecting speakers", "Transcribing", "Running QA"]})
+        if run_clip:
+            agents_to_run.append({"name": "Clip Agent", "icon": "🎬", "steps": ["Analyzing frames", "Detecting emotions", "Scoring virality", "Generating clips"]})
+        if run_compliance:
+            agents_to_run.append({"name": "Compliance Agent", "icon": "⚖️", "steps": ["Scanning audio", "Checking ads", "Validating EAS", "Generating report"]})
+        if run_archive:
+            agents_to_run.append({"name": "Archive Agent", "icon": "🔍", "steps": ["Extracting metadata", "AI tagging", "Indexing content", "MAM sync"]})
+        if run_social:
+            agents_to_run.append({"name": "Social Publishing", "icon": "📱", "steps": ["Analyzing content", "Generating posts", "Optimizing hashtags", "Scheduling"]})
+        if run_localization:
+            agents_to_run.append({"name": "Localization", "icon": "🌍", "steps": ["Translating", "Quality check", "Generating subtitles", "Voice synthesis"]})
+        if run_rights:
+            agents_to_run.append({"name": "Rights Agent", "icon": "📜", "steps": ["Checking licenses", "Scanning violations", "Verifying usage", "Generating alerts"]})
+        if run_trending:
+            agents_to_run.append({"name": "Trending Agent", "icon": "📈", "steps": ["Analyzing trends", "Matching topics", "Sentiment analysis", "Recommendations"]})
+
+        # Progress display
+        overall_progress = st.progress(0, "Starting all agents...")
+
+        # Create status placeholders for each agent
+        agent_containers = {}
+        cols = st.columns(4)
+        for i, agent in enumerate(agents_to_run):
+            with cols[i % 4]:
+                agent_containers[agent['name']] = st.empty()
+                agent_containers[agent['name']].markdown(f"""
+                <div style="background: #1e293b; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 3px solid #6366f1;">
+                    <strong>{agent['icon']} {agent['name']}</strong><br/>
+                    <span style="color: #f59e0b;">⏳ Waiting...</span>
+                </div>
+                """, unsafe_allow_html=True)
+
+        # Simulate parallel processing
+        import time
+        total_steps = sum(len(a['steps']) for a in agents_to_run)
+        completed_steps = 0
+
+        for step_num in range(4):  # Max 4 steps per agent
+            for i, agent in enumerate(agents_to_run):
+                if step_num < len(agent['steps']):
+                    current_step = agent['steps'][step_num]
+                    with cols[i % 4]:
+                        if step_num == len(agent['steps']) - 1:
+                            # Last step - mark complete
+                            agent_containers[agent['name']].markdown(f"""
+                            <div style="background: #1e293b; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 3px solid #22c55e;">
+                                <strong>{agent['icon']} {agent['name']}</strong><br/>
+                                <span style="color: #22c55e;">✅ Complete</span>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        else:
+                            agent_containers[agent['name']].markdown(f"""
+                            <div style="background: #1e293b; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 3px solid #f59e0b;">
+                                <strong>{agent['icon']} {agent['name']}</strong><br/>
+                                <span style="color: #f59e0b;">🔄 {current_step}...</span>
+                            </div>
+                            """, unsafe_allow_html=True)
+                    completed_steps += 1
+
+            overall_progress.progress(completed_steps / total_steps, f"Processing... {completed_steps}/{total_steps} steps complete")
+            time.sleep(0.4)
+
+        overall_progress.progress(1.0, "✅ All agents complete!")
+        time.sleep(0.5)
+
+        st.session_state.all_in_one_done = True
+        st.session_state.all_in_one_running = False
+
+    # Show Results
+    if st.session_state.get("all_in_one_done"):
+        st.divider()
+        st.subheader("📋 Combined Results")
+
+        # Summary Metrics
+        col1, col2, col3, col4, col5, col6 = st.columns(6)
+        col1.metric("Captions", "13 segments", "96.2% accuracy")
+        col2.metric("Viral Clips", "4 found", "Top: 97%")
+        col3.metric("Compliance", "2 issues", "Review needed")
+        col4.metric("Social Posts", "15 ready", "5 platforms")
+        col5.metric("Translations", f"{len(target_languages)} languages", "94% quality")
+        col6.metric("Trending Match", "3 topics", "#NashvilleFire")
+
+        st.divider()
+
+        # Tabbed Results
+        tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
+            "📝 Captions", "🎬 Viral Clips", "⚖️ Compliance", "🔍 Archive",
+            "📱 Social", "🌍 Translations", "📜 Rights", "📈 Trending"
+        ])
+
+        with tab1:
+            st.markdown("**Generated Captions** - 13 segments, 2 speakers detected")
+            for cap in DEMO_CAPTIONS[:5]:
+                st.markdown(f"""
+                <div style="background: #1e293b; padding: 8px 12px; border-radius: 6px; margin: 4px 0; border-left: 3px solid #6366f1;">
+                    <small style="color: #6366f1;">{format_srt_time(cap['start'])} → {format_srt_time(cap['end'])}</small>
+                    <span style="color: #94a3b8; margin-left: 12px;">{cap['speaker']}</span><br/>
+                    <span style="color: #e2e8f0;">{cap['text']}</span>
+                </div>
+                """, unsafe_allow_html=True)
+            st.caption("... and 8 more segments")
+            col1, col2 = st.columns(2)
+            col1.download_button("📥 Download SRT", generate_srt(DEMO_CAPTIONS), "captions.srt", use_container_width=True)
+            col2.download_button("📥 Download VTT", generate_srt(DEMO_CAPTIONS).replace(",", "."), "captions.vtt", use_container_width=True)
+
+        with tab2:
+            st.markdown("**Viral Moments Detected** - 4 clips ready for export")
+            for moment in DEMO_VIRAL_MOMENTS[:3]:
+                col1, col2 = st.columns([3, 1])
+                with col1:
+                    st.markdown(f"**{moment['title']}** ({moment['end']-moment['start']:.0f}s)")
+                    st.caption(moment['description'])
+                with col2:
+                    st.metric("Viral Score", f"{moment['score']:.0%}")
+            st.button("📤 Export All Clips", use_container_width=True)
+
+        with tab3:
+            st.markdown("**Compliance Scan Results** - 2 issues require attention")
+            for issue in DEMO_COMPLIANCE_ISSUES[:2]:
+                severity_icon = "🔴" if issue["severity"] == "critical" else "🟠"
+                st.warning(f"{severity_icon} **{issue['type'].upper()}** @ {issue['timestamp']}\n\n{issue['description']}\n\n*Fine range: {issue['fine_range']}*")
+            st.button("📝 Generate Compliance Report", use_container_width=True)
+
+        with tab4:
+            st.markdown("**Archive Metadata Generated**")
+            st.json({
+                "title": "Morning News Broadcast - Fire Coverage",
+                "duration": "4:02:15",
+                "speakers": ["Sarah Mitchell", "Jake Thompson", "Weather Team"],
+                "topics": ["warehouse fire", "downtown Nashville", "breaking news"],
+                "ai_tags": ["fire", "emergency", "reporter", "live coverage", "breaking"],
+                "sentiment": "urgent/concerned",
+                "quality": "HD 1080p"
+            })
+            st.button("📤 Send to MAM System", use_container_width=True)
+
+        with tab5:
+            st.markdown("**Social Posts Generated** - 15 posts across 5 platforms")
+            platforms = ["Twitter/X", "Instagram", "TikTok", "Facebook", "YouTube Shorts"]
+            for platform in platforms:
+                st.markdown(f"**{platform}** - 3 posts ready")
+            col1, col2 = st.columns(2)
+            col1.button("📤 Post All Now", type="primary", use_container_width=True)
+            col2.button("🕐 Schedule All", use_container_width=True)
+
+        with tab6:
+            st.markdown(f"**Translations Complete** - {len(target_languages)} languages")
+            for lang in target_languages:
+                lang_data = {"Spanish": ("🇪🇸", 96), "French": ("🇫🇷", 94), "German": ("🇩🇪", 95), "Chinese": ("🇨🇳", 93)}
+                flag, score = lang_data.get(lang, ("🌍", 90))
+                st.progress(score/100, f"{flag} {lang}: {score}% quality")
+            st.button("📥 Download All Subtitle Files", use_container_width=True)
+
+        with tab7:
+            st.markdown("**Rights Verification**")
+            st.success("✅ Content cleared for broadcast use")
+            st.info("ℹ️ 2 licenses used: Wire Service Feed, Stock Images")
+            st.warning("⚠️ Reminder: Wire Service license expires in 18 days")
+
+        with tab8:
+            st.markdown("**Trending Context**")
+            st.markdown("Your content matches these trending topics:")
+            for trend in DEMO_TRENDS[:3]:
+                if trend['our_coverage']:
+                    st.markdown(f"✅ **{trend['topic']}** - {trend['velocity']} ({trend['volume']})")
+            st.info("💡 **AI Recommendation:** This content is highly relevant to current trends. Consider immediate publication for maximum reach.")
+
+        st.divider()
+
+        # Export All Results
+        st.subheader("📦 Export Complete Package")
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.button("📥 Download All Files (ZIP)", type="primary", use_container_width=True)
+        with col2:
+            st.button("📤 Send to MAM", use_container_width=True)
+        with col3:
+            st.button("📤 Publish to Social", use_container_width=True)
+        with col4:
+            st.button("📋 Generate Report (PDF)", use_container_width=True)
 
 
 elif page == "Caption Agent":
