@@ -1,20 +1,33 @@
 """
 Compliance Agent - Monitors 24/7 for FCC violations, profanity, political ad issues
+
+Supports:
+- Demo Mode: Returns mock compliance issues for demonstration
+- Production Mode: Uses Vision + Transcription services for real content analysis
 """
 import random
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
 from pathlib import Path
 from datetime import datetime
-from .base_agent import BaseAgent
+from .base_agent import BaseAgent, ProductionNotReadyError
+
+if TYPE_CHECKING:
+    from settings import Settings
 
 
 class ComplianceAgent(BaseAgent):
-    """Agent for monitoring FCC compliance and content violations."""
+    """
+    Agent for monitoring FCC compliance and content violations.
 
-    def __init__(self):
+    Demo Mode: Returns realistic mock compliance issues
+    Production Mode: Uses OpenAI Whisper + GPT-4 Vision for real analysis
+    """
+
+    def __init__(self, settings: Optional["Settings"] = None):
         super().__init__(
             name="Compliance Agent",
-            description="Monitors 24/7 for FCC violations, profanity, political ad issues, auto-logs and alerts"
+            description="Monitors 24/7 for FCC violations, profanity, political ad issues, auto-logs and alerts",
+            settings=settings
         )
 
         # FCC violation categories
@@ -62,6 +75,12 @@ class ComplianceAgent(BaseAgent):
             "democrat", "republican", "congress", "senator", "paid for by"
         ]
 
+    def _get_required_integrations(self) -> Dict[str, bool]:
+        """Compliance Agent requires OpenAI for production."""
+        return {
+            "openai": self.settings.is_openai_configured
+        }
+
     async def validate_input(self, input_data: Any) -> bool:
         """Validate input for compliance scanning."""
         if not input_data:
@@ -73,18 +92,18 @@ class ComplianceAgent(BaseAgent):
             return "file" in input_data or "transcript" in input_data
         return False
 
-    async def process(self, input_data: Any) -> Dict[str, Any]:
-        """Scan content for compliance issues."""
-        if not await self.validate_input(input_data):
-            return self.create_response(False, error="Invalid input for compliance scan")
+    async def _demo_process(self, input_data: Any) -> Dict[str, Any]:
+        """
+        Demo mode processing - returns mock compliance issues.
+        """
+        self.log_activity("demo_process", f"Scanning content for compliance")
 
-        # Run all compliance checks
+        # Run all compliance checks (mock)
         issues = []
-        issues.extend(await self._check_profanity(input_data))
-        issues.extend(await self._check_political_ads(input_data))
-        issues.extend(await self._check_sponsor_identification(input_data))
-        issues.extend(await self._check_caption_compliance(input_data))
-        issues.extend(await self._check_eas_compliance(input_data))
+        issues.extend(await self._check_profanity_mock())
+        issues.extend(await self._check_political_ads_mock())
+        issues.extend(await self._check_sponsor_identification_mock())
+        issues.extend(await self._check_caption_compliance_mock())
 
         # Generate compliance report
         report = await self._generate_report(issues)
@@ -107,59 +126,184 @@ class ComplianceAgent(BaseAgent):
             }
         })
 
-    async def _check_profanity(self, input_data: Any) -> List[Dict]:
-        """Check for profanity/indecent content."""
+    async def _production_process(self, input_data: Any) -> Dict[str, Any]:
+        """
+        Production mode processing - uses real AI services.
+        """
+        if not self.settings.is_openai_configured:
+            raise ProductionNotReadyError(self.name, "OPENAI_API_KEY")
+
+        self.log_activity("production_process", f"Scanning content for compliance")
+
+        # Import services
+        from services.transcription import WhisperService
+        from services.vision import GPT4VisionService
+
         issues = []
 
-        # Demo: Generate mock profanity detection
-        mock_detections = [
-            {
-                "word": "damn",
-                "timestamp": 125.5,
-                "context": "...what the damn problem is with...",
-                "confidence": 0.95
-            }
-        ]
+        # Get transcript for audio analysis
+        transcript_text = None
+        if isinstance(input_data, dict):
+            file_path = input_data.get("file")
+            transcript_text = input_data.get("transcript")
+        else:
+            file_path = input_data if Path(input_data).exists() else None
 
-        for detection in mock_detections:
-            issues.append({
-                "id": f"prof_{random.randint(1000, 9999)}",
-                "type": "profanity",
-                "severity": "high",
-                "timestamp": detection["timestamp"],
-                "timestamp_formatted": self.format_timestamp(detection["timestamp"]),
-                "description": f"Potential profanity detected: '{detection['word']}'",
-                "context": detection["context"],
-                "confidence": detection["confidence"],
-                "fcc_rule": "47 U.S.C. § 326",
-                "potential_fine": "$25,000 - $500,000",
-                "recommendation": "Review segment, consider bleeping or re-recording",
-                "action_required": True
-            })
+        # Transcribe if we have a file
+        if file_path and not transcript_text:
+            whisper = WhisperService(
+                api_key=self.settings.OPENAI_API_KEY,
+                model=self.settings.OPENAI_WHISPER_MODEL
+            )
+            try:
+                result = await whisper.transcribe(str(file_path))
+                transcript_text = result.text
+                transcript_segments = result.segments
+            except Exception as e:
+                self.log_activity("transcription_failed", str(e))
+                transcript_text = ""
+                transcript_segments = []
+        else:
+            transcript_segments = []
+
+        # Check transcript for profanity
+        if transcript_text:
+            issues.extend(await self._check_profanity_real(transcript_text, transcript_segments))
+            issues.extend(await self._check_political_ads_real(transcript_text, transcript_segments))
+
+        # Check video frames for visual compliance
+        if file_path and Path(file_path).suffix.lower() in {".mp4", ".mov", ".avi", ".mkv", ".webm"}:
+            vision = GPT4VisionService(
+                api_key=self.settings.OPENAI_API_KEY
+            )
+            frame_paths = await self._extract_frames(str(file_path))
+            if frame_paths:
+                visual_issues = await vision.check_compliance(frame_paths, transcript_text)
+                for vi in visual_issues:
+                    issues.append({
+                        "id": f"vis_{random.randint(1000, 9999)}",
+                        "type": vi.issue_type,
+                        "severity": vi.severity,
+                        "timestamp": vi.timestamp,
+                        "timestamp_formatted": self.format_timestamp(vi.timestamp),
+                        "description": vi.description,
+                        "context": vi.description,
+                        "confidence": vi.confidence,
+                        "fcc_rule": "47 U.S.C. § 326",
+                        "potential_fine": self.violation_types.get(vi.issue_type, {}).get("fine_range", "TBD"),
+                        "recommendation": vi.recommendation,
+                        "action_required": vi.severity in ["high", "critical"]
+                    })
+
+        # Generate compliance report
+        report = await self._generate_report(issues)
+
+        # Calculate risk score
+        risk_score = self._calculate_risk_score(issues)
+
+        return self.create_response(True, data={
+            "issues": issues,
+            "report": report,
+            "risk_score": risk_score,
+            "stats": {
+                "total_issues": len(issues),
+                "critical_count": len([i for i in issues if i["severity"] == "critical"]),
+                "high_count": len([i for i in issues if i["severity"] == "high"]),
+                "medium_count": len([i for i in issues if i["severity"] == "medium"]),
+                "low_count": len([i for i in issues if i["severity"] == "low"]),
+                "potential_fines": self._calculate_potential_fines(issues),
+                "scan_timestamp": datetime.now().isoformat(),
+                "analysis_mode": "production"
+            }
+        })
+
+    async def _extract_frames(self, video_path: str) -> List[str]:
+        """Extract frames from video for visual compliance check."""
+        import subprocess
+        import tempfile
+        import os
+
+        try:
+            temp_dir = tempfile.mkdtemp(prefix="compliance_agent_")
+            output_pattern = os.path.join(temp_dir, "frame_%04d.jpg")
+
+            cmd = [
+                "ffmpeg", "-i", video_path,
+                "-vf", "fps=0.5",  # One frame every 2 seconds
+                "-frames:v", "15",
+                output_pattern,
+                "-y", "-loglevel", "error"
+            ]
+
+            result = subprocess.run(cmd, capture_output=True, timeout=60)
+
+            if result.returncode == 0:
+                frames = sorted([
+                    os.path.join(temp_dir, f) for f in os.listdir(temp_dir)
+                    if f.endswith('.jpg')
+                ])
+                return frames
+
+        except Exception as e:
+            self.log_activity("frame_extraction_failed", str(e))
+
+        return []
+
+    async def _check_profanity_real(self, transcript: str, segments: List) -> List[Dict]:
+        """Check for profanity in real transcript."""
+        issues = []
+        transcript_lower = transcript.lower()
+
+        for word in self.profanity_words:
+            if word in transcript_lower:
+                # Find timestamp if we have segments
+                timestamp = 0.0
+                for seg in segments:
+                    if word in seg.text.lower():
+                        timestamp = seg.start
+                        break
+
+                issues.append({
+                    "id": f"prof_{random.randint(1000, 9999)}",
+                    "type": "profanity",
+                    "severity": "high",
+                    "timestamp": timestamp,
+                    "timestamp_formatted": self.format_timestamp(timestamp),
+                    "description": f"Profanity detected: '{word}'",
+                    "context": f"Found in transcript",
+                    "confidence": 0.95,
+                    "fcc_rule": "47 U.S.C. § 326",
+                    "potential_fine": "$25,000 - $500,000",
+                    "recommendation": "Review segment, consider bleeping or re-recording",
+                    "action_required": True
+                })
 
         return issues
 
-    async def _check_political_ads(self, input_data: Any) -> List[Dict]:
-        """Check for political advertising compliance."""
+    async def _check_political_ads_real(self, transcript: str, segments: List) -> List[Dict]:
+        """Check for political ad compliance in real transcript."""
         issues = []
+        transcript_lower = transcript.lower()
 
-        # Demo: Mock political ad detection
-        mock_political_content = {
-            "timestamp": 450.0,
-            "text": "Vote for candidate Johnson this November",
-            "missing_disclosure": True
-        }
+        political_count = sum(1 for kw in self.political_keywords if kw in transcript_lower)
 
-        if mock_political_content["missing_disclosure"]:
+        if political_count >= 2 and "paid for by" not in transcript_lower:
+            timestamp = 0.0
+            for seg in segments:
+                for kw in self.political_keywords:
+                    if kw in seg.text.lower():
+                        timestamp = seg.start
+                        break
+
             issues.append({
                 "id": f"pol_{random.randint(1000, 9999)}",
                 "type": "political_ad",
                 "severity": "medium",
-                "timestamp": mock_political_content["timestamp"],
-                "timestamp_formatted": self.format_timestamp(mock_political_content["timestamp"]),
+                "timestamp": timestamp,
+                "timestamp_formatted": self.format_timestamp(timestamp),
                 "description": "Political content detected without proper disclosure",
-                "context": mock_political_content["text"],
-                "confidence": 0.88,
+                "context": f"Found {political_count} political keywords without 'paid for by' disclosure",
+                "confidence": 0.85,
                 "fcc_rule": "47 U.S.C. § 315",
                 "potential_fine": "$10,000 - $100,000",
                 "recommendation": "Add 'Paid for by...' disclosure statement",
@@ -169,12 +313,45 @@ class ComplianceAgent(BaseAgent):
 
         return issues
 
-    async def _check_sponsor_identification(self, input_data: Any) -> List[Dict]:
-        """Check for sponsor identification compliance."""
-        issues = []
+    # Mock methods for demo mode
+    async def _check_profanity_mock(self) -> List[Dict]:
+        """Check for profanity/indecent content (mock)."""
+        return [{
+            "id": f"prof_{random.randint(1000, 9999)}",
+            "type": "profanity",
+            "severity": "high",
+            "timestamp": 125.5,
+            "timestamp_formatted": self.format_timestamp(125.5),
+            "description": "Potential profanity detected: 'damn'",
+            "context": "...what the damn problem is with...",
+            "confidence": 0.95,
+            "fcc_rule": "47 U.S.C. § 326",
+            "potential_fine": "$25,000 - $500,000",
+            "recommendation": "Review segment, consider bleeping or re-recording",
+            "action_required": True
+        }]
 
-        # Demo: Mock sponsored content without ID
-        issues.append({
+    async def _check_political_ads_mock(self) -> List[Dict]:
+        """Check for political advertising compliance (mock)."""
+        return [{
+            "id": f"pol_{random.randint(1000, 9999)}",
+            "type": "political_ad",
+            "severity": "medium",
+            "timestamp": 450.0,
+            "timestamp_formatted": self.format_timestamp(450.0),
+            "description": "Political content detected without proper disclosure",
+            "context": "Vote for candidate Johnson this November",
+            "confidence": 0.88,
+            "fcc_rule": "47 U.S.C. § 315",
+            "potential_fine": "$10,000 - $100,000",
+            "recommendation": "Add 'Paid for by...' disclosure statement",
+            "action_required": True,
+            "disclosure_template": "Paid for by [Committee Name]. Authorized by [Candidate Name] for [Office]."
+        }]
+
+    async def _check_sponsor_identification_mock(self) -> List[Dict]:
+        """Check for sponsor identification compliance (mock)."""
+        return [{
             "id": f"spons_{random.randint(1000, 9999)}",
             "type": "sponsor_id",
             "severity": "medium",
@@ -187,16 +364,11 @@ class ComplianceAgent(BaseAgent):
             "potential_fine": "$10,000 - $50,000",
             "recommendation": "Add clear sponsor identification at start of segment",
             "action_required": True
-        })
+        }]
 
-        return issues
-
-    async def _check_caption_compliance(self, input_data: Any) -> List[Dict]:
-        """Check closed captioning compliance."""
-        issues = []
-
-        # Demo: Caption quality issues
-        issues.append({
+    async def _check_caption_compliance_mock(self) -> List[Dict]:
+        """Check closed captioning compliance (mock)."""
+        return [{
             "id": f"cap_{random.randint(1000, 9999)}",
             "type": "closed_caption",
             "severity": "low",
@@ -209,14 +381,7 @@ class ComplianceAgent(BaseAgent):
             "potential_fine": "$1,000 - $10,000",
             "recommendation": "Review and correct caption errors before broadcast",
             "action_required": False
-        })
-
-        return issues
-
-    async def _check_eas_compliance(self, input_data: Any) -> List[Dict]:
-        """Check Emergency Alert System compliance."""
-        # In production, would check for proper EAS handling
-        return []  # No issues in demo
+        }]
 
     async def _generate_report(self, issues: List[Dict]) -> Dict:
         """Generate comprehensive compliance report."""
@@ -283,13 +448,11 @@ class ComplianceAgent(BaseAgent):
         if not issues:
             return "$0"
 
-        # Simplified calculation
         total_min = 0
         total_max = 0
 
         for issue in issues:
             fine_str = issue.get("potential_fine", "$0")
-            # Parse fine range (simplified)
             if "-" in fine_str:
                 parts = fine_str.replace("$", "").replace(",", "").split("-")
                 try:
@@ -304,7 +467,6 @@ class ComplianceAgent(BaseAgent):
         """Get prioritized list of recommended actions."""
         actions = []
 
-        # Group actions by priority
         critical_high = [i for i in issues if i["severity"] in ["critical", "high"]]
         if critical_high:
             actions.append("URGENT: Address all critical and high severity issues before broadcast")

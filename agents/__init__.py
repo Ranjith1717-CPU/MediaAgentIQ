@@ -1,7 +1,7 @@
 """
 MediaAgentIQ Agents - AI-Powered Media Operations
 """
-from .base_agent import BaseAgent
+from .base_agent import BaseAgent, ProductionNotReadyError
 from .caption_agent import CaptionAgent
 from .clip_agent import ClipAgent
 from .archive_agent import ArchiveAgent
@@ -13,6 +13,7 @@ from .trending_agent import TrendingAgent
 
 __all__ = [
     "BaseAgent",
+    "ProductionNotReadyError",
     "CaptionAgent",
     "ClipAgent",
     "ArchiveAgent",

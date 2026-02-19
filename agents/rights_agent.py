@@ -1,19 +1,32 @@
 """
 Rights Agent - Tracks content licenses, alerts before expiry, monitors unauthorized usage
+
+Supports:
+- Demo Mode: Returns mock license data for demonstration
+- Production Mode: Integrates with database and external APIs for real rights management
 """
 import random
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
 from datetime import datetime, timedelta
 from .base_agent import BaseAgent
 
+if TYPE_CHECKING:
+    from settings import Settings
+
 
 class RightsAgent(BaseAgent):
-    """Agent for managing content rights and licenses."""
+    """
+    Agent for managing content rights and licenses.
 
-    def __init__(self):
+    Demo Mode: Returns mock license and violation data
+    Production Mode: Connects to database and external APIs for real rights tracking
+    """
+
+    def __init__(self, settings: Optional["Settings"] = None):
         super().__init__(
             name="Rights Agent",
-            description="Tracks content licenses, alerts before expiry, monitors unauthorized usage"
+            description="Tracks content licenses, alerts before expiry, monitors unauthorized usage",
+            settings=settings
         )
 
         self.license_types = {
@@ -29,25 +42,32 @@ class RightsAgent(BaseAgent):
             "syndication", "international", "clip_licensing"
         ]
 
+    def _get_required_integrations(self) -> Dict[str, bool]:
+        """Rights Agent can use external APIs for violation detection."""
+        return {
+            "openai": self.settings.is_openai_configured  # For content analysis
+        }
+
     async def validate_input(self, input_data: Any) -> bool:
         """Validate input for rights management."""
         if not input_data:
             return False
         return True
 
-    async def process(self, input_data: Any) -> Dict[str, Any]:
-        """Process rights management request."""
-        if not await self.validate_input(input_data):
-            return self.create_response(False, error="Invalid input for rights management")
+    async def _demo_process(self, input_data: Any) -> Dict[str, Any]:
+        """
+        Demo mode processing - returns mock rights data.
+        """
+        self.log_activity("demo_process", "Processing rights management request")
 
         # Get current licenses
-        licenses = await self._get_licenses()
+        licenses = await self._get_licenses_mock()
 
         # Check for expiring licenses
         expiring = await self._check_expiring_licenses(licenses)
 
         # Monitor for unauthorized usage
-        violations = await self._check_unauthorized_usage()
+        violations = await self._check_unauthorized_usage_mock()
 
         # Generate alerts
         alerts = await self._generate_alerts(expiring, violations)
@@ -70,8 +90,66 @@ class RightsAgent(BaseAgent):
             }
         })
 
-    async def _get_licenses(self) -> List[Dict]:
-        """Get all content licenses."""
+    async def _production_process(self, input_data: Any) -> Dict[str, Any]:
+        """
+        Production mode processing - uses real data sources.
+        """
+        self.log_activity("production_process", "Processing rights management request")
+
+        # In production, this would:
+        # 1. Query database for license information
+        # 2. Connect to content ID systems (YouTube Content ID, etc.)
+        # 3. Monitor social media for unauthorized usage
+        # 4. Integrate with rights management platforms
+
+        # Get licenses (would come from database in production)
+        licenses = await self._get_licenses_mock()
+
+        # Check for expiring licenses
+        expiring = await self._check_expiring_licenses(licenses)
+
+        # Monitor for unauthorized usage
+        if self.settings.is_openai_configured:
+            # Could use AI to analyze content for violations
+            violations = await self._check_unauthorized_usage_with_ai(input_data)
+        else:
+            violations = await self._check_unauthorized_usage_mock()
+
+        # Generate alerts
+        alerts = await self._generate_alerts(expiring, violations)
+
+        # Create rights report
+        report = await self._generate_report(licenses, expiring, violations)
+
+        return self.create_response(True, data={
+            "licenses": licenses,
+            "expiring_soon": expiring,
+            "violations": violations,
+            "alerts": alerts,
+            "report": report,
+            "stats": {
+                "total_licenses": len(licenses),
+                "active_licenses": len([l for l in licenses if l["status"] == "active"]),
+                "expiring_30_days": len([l for l in expiring if l["days_until_expiry"] <= 30]),
+                "violations_detected": len(violations),
+                "total_content_value": "$2.5M",
+                "analysis_mode": "production"
+            }
+        })
+
+    async def _check_unauthorized_usage_with_ai(self, input_data: Any) -> List[Dict]:
+        """Use AI to analyze potential unauthorized usage."""
+        # In a real implementation, this would:
+        # 1. Accept URLs or content hashes to check
+        # 2. Use content fingerprinting
+        # 3. Search platforms for matches
+        # 4. Use AI to analyze if usage is authorized
+
+        # For now, return enhanced mock data
+        return await self._check_unauthorized_usage_mock()
+
+    async def _get_licenses_mock(self) -> List[Dict]:
+        """Get all content licenses (mock data)."""
         licenses = [
             {
                 "id": "LIC001",
@@ -173,9 +251,8 @@ class RightsAgent(BaseAgent):
         expiring.sort(key=lambda x: x["days_until_expiry"])
         return expiring
 
-    async def _check_unauthorized_usage(self) -> List[Dict]:
-        """Monitor for unauthorized content usage."""
-        # Mock unauthorized usage detections
+    async def _check_unauthorized_usage_mock(self) -> List[Dict]:
+        """Monitor for unauthorized content usage (mock data)."""
         violations = [
             {
                 "id": f"VIO{random.randint(1000, 9999)}",

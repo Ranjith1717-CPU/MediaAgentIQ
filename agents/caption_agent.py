@@ -1,21 +1,44 @@
 """
 Caption Agent - Auto-captioning and QA for media content
+
+Supports:
+- Demo Mode: Returns mock captions for demonstration
+- Production Mode: Uses OpenAI Whisper for real transcription
 """
-import random
-from typing import Any, Dict, List
+
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
 from pathlib import Path
-from .base_agent import BaseAgent
+import logging
+
+from .base_agent import BaseAgent, ProductionNotReadyError
+
+if TYPE_CHECKING:
+    from settings import Settings
+
+logger = logging.getLogger(__name__)
 
 
 class CaptionAgent(BaseAgent):
-    """Agent for generating and QA-checking captions."""
+    """
+    Agent for generating and QA-checking captions.
 
-    def __init__(self):
+    Demo Mode: Returns realistic mock captions
+    Production Mode: Uses OpenAI Whisper API for transcription
+    """
+
+    def __init__(self, settings: Optional["Settings"] = None):
         super().__init__(
             name="Caption Agent",
-            description="Automatically generate captions with QA checks"
+            description="Automatically generate captions with QA checks",
+            settings=settings
         )
-        self.profanity_list = ["damn", "hell", "crap"]  # Demo list
+        self.profanity_list = ["damn", "hell", "crap", "ass", "bastard"]
+
+    def _get_required_integrations(self) -> Dict[str, bool]:
+        """Caption Agent requires OpenAI for production."""
+        return {
+            "openai": self.settings.is_openai_configured
+        }
 
     async def validate_input(self, input_data: Any) -> bool:
         """Validate that input is a valid media file path."""
@@ -25,12 +48,13 @@ class CaptionAgent(BaseAgent):
         valid_extensions = {".mp4", ".mov", ".avi", ".mkv", ".webm", ".mp3", ".wav", ".m4a"}
         return file_path.suffix.lower() in valid_extensions
 
-    async def process(self, input_data: Any) -> Dict[str, Any]:
-        """Generate captions for the input media file."""
-        if not await self.validate_input(input_data):
-            return self.create_response(False, error="Invalid input file format")
+    async def _demo_process(self, input_data: Any) -> Dict[str, Any]:
+        """
+        Demo mode processing - returns mock captions.
+        """
+        self.log_activity("demo_process", f"Processing {input_data}")
 
-        # Generate mock captions (in production, would use Whisper API)
+        # Generate mock captions
         captions = await self._generate_mock_captions()
 
         # Run QA checks
@@ -49,24 +73,77 @@ class CaptionAgent(BaseAgent):
                 "total_segments": len(captions),
                 "total_duration": captions[-1]["end"] if captions else 0,
                 "word_count": sum(len(c["text"].split()) for c in captions),
-                "qa_issues": len([r for r in qa_results if r["type"] == "warning" or r["type"] == "error"])
+                "qa_issues": len([r for r in qa_results if r["type"] in ("warning", "error")])
+            }
+        })
+
+    async def _production_process(self, input_data: Any) -> Dict[str, Any]:
+        """
+        Production mode processing - uses OpenAI Whisper API.
+        """
+        if not self.settings.is_openai_configured:
+            raise ProductionNotReadyError(self.name, "OPENAI_API_KEY")
+
+        self.log_activity("production_process", f"Transcribing {input_data}")
+
+        # Import transcription service
+        from services.transcription import WhisperService
+
+        # Initialize Whisper service
+        whisper = WhisperService(
+            api_key=self.settings.OPENAI_API_KEY,
+            model=self.settings.OPENAI_WHISPER_MODEL
+        )
+
+        # Transcribe
+        result = await whisper.transcribe(str(input_data))
+
+        # Convert to caption format
+        captions = []
+        for segment in result.segments:
+            captions.append({
+                "start": segment.start,
+                "end": segment.end,
+                "text": segment.text,
+                "speaker": segment.speaker or "Speaker",
+                "confidence": segment.confidence
+            })
+
+        # Run QA checks
+        qa_results = await self._run_qa_checks(captions)
+
+        # Generate output formats
+        srt_content = result.to_srt()
+        vtt_content = result.to_vtt()
+
+        return self.create_response(True, data={
+            "captions": captions,
+            "qa_results": qa_results,
+            "srt": srt_content,
+            "vtt": vtt_content,
+            "stats": {
+                "total_segments": len(captions),
+                "total_duration": result.duration,
+                "word_count": len(result.text.split()),
+                "qa_issues": len([r for r in qa_results if r["type"] in ("warning", "error")]),
+                "language": result.language
             }
         })
 
     async def _generate_mock_captions(self) -> List[Dict]:
         """Generate mock caption data for demo purposes."""
         mock_transcript = [
-            {"start": 0.0, "end": 3.5, "text": "Welcome to today's broadcast.", "speaker": "Host", "confidence": 0.98},
-            {"start": 3.5, "end": 7.2, "text": "We have an exciting show lined up for you.", "speaker": "Host", "confidence": 0.95},
-            {"start": 7.5, "end": 12.0, "text": "Let's start with the top stories of the day.", "speaker": "Host", "confidence": 0.97},
-            {"start": 12.5, "end": 18.0, "text": "Our first story covers the recent developments in technology.", "speaker": "Host", "confidence": 0.94},
-            {"start": 18.5, "end": 24.0, "text": "Artificial intelligence continues to transform industries worldwide.", "speaker": "Host", "confidence": 0.96},
-            {"start": 24.5, "end": 30.0, "text": "Experts predict significant changes in the coming years.", "speaker": "Host", "confidence": 0.93},
-            {"start": 30.5, "end": 36.0, "text": "Now let's hear from our correspondent in the field.", "speaker": "Host", "confidence": 0.97},
-            {"start": 36.5, "end": 42.0, "text": "Thank you. I'm here at the conference center.", "speaker": "Reporter", "confidence": 0.95},
-            {"start": 42.5, "end": 48.0, "text": "Industry leaders are gathered to discuss the future.", "speaker": "Reporter", "confidence": 0.94},
-            {"start": 48.5, "end": 54.0, "text": "The atmosphere here is electric with anticipation.", "speaker": "Reporter", "confidence": 0.92},
-            {"start": 54.5, "end": 60.0, "text": "Back to you in the studio.", "speaker": "Reporter", "confidence": 0.98},
+            {"start": 0.0, "end": 4.2, "text": "Good morning, I'm Sarah Mitchell, and this is WKRN Morning News.", "speaker": "Anchor", "confidence": 0.99},
+            {"start": 4.5, "end": 9.8, "text": "Breaking overnight: A massive fire has destroyed a warehouse in downtown Nashville.", "speaker": "Anchor", "confidence": 0.98},
+            {"start": 10.2, "end": 15.5, "text": "Fire crews responded around 2 AM and battled the blaze for nearly four hours.", "speaker": "Anchor", "confidence": 0.97},
+            {"start": 16.0, "end": 20.3, "text": "We go live now to reporter Jake Thompson at the scene. Jake, what's the latest?", "speaker": "Anchor", "confidence": 0.98},
+            {"start": 21.0, "end": 27.5, "text": "Sarah, as you can see behind me, crews are still working to contain hot spots.", "speaker": "Reporter", "confidence": 0.96},
+            {"start": 28.0, "end": 34.2, "text": "The warehouse, owned by Mitchell Distribution, stored electronics and furniture.", "speaker": "Reporter", "confidence": 0.94},
+            {"start": 34.8, "end": 41.0, "text": "Fire Chief Robert Anderson told me moments ago that the cause is under investigation.", "speaker": "Reporter", "confidence": 0.97},
+            {"start": 41.5, "end": 48.3, "text": "You can hear additional units arriving now to assist with the operation.", "speaker": "Reporter", "confidence": 0.89},
+            {"start": 49.0, "end": 55.8, "text": "Thankfully, no injuries have been reported. The building was unoccupied at the time.", "speaker": "Reporter", "confidence": 0.98},
+            {"start": 56.2, "end": 62.0, "text": "We'll have more updates throughout the morning. Back to you, Sarah.", "speaker": "Reporter", "confidence": 0.97},
+            {"start": 62.5, "end": 68.4, "text": "Thank you, Jake. Stay safe out there. We'll check back with you at the top of the hour.", "speaker": "Anchor", "confidence": 0.98},
         ]
         return mock_transcript
 
@@ -76,13 +153,15 @@ class CaptionAgent(BaseAgent):
 
         for i, caption in enumerate(captions):
             # Check confidence threshold
-            if caption.get("confidence", 1.0) < 0.90:
+            confidence = caption.get("confidence", 1.0)
+            if confidence < self.settings.CAPTION_CONFIDENCE_THRESHOLD:
                 issues.append({
                     "type": "warning",
+                    "severity": "medium",
                     "segment": i + 1,
                     "timestamp": self.format_timestamp(caption["start"]),
                     "issue": "Low confidence score",
-                    "details": f"Confidence: {caption.get('confidence', 0):.2%}",
+                    "details": f"Confidence: {confidence:.0%}",
                     "suggestion": "Review and verify this segment manually"
                 })
 
@@ -92,6 +171,7 @@ class CaptionAgent(BaseAgent):
                 if word in text_lower:
                     issues.append({
                         "type": "error",
+                        "severity": "high",
                         "segment": i + 1,
                         "timestamp": self.format_timestamp(caption["start"]),
                         "issue": "Potential profanity detected",
@@ -105,6 +185,7 @@ class CaptionAgent(BaseAgent):
                 if gap > 3.0:
                     issues.append({
                         "type": "info",
+                        "severity": "low",
                         "segment": i + 1,
                         "timestamp": self.format_timestamp(caption["start"]),
                         "issue": "Large gap between segments",
@@ -117,6 +198,7 @@ class CaptionAgent(BaseAgent):
             if duration > 7.0:
                 issues.append({
                     "type": "warning",
+                    "severity": "medium",
                     "segment": i + 1,
                     "timestamp": self.format_timestamp(caption["start"]),
                     "issue": "Long segment duration",
@@ -128,6 +210,7 @@ class CaptionAgent(BaseAgent):
             if i > 0 and caption.get("speaker") != captions[i - 1].get("speaker"):
                 issues.append({
                     "type": "info",
+                    "severity": "low",
                     "segment": i + 1,
                     "timestamp": self.format_timestamp(caption["start"]),
                     "issue": "Speaker change detected",
@@ -139,6 +222,7 @@ class CaptionAgent(BaseAgent):
         if not issues:
             issues.append({
                 "type": "success",
+                "severity": "none",
                 "segment": None,
                 "timestamp": None,
                 "issue": "All checks passed",
