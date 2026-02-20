@@ -6,7 +6,22 @@ Real-time demos showcasing full agent capabilities
 import streamlit as st
 import random
 import time
+import os
 from datetime import datetime, timedelta
+from pathlib import Path
+
+# Import demo sample configuration
+try:
+    from demo_config import (
+        DEMO_SAMPLE_VIDEO,
+        SAMPLE_CAPTIONS, SAMPLE_QA_ISSUES, SAMPLE_VIRAL_MOMENTS,
+        SAMPLE_COMPLIANCE_ISSUES, SAMPLE_SOCIAL_POSTS, SAMPLE_TRANSLATIONS,
+        SAMPLE_LICENSES, SAMPLE_TRENDS, SAMPLE_ARCHIVE_METADATA,
+        get_demo_video_path, is_demo_video_available
+    )
+    DEMO_SAMPLE_AVAILABLE = is_demo_video_available()
+except ImportError:
+    DEMO_SAMPLE_AVAILABLE = False
 
 # Page configuration
 st.set_page_config(
@@ -694,6 +709,32 @@ if page == "Dashboard":
     st.title("MediaAgentIQ Dashboard")
     st.markdown("**AI-Powered Media Operations Platform** | Real-time Broadcast Intelligence")
 
+    # Demo Sample Video Section (if available)
+    if DEMO_SAMPLE_AVAILABLE:
+        with st.expander("🎬 **Demo Sample Video Available** - Click to preview and process", expanded=False):
+            col1, col2 = st.columns([2, 1])
+            with col1:
+                st.markdown(f"**{DEMO_SAMPLE_VIDEO['title']}**")
+                st.caption(f"Duration: {DEMO_SAMPLE_VIDEO['duration']} | Format: {DEMO_SAMPLE_VIDEO['format']} | Size: {DEMO_SAMPLE_VIDEO['size_mb']} MB")
+                video_path = get_demo_video_path()
+                if video_path.exists():
+                    st.video(str(video_path))
+            with col2:
+                st.markdown("**Quick Process Options:**")
+                if st.button("🚀 Process with All Agents", key="demo_process_all"):
+                    st.session_state.demo_processing = True
+                    st.session_state.demo_process_start = datetime.now()
+                if st.button("📝 Generate Captions Only", key="demo_caption_only"):
+                    st.session_state.demo_caption_processing = True
+                if st.button("🎬 Find Viral Clips", key="demo_clip_only"):
+                    st.session_state.demo_clip_processing = True
+
+                if st.session_state.get("demo_processing"):
+                    with st.spinner("Processing demo video through all agents..."):
+                        time.sleep(2)
+                    st.success("✅ Demo video processed! Check 'All-in-One Workflow' for results.")
+                    st.session_state.demo_processing = False
+
     # Autonomous Agent Status Section
     st.markdown("---")
     col1, col2 = st.columns([2, 1])
@@ -760,13 +801,25 @@ if page == "Dashboard":
 
         # Recent Autonomous Activity
         with st.expander("📋 **Recent Autonomous Activity**", expanded=True):
-            auto_activity = [
-                {"time": "Just now", "event": "📈 Trending Agent detected #NashvilleFire spike", "action": "Triggered Social Publishing"},
-                {"time": "2 min ago", "event": "⚖️ Compliance scan completed", "action": "No issues found"},
-                {"time": "5 min ago", "event": "📝 Caption Agent auto-processed new upload", "action": "Triggered Localization"},
-                {"time": "8 min ago", "event": "🎬 Clip Agent found viral moment (94%)", "action": "Triggered Social Publishing"},
-                {"time": "15 min ago", "event": "📜 Rights Agent license check", "action": "Alert: 2 licenses expiring soon"},
-            ]
+            # Use sample video activity if demo is available
+            if DEMO_SAMPLE_AVAILABLE:
+                auto_activity = [
+                    {"time": "Just now", "event": f"📈 Trending Agent matched content to #Innovation", "action": "Recommended optimal posting time"},
+                    {"time": "1 min ago", "event": f"🎬 Clip Agent processed '{DEMO_SAMPLE_VIDEO['title'][:30]}...'", "action": "Found 2 viral moments (94% score)"},
+                    {"time": "2 min ago", "event": "📝 Caption Agent completed transcription", "action": f"Generated {len(SAMPLE_CAPTIONS)} segments, triggered Localization"},
+                    {"time": "3 min ago", "event": "⚖️ Compliance scan on demo video", "action": "Identified as advertisement - disclosure recommended"},
+                    {"time": "5 min ago", "event": "📱 Social Publishing generated posts", "action": f"5 platforms ready: {', '.join([p['platform'] for p in SAMPLE_SOCIAL_POSTS['product_launch'][:3]])}..."},
+                    {"time": "8 min ago", "event": "🌍 Localization completed", "action": f"8 languages translated, voice dub available"},
+                    {"time": "10 min ago", "event": "📜 Rights Agent verified licenses", "action": "All content cleared for use"},
+                ]
+            else:
+                auto_activity = [
+                    {"time": "Just now", "event": "📈 Trending Agent detected #NashvilleFire spike", "action": "Triggered Social Publishing"},
+                    {"time": "2 min ago", "event": "⚖️ Compliance scan completed", "action": "No issues found"},
+                    {"time": "5 min ago", "event": "📝 Caption Agent auto-processed new upload", "action": "Triggered Localization"},
+                    {"time": "8 min ago", "event": "🎬 Clip Agent found viral moment (94%)", "action": "Triggered Social Publishing"},
+                    {"time": "15 min ago", "event": "📜 Rights Agent license check", "action": "Alert: 2 licenses expiring soon"},
+                ]
 
             for act in auto_activity:
                 st.markdown(f"**{act['time']}** - {act['event']}")
@@ -952,7 +1005,24 @@ elif page == "🚀 All-in-One Workflow":
             help="Supported formats: MP4, MOV, WAV, MP3, M4A, AVI"
         )
 
-        use_demo = st.checkbox("Use demo content: Morning News Broadcast (4 hrs)", value=True)
+        # Demo content selection
+        demo_options = ["None - Use uploaded file"]
+        if DEMO_SAMPLE_AVAILABLE:
+            demo_options.insert(0, f"🎬 Sample Video: {DEMO_SAMPLE_VIDEO['title']} ({DEMO_SAMPLE_VIDEO['duration']})")
+        demo_options.append("📺 News Broadcast Demo (4 hrs)")
+
+        demo_selection = st.radio("**Or use demo content:**", demo_options, index=0 if DEMO_SAMPLE_AVAILABLE else len(demo_options)-1)
+        use_sample_video = DEMO_SAMPLE_AVAILABLE and "Sample Video" in demo_selection
+        use_news_demo = "News Broadcast" in demo_selection
+
+        # Show video preview if sample video selected
+        if use_sample_video:
+            st.markdown("---")
+            st.markdown("**📹 Demo Video Preview:**")
+            video_path = get_demo_video_path()
+            if video_path.exists():
+                st.video(str(video_path))
+                st.caption(f"📁 {DEMO_SAMPLE_VIDEO['filename']} | {DEMO_SAMPLE_VIDEO['resolution']} | {DEMO_SAMPLE_VIDEO['size_mb']} MB")
 
         st.markdown("**Or enter content URL:**")
         content_url = st.text_input("Content URL", placeholder="https://your-mam-system.com/asset/12345")
@@ -1063,14 +1133,46 @@ elif page == "🚀 All-in-One Workflow":
         st.divider()
         st.subheader("📋 Combined Results")
 
-        # Summary Metrics
+        # Select data source based on demo selection
+        if use_sample_video:
+            active_captions = SAMPLE_CAPTIONS
+            active_viral = SAMPLE_VIRAL_MOMENTS
+            active_compliance = SAMPLE_COMPLIANCE_ISSUES
+            active_trends = SAMPLE_TRENDS
+            active_archive = SAMPLE_ARCHIVE_METADATA
+            active_social = SAMPLE_SOCIAL_POSTS.get("product_launch", [])
+            active_translations = SAMPLE_TRANSLATIONS
+            active_licenses = SAMPLE_LICENSES
+            content_title = DEMO_SAMPLE_VIDEO['title']
+            content_duration = DEMO_SAMPLE_VIDEO['duration']
+        else:
+            active_captions = DEMO_CAPTIONS
+            active_viral = DEMO_VIRAL_MOMENTS
+            active_compliance = DEMO_COMPLIANCE_ISSUES
+            active_trends = DEMO_TRENDS
+            active_archive = {
+                "title": "Morning News Broadcast - Fire Coverage",
+                "duration": "4:02:15",
+                "speakers": ["Sarah Mitchell", "Jake Thompson", "Weather Team"],
+                "topics": ["warehouse fire", "downtown Nashville", "breaking news"],
+                "ai_tags": ["fire", "emergency", "reporter", "live coverage", "breaking"],
+                "sentiment": "urgent/concerned",
+                "quality": "HD 1080p"
+            }
+            active_social = DEMO_SOCIAL_POSTS.get("breaking_news", [])
+            active_translations = DEMO_TRANSLATIONS
+            active_licenses = DEMO_LICENSES
+            content_title = "Morning News Broadcast"
+            content_duration = "4:02:15"
+
+        # Summary Metrics - Dynamic based on content
         col1, col2, col3, col4, col5, col6 = st.columns(6)
-        col1.metric("Captions", "13 segments", "96.2% accuracy")
-        col2.metric("Viral Clips", "4 found", "Top: 97%")
-        col3.metric("Compliance", "2 issues", "Review needed")
-        col4.metric("Social Posts", "15 ready", "5 platforms")
-        col5.metric("Translations", f"{len(target_languages)} languages", "94% quality")
-        col6.metric("Trending Match", "3 topics", "#NashvilleFire")
+        col1.metric("Captions", f"{len(active_captions)} segments", f"{sum(c['confidence'] for c in active_captions)/len(active_captions)*100:.1f}% accuracy")
+        col2.metric("Viral Clips", f"{len(active_viral)} found", f"Top: {max(m['score'] for m in active_viral)*100:.0f}%")
+        col3.metric("Compliance", f"{len(active_compliance)} items", "Reviewed")
+        col4.metric("Social Posts", f"{len(active_social)} ready", "5 platforms")
+        col5.metric("Translations", f"{len(target_languages)} languages", "95% quality")
+        col6.metric("Trending Match", f"{len(active_trends)} topics", f"{active_trends[0]['topic']}" if active_trends else "N/A")
 
         st.divider()
 
@@ -1081,81 +1183,104 @@ elif page == "🚀 All-in-One Workflow":
         ])
 
         with tab1:
-            st.markdown("**Generated Captions** - 13 segments, 2 speakers detected")
-            for cap in DEMO_CAPTIONS[:5]:
+            st.markdown(f"**Generated Captions** - {len(active_captions)} segments from '{content_title}'")
+            for cap in active_captions:
+                conf_color = "#22c55e" if cap["confidence"] >= 0.95 else "#f59e0b" if cap["confidence"] >= 0.90 else "#ef4444"
                 st.markdown(f"""
                 <div style="background: #1e293b; padding: 8px 12px; border-radius: 6px; margin: 4px 0; border-left: 3px solid #6366f1;">
                     <small style="color: #6366f1;">{format_srt_time(cap['start'])} → {format_srt_time(cap['end'])}</small>
-                    <span style="color: #94a3b8; margin-left: 12px;">{cap['speaker']}</span><br/>
+                    <span style="color: #94a3b8; margin-left: 12px;">{cap['speaker']}</span>
+                    <span style="color: {conf_color}; float: right;">{cap['confidence']*100:.0f}%</span><br/>
                     <span style="color: #e2e8f0;">{cap['text']}</span>
                 </div>
                 """, unsafe_allow_html=True)
-            st.caption("... and 8 more segments")
             col1, col2 = st.columns(2)
-            col1.download_button("📥 Download SRT", generate_srt(DEMO_CAPTIONS), "captions.srt", use_container_width=True)
-            col2.download_button("📥 Download VTT", generate_srt(DEMO_CAPTIONS).replace(",", "."), "captions.vtt", use_container_width=True)
+            col1.download_button("📥 Download SRT", generate_srt(active_captions), "captions.srt", use_container_width=True)
+            col2.download_button("📥 Download VTT", generate_srt(active_captions).replace(",", "."), "captions.vtt", use_container_width=True)
 
         with tab2:
-            st.markdown("**Viral Moments Detected** - 4 clips ready for export")
-            for moment in DEMO_VIRAL_MOMENTS[:3]:
+            st.markdown(f"**Viral Moments Detected** - {len(active_viral)} clips ready for export")
+            for moment in active_viral:
                 col1, col2 = st.columns([3, 1])
                 with col1:
                     st.markdown(f"**{moment['title']}** ({moment['end']-moment['start']:.0f}s)")
                     st.caption(moment['description'])
+                    st.markdown(f"**Platforms:** {', '.join(moment['platforms'])}")
+                    st.markdown(f"**Hashtags:** {' '.join(moment['hashtags'])}")
                 with col2:
                     st.metric("Viral Score", f"{moment['score']:.0%}")
-            st.button("📤 Export All Clips", use_container_width=True)
+                    st.caption(f"📈 {moment['predicted_views']}")
+                st.divider()
+            st.button("📤 Export All Clips", use_container_width=True, key="export_clips_allinone")
 
         with tab3:
-            st.markdown("**Compliance Scan Results** - 2 issues require attention")
-            for issue in DEMO_COMPLIANCE_ISSUES[:2]:
-                severity_icon = "🔴" if issue["severity"] == "critical" else "🟠"
-                st.warning(f"{severity_icon} **{issue['type'].upper()}** @ {issue['timestamp']}\n\n{issue['description']}\n\n*Fine range: {issue['fine_range']}*")
-            st.button("📝 Generate Compliance Report", use_container_width=True)
+            st.markdown(f"**Compliance Scan Results** - {len(active_compliance)} items reviewed")
+            for issue in active_compliance:
+                severity_icon = "🔴" if issue["severity"] == "critical" else "🟠" if issue["severity"] in ["high", "medium"] else "🟢" if issue["severity"] == "info" else "ℹ️"
+                if issue["severity"] in ["critical", "high"]:
+                    st.error(f"{severity_icon} **{issue['type'].upper()}** @ {issue['timestamp']}\n\n{issue['description']}\n\n**FCC Rule:** {issue['fcc_rule']}\n\n**Recommendation:** {issue['recommendation']}")
+                elif issue["severity"] == "medium":
+                    st.warning(f"{severity_icon} **{issue['type'].upper()}** @ {issue['timestamp']}\n\n{issue['description']}\n\n**Recommendation:** {issue['recommendation']}")
+                else:
+                    st.info(f"{severity_icon} **{issue['type'].upper()}** @ {issue['timestamp']}\n\n{issue['description']}\n\n**Recommendation:** {issue['recommendation']}")
+            st.button("📝 Generate Compliance Report", use_container_width=True, key="compliance_report_allinone")
 
         with tab4:
             st.markdown("**Archive Metadata Generated**")
-            st.json({
-                "title": "Morning News Broadcast - Fire Coverage",
-                "duration": "4:02:15",
-                "speakers": ["Sarah Mitchell", "Jake Thompson", "Weather Team"],
-                "topics": ["warehouse fire", "downtown Nashville", "breaking news"],
-                "ai_tags": ["fire", "emergency", "reporter", "live coverage", "breaking"],
-                "sentiment": "urgent/concerned",
-                "quality": "HD 1080p"
-            })
-            st.button("📤 Send to MAM System", use_container_width=True)
+            st.json(active_archive)
+            st.button("📤 Send to MAM System", use_container_width=True, key="mam_sync_allinone")
 
         with tab5:
-            st.markdown("**Social Posts Generated** - 15 posts across 5 platforms")
-            platforms = ["Twitter/X", "Instagram", "TikTok", "Facebook", "YouTube Shorts"]
-            for platform in platforms:
-                st.markdown(f"**{platform}** - 3 posts ready")
+            st.markdown(f"**Social Posts Generated** - {len(active_social)} posts across 5 platforms")
+            for post in active_social:
+                with st.expander(f"**{post['platform']}** - {post['char_count']} chars | Best time: {post['best_time']}"):
+                    st.text_area("Post Content", post['content'], height=120, key=f"social_{post['platform']}")
+                    st.caption(f"📊 Predicted engagement: {post['predicted_engagement']}")
             col1, col2 = st.columns(2)
-            col1.button("📤 Post All Now", type="primary", use_container_width=True)
-            col2.button("🕐 Schedule All", use_container_width=True)
+            col1.button("📤 Post All Now", type="primary", use_container_width=True, key="post_all_allinone")
+            col2.button("🕐 Schedule All", use_container_width=True, key="schedule_all_allinone")
 
         with tab6:
             st.markdown(f"**Translations Complete** - {len(target_languages)} languages")
             for lang in target_languages:
-                lang_data = {"Spanish": ("🇪🇸", 96), "French": ("🇫🇷", 94), "German": ("🇩🇪", 95), "Chinese": ("🇨🇳", 93)}
-                flag, score = lang_data.get(lang, ("🌍", 90))
-                st.progress(score/100, f"{flag} {lang}: {score}% quality")
-            st.button("📥 Download All Subtitle Files", use_container_width=True)
+                lang_key = {"Spanish": "es", "French": "fr", "German": "de", "Chinese": "zh"}.get(lang, "es")
+                if lang_key in active_translations:
+                    trans = active_translations[lang_key]
+                    with st.expander(f"{trans['flag']} **{trans['name']}** - {trans['quality_score']}% quality"):
+                        st.markdown(f"**Original:** {trans['sample_original']}")
+                        st.markdown(f"**Translated:** {trans['sample_translated']}")
+                        st.caption(f"📝 {trans['notes']}")
+                        if trans['voice_available']:
+                            st.success("🎙️ AI Voice Dubbing Available")
+            st.button("📥 Download All Subtitle Files", use_container_width=True, key="download_subs_allinone")
 
         with tab7:
             st.markdown("**Rights Verification**")
-            st.success("✅ Content cleared for broadcast use")
-            st.info("ℹ️ 2 licenses used: Wire Service Feed, Stock Images")
-            st.warning("⚠️ Reminder: Wire Service license expires in 18 days")
+            if use_sample_video:
+                for lic in active_licenses:
+                    status_color = "🟢" if lic['status'] == 'active' else "🟡"
+                    st.success(f"{status_color} **{lic['title']}**\n\nType: {lic['type']} | Licensor: {lic['licensor']}\n\nRights: {', '.join(lic['rights'])}\n\nCompliance: {lic['compliance_score']}%")
+            else:
+                st.success("✅ Content cleared for broadcast use")
+                st.info("ℹ️ 2 licenses used: Wire Service Feed, Stock Images")
+                st.warning("⚠️ Reminder: Wire Service license expires in 18 days")
 
         with tab8:
             st.markdown("**Trending Context**")
             st.markdown("Your content matches these trending topics:")
-            for trend in DEMO_TRENDS[:3]:
-                if trend['our_coverage']:
-                    st.markdown(f"✅ **{trend['topic']}** - {trend['velocity']} ({trend['volume']})")
-            st.info("💡 **AI Recommendation:** This content is highly relevant to current trends. Consider immediate publication for maximum reach.")
+            for trend in active_trends:
+                velocity_color = "#22c55e" if trend['velocity_score'] > 80 else "#f59e0b" if trend['velocity_score'] > 60 else "#94a3b8"
+                with st.expander(f"**{trend['topic']}** - {trend['velocity']} ({trend['volume']})"):
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.metric("Velocity Score", f"{trend['velocity_score']}/100")
+                        st.metric("Sentiment", trend['sentiment'], f"{trend['sentiment_score']:.2f}")
+                    with col2:
+                        st.markdown("**Demographics:**")
+                        for age, pct in trend['demographics'].items():
+                            st.progress(pct/100, f"{age}: {pct}%")
+                    st.info(f"💡 **Recommendation:** {trend['recommendation']}")
+            st.success("💡 **AI Analysis:** Content aligns well with current trends. Optimal for immediate publication.")
 
         st.divider()
 
@@ -1210,9 +1335,24 @@ elif page == "Caption Agent":
 
     with col1:
         st.subheader("Upload Media")
-        uploaded = st.file_uploader("Upload video or audio file", type=["mp4", "mov", "wav", "mp3", "m4a"])
+        uploaded = st.file_uploader("Upload video or audio file", type=["mp4", "mov", "wav", "mp3", "m4a"], key="caption_upload")
 
-        demo_mode = st.checkbox("Use demo: Morning News Broadcast (1:22)", value=True)
+        # Demo selection with sample video option
+        caption_demo_options = ["Upload your own file"]
+        if DEMO_SAMPLE_AVAILABLE:
+            caption_demo_options.insert(0, f"🎬 Sample Video: {DEMO_SAMPLE_VIDEO['title']} ({DEMO_SAMPLE_VIDEO['duration']})")
+        caption_demo_options.append("📺 News Broadcast Demo (1:22)")
+
+        caption_demo_selection = st.radio("**Or use demo content:**", caption_demo_options, index=0 if DEMO_SAMPLE_AVAILABLE else len(caption_demo_options)-1, key="caption_demo_select")
+        use_sample_video_caption = DEMO_SAMPLE_AVAILABLE and "Sample Video" in caption_demo_selection
+        demo_mode = "News Broadcast" in caption_demo_selection
+
+        # Show video preview if sample video selected
+        if use_sample_video_caption:
+            video_path = get_demo_video_path()
+            if video_path.exists():
+                st.video(str(video_path))
+                st.caption(f"📁 {DEMO_SAMPLE_VIDEO['filename']} | {DEMO_SAMPLE_VIDEO['resolution']}")
 
         if st.button("Generate Captions", type="primary", use_container_width=True):
             # Real-time processing simulation
@@ -1243,13 +1383,30 @@ elif page == "Caption Agent":
     if st.session_state.get("caption_done"):
         st.divider()
 
+        # Select data based on demo type
+        if use_sample_video_caption:
+            caption_data = SAMPLE_CAPTIONS
+            qa_data = SAMPLE_QA_ISSUES
+            content_title = DEMO_SAMPLE_VIDEO['title']
+            content_duration = DEMO_SAMPLE_VIDEO['duration']
+            speakers = ["Narrator"]
+            speaker_data = {"Narrator": 30}
+        else:
+            caption_data = DEMO_CAPTIONS
+            qa_data = DEMO_QA_ISSUES
+            content_title = "Morning News Broadcast"
+            content_duration = "1:22"
+            speakers = ["Sarah Mitchell (Anchor)", "Jake Thompson (Reporter)"]
+            speaker_data = {"Sarah Mitchell (Anchor)": 45, "Jake Thompson (Reporter)": 37}
+
         # Results Summary
-        st.subheader("Results")
+        st.subheader(f"Results - {content_title}")
+        avg_confidence = sum(c['confidence'] for c in caption_data) / len(caption_data) * 100
         col1, col2, col3, col4, col5 = st.columns(5)
-        col1.metric("Segments", len(DEMO_CAPTIONS))
-        col2.metric("Duration", "1:22")
-        col3.metric("Speakers", "2")
-        col4.metric("Avg Confidence", "96.2%")
+        col1.metric("Segments", len(caption_data))
+        col2.metric("Duration", content_duration)
+        col3.metric("Speakers", len(speakers))
+        col4.metric("Avg Confidence", f"{avg_confidence:.1f}%")
         col5.metric("Words/Min", "152")
 
         tab1, tab2, tab3, tab4 = st.tabs(["📄 Captions", "✅ QA Report", "📊 Analytics", "⬇️ Export"])
@@ -1257,7 +1414,7 @@ elif page == "Caption Agent":
         with tab1:
             # Interactive caption editor
             st.markdown("**Interactive Caption Editor** - Click any segment to edit")
-            for cap in DEMO_CAPTIONS:
+            for cap in caption_data:
                 conf_color = "#22c55e" if cap["confidence"] >= 0.95 else "#f59e0b" if cap["confidence"] >= 0.90 else "#ef4444"
                 st.markdown(f"""
                 <div class="caption-block">
@@ -1272,19 +1429,29 @@ elif page == "Caption Agent":
 
         with tab2:
             st.markdown("**Quality Assurance Report**")
-            issues_by_type = {"Critical": 0, "Warning": 1, "Info": 2, "Passed": 2}
+            issues_count = {"Critical": 0, "Warning": 0, "Info": 0, "Passed": 0}
+            for issue in qa_data:
+                if issue["severity"] == "critical":
+                    issues_count["Critical"] += 1
+                elif issue["severity"] in ["medium", "warning"]:
+                    issues_count["Warning"] += 1
+                elif issue["severity"] == "low" or issue["type"] == "info":
+                    issues_count["Info"] += 1
+                elif issue["type"] == "success":
+                    issues_count["Passed"] += 1
+
             col1, col2, col3, col4 = st.columns(4)
-            col1.metric("Critical", issues_by_type["Critical"], delta_color="inverse")
-            col2.metric("Warnings", issues_by_type["Warning"])
-            col3.metric("Info", issues_by_type["Info"])
-            col4.metric("Passed", issues_by_type["Passed"])
+            col1.metric("Critical", issues_count["Critical"], delta_color="inverse")
+            col2.metric("Warnings", issues_count["Warning"])
+            col3.metric("Info", issues_count["Info"])
+            col4.metric("Passed", issues_count["Passed"])
 
             st.divider()
-            for issue in DEMO_QA_ISSUES:
+            for issue in qa_data:
                 if issue["type"] == "warning":
-                    st.warning(f"⚠️ **{issue['issue']}** (Segment {issue['segment']} @ {issue['timestamp']})\n\n{issue['details']}\n\n💡 *{issue['suggestion']}*")
+                    st.warning(f"⚠️ **{issue['issue']}** (Segment {issue.get('segment', 'N/A')} @ {issue.get('timestamp', 'N/A')})\n\n{issue['details']}\n\n💡 *{issue.get('suggestion', '')}*")
                 elif issue["type"] == "info":
-                    st.info(f"ℹ️ **{issue['issue']}** (Segment {issue['segment']} @ {issue['timestamp']})\n\n{issue['details']}")
+                    st.info(f"ℹ️ **{issue['issue']}** (Segment {issue.get('segment', 'N/A')} @ {issue.get('timestamp', 'N/A')})\n\n{issue['details']}")
                 elif issue["type"] == "success":
                     st.success(f"✅ **{issue['issue']}**\n\n{issue['details']}")
 
@@ -1293,34 +1460,39 @@ elif page == "Caption Agent":
             col1, col2 = st.columns(2)
             with col1:
                 st.markdown("**Speaker Distribution**")
-                speaker_data = {"Sarah Mitchell (Anchor)": 45, "Jake Thompson (Reporter)": 37}
+                total_time = sum(speaker_data.values())
                 for speaker, seconds in speaker_data.items():
-                    st.progress(seconds / 82, f"{speaker}: {seconds}s")
+                    st.progress(seconds / total_time if total_time > 0 else 0, f"{speaker}: {seconds}s")
 
             with col2:
                 st.markdown("**Confidence Distribution**")
-                st.progress(0.85, "High (>95%): 85%")
-                st.progress(0.12, "Medium (90-95%): 12%")
-                st.progress(0.03, "Low (<90%): 3%")
+                high_conf = len([c for c in caption_data if c['confidence'] >= 0.95]) / len(caption_data)
+                med_conf = len([c for c in caption_data if 0.90 <= c['confidence'] < 0.95]) / len(caption_data)
+                low_conf = len([c for c in caption_data if c['confidence'] < 0.90]) / len(caption_data)
+                st.progress(high_conf, f"High (>95%): {high_conf*100:.0f}%")
+                st.progress(med_conf, f"Medium (90-95%): {med_conf*100:.0f}%")
+                st.progress(low_conf, f"Low (<90%): {low_conf*100:.0f}%")
 
             st.markdown("**Words per Speaker**")
-            col1, col2 = st.columns(2)
-            col1.metric("Sarah Mitchell", "98 words")
-            col2.metric("Jake Thompson", "109 words")
+            cols = st.columns(len(speakers))
+            for i, speaker in enumerate(speakers):
+                word_count = sum(len(c['text'].split()) for c in caption_data if c['speaker'] == speaker)
+                cols[i].metric(speaker.split(" (")[0], f"{word_count} words")
 
         with tab4:
             st.markdown("**Export Options**")
-            srt_content = generate_srt(DEMO_CAPTIONS)
+            srt_content = generate_srt(caption_data)
+            filename_base = "sample_video" if use_sample_video_caption else "morning_news"
 
             col1, col2, col3 = st.columns(3)
             with col1:
-                st.download_button("📥 Download SRT", srt_content, "morning_news_captions.srt", "text/plain", use_container_width=True)
+                st.download_button("📥 Download SRT", srt_content, f"{filename_base}_captions.srt", "text/plain", use_container_width=True, key="cap_srt")
             with col2:
-                st.download_button("📥 Download VTT", srt_content.replace(",", "."), "morning_news_captions.vtt", "text/plain", use_container_width=True)
+                st.download_button("📥 Download VTT", srt_content.replace(",", "."), f"{filename_base}_captions.vtt", "text/plain", use_container_width=True, key="cap_vtt")
             with col3:
                 import json
-                json_content = json.dumps(DEMO_CAPTIONS, indent=2)
-                st.download_button("📥 Download JSON", json_content, "morning_news_captions.json", "application/json", use_container_width=True)
+                json_content = json.dumps(caption_data, indent=2)
+                st.download_button("📥 Download JSON", json_content, f"{filename_base}_captions.json", "application/json", use_container_width=True, key="cap_json")
 
             st.divider()
             st.markdown("**Integration Export**")
@@ -1373,10 +1545,27 @@ elif page == "Clip Agent":
 
     st.divider()
 
-    uploaded = st.file_uploader("Upload broadcast recording", type=["mp4", "mov", "avi"])
-    demo_mode = st.checkbox("Use demo: 4-hour morning broadcast with fire coverage", value=True)
+    col1, col2 = st.columns([2, 1])
+    with col1:
+        uploaded = st.file_uploader("Upload broadcast recording", type=["mp4", "mov", "avi"], key="clip_upload")
 
-    col1, col2 = st.columns([3, 1])
+        # Demo selection with sample video option
+        clip_demo_options = ["Upload your own file"]
+        if DEMO_SAMPLE_AVAILABLE:
+            clip_demo_options.insert(0, f"🎬 Sample Video: {DEMO_SAMPLE_VIDEO['title']} ({DEMO_SAMPLE_VIDEO['duration']})")
+        clip_demo_options.append("📺 News Broadcast Demo (4 hrs)")
+
+        clip_demo_selection = st.radio("**Or use demo content:**", clip_demo_options, index=0 if DEMO_SAMPLE_AVAILABLE else len(clip_demo_options)-1, key="clip_demo_select")
+        use_sample_video_clip = DEMO_SAMPLE_AVAILABLE and "Sample Video" in clip_demo_selection
+        demo_mode = "News Broadcast" in clip_demo_selection
+
+        # Show video preview if sample video selected
+        if use_sample_video_clip:
+            video_path = get_demo_video_path()
+            if video_path.exists():
+                st.video(str(video_path))
+                st.caption(f"📁 {DEMO_SAMPLE_VIDEO['filename']} | {DEMO_SAMPLE_VIDEO['resolution']}")
+
     with col2:
         st.markdown("**Detection Settings**")
         emotion_threshold = st.slider("Emotion threshold", 0.5, 1.0, 0.7)
@@ -1401,17 +1590,22 @@ elif page == "Clip Agent":
     if st.session_state.get("clip_done"):
         st.divider()
 
+        # Select data based on demo type
+        viral_data = SAMPLE_VIRAL_MOMENTS if use_sample_video_clip else DEMO_VIRAL_MOMENTS
+        high_viral_count = len([m for m in viral_data if m['score'] >= 0.90])
+        total_clip_time = sum(m['end'] - m['start'] for m in viral_data)
+
         # Summary metrics
         col1, col2, col3, col4, col5 = st.columns(5)
-        col1.metric("Moments Found", len(DEMO_VIRAL_MOMENTS))
-        col2.metric("High Viral (>90%)", "3")
-        col3.metric("Total Clip Time", "1:42")
-        col4.metric("Est. Total Reach", "2.5M - 8M")
+        col1.metric("Moments Found", len(viral_data))
+        col2.metric("High Viral (>90%)", high_viral_count)
+        col3.metric("Total Clip Time", f"{total_clip_time:.0f}s")
+        col4.metric("Est. Total Reach", viral_data[0]['predicted_views'] if viral_data else "N/A")
         col5.metric("Platforms Optimized", len(platforms))
 
         st.subheader(f"Viral Moments Detected")
 
-        for moment in DEMO_VIRAL_MOMENTS:
+        for moment in viral_data:
             score_color = "#22c55e" if moment['score'] >= 0.9 else "#f59e0b" if moment['score'] >= 0.8 else "#3b82f6"
 
             with st.expander(f"**{moment['title']}** — Viral Score: {moment['score']:.0%}", expanded=moment['score'] >= 0.95):
