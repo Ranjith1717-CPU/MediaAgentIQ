@@ -651,6 +651,21 @@ def generate_srt(captions):
         srt_content += f"{cap['text']}\n\n"
     return srt_content
 
+def parse_engagement(value):
+    """Parse engagement values like '250K', '1.5M', '85K' to integers"""
+    try:
+        if isinstance(value, (int, float)):
+            return int(value)
+        value = str(value).strip().upper()
+        if 'M' in value:
+            return int(float(value.replace('M', '').replace(',', '')) * 1000000)
+        elif 'K' in value:
+            return int(float(value.replace('K', '').replace(',', '')) * 1000)
+        else:
+            return int(float(value.replace(',', '')))
+    except:
+        return 0
+
 def simulate_realtime_processing(steps, container):
     """Simulate real-time processing with visual feedback"""
     progress_bar = container.progress(0)
@@ -1951,7 +1966,7 @@ elif page == "Social Publishing":
         col1, col2, col3, col4 = st.columns(4)
         col1.metric("Posts Generated", len(filtered_posts))
         col2.metric("Platforms", len(set(p['platform'] for p in filtered_posts)))
-        col3.metric("Est. Total Reach", f"{sum([int(p['predicted_engagement'].replace('K', '000')) for p in filtered_posts]):,}")
+        col3.metric("Est. Total Reach", f"{sum([parse_engagement(p['predicted_engagement']) for p in filtered_posts]):,}")
         col4.metric("Optimal Time", filtered_posts[0]['best_time'] if filtered_posts else "N/A")
 
         st.subheader("Generated Posts")
