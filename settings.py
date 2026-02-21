@@ -139,6 +139,88 @@ class Settings(BaseSettings):
         description="Maximum clip duration in seconds"
     )
 
+    # ==================== Future-Ready Agent Settings ====================
+
+    # Deepfake Detection Agent
+    DEEPFAKE_RISK_THRESHOLD: float = Field(
+        default=0.60,
+        description="Risk score above which content is flagged as likely synthetic (0.0-1.0)"
+    )
+    DEEPFAKE_AUTO_HOLD: bool = Field(
+        default=True,
+        description="Automatically hold content from broadcast when deepfake score > DEEPFAKE_RISK_THRESHOLD"
+    )
+    DEEPFAKE_SENSITIVITY: str = Field(
+        default="balanced",
+        description="Detection sensitivity: 'strict' (fewer false negatives) | 'balanced' | 'lenient'"
+    )
+
+    # Live Fact-Check Agent
+    FACT_CHECK_AUTO_ALERT: bool = Field(
+        default=True,
+        description="Automatically alert producers when false/misleading claims detected"
+    )
+    FACT_CHECK_CLAIM_MIN_CONFIDENCE: float = Field(
+        default=0.70,
+        description="Minimum confidence to include a fact-check verdict in alerts"
+    )
+    FACT_CHECK_DATABASES: str = Field(
+        default="ap,reuters,politifact,factcheck_org,snopes",
+        description="Comma-separated fact-check databases to query"
+    )
+
+    # Audience Intelligence Agent
+    AUDIENCE_PREDICTION_INTERVAL_SECS: int = Field(
+        default=300,
+        description="How often to refresh audience retention predictions (seconds)"
+    )
+    AUDIENCE_DROP_OFF_ALERT_THRESHOLD: float = Field(
+        default=0.04,
+        description="Predicted retention drop % that triggers producer alert (0.04 = 4%)"
+    )
+
+    # AI Production Director Agent
+    PRODUCTION_DIRECTOR_AUTO_ACCEPT: bool = Field(
+        default=False,
+        description="Auto-accept AI production decisions (lower-thirds, graphics). False = human approval required."
+    )
+    PRODUCTION_DIRECTOR_CAMERA_LATENCY_MS: int = Field(
+        default=500,
+        description="Delay before suggesting camera cut (allow human director to act first)"
+    )
+
+    # Brand Safety Agent
+    BRAND_SAFETY_DEFAULT_FLOOR: int = Field(
+        default=70,
+        description="Default minimum brand safety score for ad insertion (0-100)"
+    )
+    BRAND_SAFETY_AUTO_BLOCK: bool = Field(
+        default=True,
+        description="Automatically block premium ad insertions when GARM critical flags detected"
+    )
+    BRAND_SAFETY_GARM_ENABLED: bool = Field(
+        default=True,
+        description="Enable GARM (Global Alliance for Responsible Media) standard compliance"
+    )
+
+    # Carbon Intelligence Agent
+    CARBON_GRID_REGION: str = Field(
+        default="US_Northeast",
+        description="Electricity grid region for carbon intensity calculation"
+    )
+    CARBON_REPORTING_INTERVAL_SECS: int = Field(
+        default=1800,
+        description="How often to update carbon footprint metrics (seconds)"
+    )
+    CARBON_ESG_REPORT_ENABLED: bool = Field(
+        default=True,
+        description="Enable automatic ESG report generation"
+    )
+    CARBON_RENEWABLE_PPA: float = Field(
+        default=0.0,
+        description="Percentage of electricity from renewable PPAs (0.0-100.0)"
+    )
+
     # ==================== API Timeouts ====================
     API_TIMEOUT_SECONDS: int = Field(
         default=30,
@@ -191,9 +273,20 @@ class Settings(BaseSettings):
         """Check if NMOS is configured."""
         return bool(self.NMOS_REGISTRY_URL) and self.NMOS_ENABLED
 
+    @property
+    def fact_check_databases_list(self) -> list:
+        """Get fact-check databases as a list."""
+        return [db.strip() for db in self.FACT_CHECK_DATABASES.split(",")]
+
+    @property
+    def is_deepfake_strict_mode(self) -> bool:
+        """Check if deepfake detection is in strict mode."""
+        return self.DEEPFAKE_SENSITIVITY == "strict"
+
     def get_integration_status(self) -> dict:
         """Get status of all integrations."""
         return {
+            # Original integrations
             "openai": {
                 "configured": self.is_openai_configured,
                 "production_ready": self.is_openai_configured and self.PRODUCTION_MODE
@@ -210,6 +303,41 @@ class Settings(BaseSettings):
             "elevenlabs": {
                 "configured": bool(self.ELEVENLABS_API_KEY),
                 "production_ready": bool(self.ELEVENLABS_API_KEY) and self.PRODUCTION_MODE
+            },
+            # Future-Ready agent configurations
+            "deepfake_detection": {
+                "risk_threshold": self.DEEPFAKE_RISK_THRESHOLD,
+                "auto_hold": self.DEEPFAKE_AUTO_HOLD,
+                "sensitivity": self.DEEPFAKE_SENSITIVITY,
+                "production_ready": self.is_openai_configured and self.PRODUCTION_MODE
+            },
+            "live_fact_check": {
+                "auto_alert": self.FACT_CHECK_AUTO_ALERT,
+                "databases": self.fact_check_databases_list,
+                "min_confidence": self.FACT_CHECK_CLAIM_MIN_CONFIDENCE,
+                "production_ready": self.is_openai_configured and self.PRODUCTION_MODE
+            },
+            "audience_intelligence": {
+                "prediction_interval_secs": self.AUDIENCE_PREDICTION_INTERVAL_SECS,
+                "drop_off_threshold": self.AUDIENCE_DROP_OFF_ALERT_THRESHOLD,
+                "production_ready": self.PRODUCTION_MODE
+            },
+            "ai_production_director": {
+                "auto_accept": self.PRODUCTION_DIRECTOR_AUTO_ACCEPT,
+                "camera_latency_ms": self.PRODUCTION_DIRECTOR_CAMERA_LATENCY_MS,
+                "production_ready": self.is_openai_configured and self.PRODUCTION_MODE
+            },
+            "brand_safety": {
+                "safety_floor": self.BRAND_SAFETY_DEFAULT_FLOOR,
+                "auto_block": self.BRAND_SAFETY_AUTO_BLOCK,
+                "garm_enabled": self.BRAND_SAFETY_GARM_ENABLED,
+                "production_ready": self.is_openai_configured and self.PRODUCTION_MODE
+            },
+            "carbon_intelligence": {
+                "grid_region": self.CARBON_GRID_REGION,
+                "reporting_interval_secs": self.CARBON_REPORTING_INTERVAL_SECS,
+                "renewable_ppa_pct": self.CARBON_RENEWABLE_PPA,
+                "production_ready": self.PRODUCTION_MODE
             }
         }
 

@@ -1,10 +1,15 @@
-# MediaAgentIQ - AI Agent Platform for Media & Broadcast
+# MediaAgentIQ v2.0 - Complete Documentation
 
 ## 📋 Overview
 
-MediaAgentIQ is an AI-powered agent platform designed specifically for media and broadcast organizations. It provides 8 specialized AI agents that automate critical workflows, from captioning to compliance monitoring, viral clip detection to rights management.
+MediaAgentIQ is an enterprise AI-powered agent platform for media and broadcast organizations. It provides **8 specialized AI agents** that run **autonomously** to automate critical workflows - from captioning to compliance monitoring, viral clip detection to rights management.
 
-**Inspired by:** Buzzboard's SMB model, adapted for enterprise media/broadcast clients.
+**Key Features:**
+- 🤖 **Autonomous Operation** - Agents run 24/7 without manual intervention
+- 🔄 **Dual-Mode Architecture** - Demo mode for showcasing, Production mode with real AI
+- 🚀 **All-in-One Workflow** - Process through all 8 agents simultaneously
+- 🔌 **Enterprise Integrations** - MAM, NMOS, broadcast automation connectivity
+- ⚡ **Event-Driven** - Agents trigger each other automatically
 
 ---
 
@@ -12,375 +17,473 @@ MediaAgentIQ is an AI-powered agent platform designed specifically for media and
 
 ### Prerequisites
 - Python 3.9+
-- Windows/Mac/Linux
+- pip package manager
 
 ### Installation
 
 ```bash
-# Navigate to project directory
-cd "C:\Users\ranjith\Desktop\AI Kalari\MediaAgentIQ"
+# Clone/navigate to project
+cd MediaAgentIQ
 
-# Option 1: Use the Windows batch launcher
-run.bat
-
-# Option 2: Manual setup
-python -m venv venv
-venv\Scripts\activate  # Windows
-# source venv/bin/activate  # Mac/Linux
-
+# Install dependencies
 pip install -r requirements.txt
-python -m uvicorn app:app --reload --host 127.0.0.1 --port 8000
+
+# Option 1: Run Streamlit UI (Recommended for demos)
+streamlit run streamlit_app.py
+
+# Option 2: Run FastAPI backend
+uvicorn app:app --reload
+
+# Option 3: Run Autonomous Orchestrator
+python orchestrator.py
 ```
 
-### Access Dashboard
-Open your browser: **http://localhost:8000**
+### Access Points
+- **Streamlit UI:** http://localhost:8501
+- **FastAPI Backend:** http://localhost:8000
+- **API Docs:** http://localhost:8000/docs
+
+---
+
+## 🏗️ Architecture
+
+### System Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           MediaAgentIQ Platform                              │
+│                                                                              │
+│  ┌───────────────────────────────────────────────────────────────────────┐  │
+│  │                         Presentation Layer                             │  │
+│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐                   │  │
+│  │  │  Streamlit  │  │   FastAPI   │  │  WebSocket  │                   │  │
+│  │  │     UI      │  │   Backend   │  │   Events    │                   │  │
+│  │  └─────────────┘  └─────────────┘  └─────────────┘                   │  │
+│  └───────────────────────────────────────────────────────────────────────┘  │
+│                                    │                                         │
+│  ┌───────────────────────────────────────────────────────────────────────┐  │
+│  │                    Autonomous Orchestrator Layer                       │  │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐                │  │
+│  │  │  Task Queue  │  │  Scheduler   │  │ Event System │                │  │
+│  │  │  (Priority)  │  │  (Periodic)  │  │  (Triggers)  │                │  │
+│  │  └──────────────┘  └──────────────┘  └──────────────┘                │  │
+│  └───────────────────────────────────────────────────────────────────────┘  │
+│                                    │                                         │
+│  ┌───────────────────────────────────────────────────────────────────────┐  │
+│  │                          Agent Layer (8 Agents)                        │  │
+│  │  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐                     │  │
+│  │  │ Caption │ │  Clip   │ │Compliance│ │ Archive │                     │  │
+│  │  └─────────┘ └─────────┘ └─────────┘ └─────────┘                     │  │
+│  │  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐                     │  │
+│  │  │ Social  │ │ Local-  │ │ Rights  │ │Trending │                     │  │
+│  │  │   Pub   │ │ ization │ │  Agent  │ │  Agent  │                     │  │
+│  │  └─────────┘ └─────────┘ └─────────┘ └─────────┘                     │  │
+│  └───────────────────────────────────────────────────────────────────────┘  │
+│                                    │                                         │
+│  ┌───────────────────────────────────────────────────────────────────────┐  │
+│  │                          Services Layer                                │  │
+│  │  ┌────────────────┐  ┌────────────────┐  ┌────────────────┐          │  │
+│  │  │  Transcription │  │     Vision     │  │    Dubbing     │          │  │
+│  │  │  (Whisper AI)  │  │  (GPT-4 Vision)│  │  (ElevenLabs)  │          │  │
+│  │  └────────────────┘  └────────────────┘  └────────────────┘          │  │
+│  └───────────────────────────────────────────────────────────────────────┘  │
+│                                    │                                         │
+│  ┌───────────────────────────────────────────────────────────────────────┐  │
+│  │                       Integrations Layer                               │  │
+│  │  ┌──────┐ ┌──────┐ ┌──────┐ ┌───────┐ ┌──────┐ ┌────────┐           │  │
+│  │  │ Avid │ │ NMOS │ │ AWS  │ │Social │ │ MOS  │ │Database│           │  │
+│  │  │ MAM  │ │IS-04 │ │Azure │ │ APIs  │ │Proto │ │ SQLite │           │  │
+│  │  └──────┘ └──────┘ └──────┘ └───────┘ └──────┘ └────────┘           │  │
+│  └───────────────────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Dual-Mode Processing
+
+Every agent supports two modes:
+
+```python
+class BaseAgent:
+    async def process(self, input_data):
+        if self.is_production_mode:
+            return await self._production_process(input_data)  # Real AI
+        else:
+            return await self._demo_process(input_data)  # Mock data
+```
 
 ---
 
 ## 🤖 The 8 AI Agents
 
 ### 1. 📝 Caption Agent
-**Purpose:** Auto-generate captions with QA checks
 
-**Features:**
-- AI-powered speech-to-text transcription
-- Speaker detection and labeling
-- Timing optimization for perfect sync
-- Automated QA checks (confidence scores, profanity detection, timing gaps)
-- Multi-format export (SRT, VTT)
+**Purpose:** Auto-generate broadcast-ready captions with QA validation
 
-**API Endpoint:** `POST /api/caption/process`
+**Capabilities:**
+| Feature | Demo Mode | Production Mode |
+|---------|-----------|-----------------|
+| Transcription | Mock data | Whisper AI |
+| Speaker Diarization | Simulated | AI-detected |
+| Confidence Scoring | Random | Real scores |
+| QA Validation | Preset issues | AI analysis |
+| Export Formats | SRT, VTT, JSON | SRT, VTT, JSON |
 
-**Input:** Video/audio file upload (MP4, MOV, AVI, MKV, WebM, MP3, WAV, M4A)
+**API:** `POST /api/caption/process`
 
-**Output:**
-```json
-{
-  "success": true,
-  "data": {
-    "captions": [...],
-    "qa_results": [...],
-    "srt": "SRT content",
-    "vtt": "VTT content",
-    "stats": {
-      "total_segments": 11,
-      "word_count": 95,
-      "qa_issues": 2
-    }
-  }
-}
+**Production Integration:**
+```python
+# Uses OpenAI Whisper
+from services.transcription import TranscriptionService
+service = TranscriptionService(settings)
+result = await service.transcribe(audio_path)
 ```
-
-**Value Proposition:** 80% reduction in captioning costs
 
 ---
 
 ### 2. 🎬 Clip Agent
-**Purpose:** Monitor broadcasts, identify viral moments, auto-create social clips
 
-**Features:**
-- Real-time viral moment detection
-- Emotional peak analysis
-- Engagement score prediction
-- Multi-platform optimization (TikTok, Reels, Shorts, Twitter)
-- Auto-generated hashtags
-- Social post suggestions
+**Purpose:** Detect viral moments from broadcasts using AI vision analysis
 
-**API Endpoint:** `POST /api/clip/process`
+**Capabilities:**
+| Feature | Demo Mode | Production Mode |
+|---------|-----------|-----------------|
+| Scene Analysis | Preset clips | GPT-4 Vision |
+| Emotion Detection | Mock scores | AI face analysis |
+| Viral Scoring | Random 0.8-0.99 | Multi-factor AI |
+| Hashtag Generation | Preset tags | AI-generated |
+| Platform Optimization | Fixed list | Trend-aware |
 
-**Input:** Video file upload
+**API:** `POST /api/clip/process`
 
-**Output:**
-```json
-{
-  "viral_moments": [...],
-  "suggested_clips": [
-    {
-      "id": "clip_1234",
-      "start": 45.5,
-      "end": 60.0,
-      "viral_score": 0.95,
-      "emotion": "excitement",
-      "hashtags": ["#Breaking", "#Viral"]
-    }
-  ],
-  "social_posts": [...]
-}
+**Production Integration:**
+```python
+# Uses GPT-4 Vision
+from services.vision import VisionService
+service = VisionService(settings)
+analysis = await service.analyze_frame(frame_path, "Detect viral moments")
 ```
-
-**Value Proposition:** 10x more social content, zero editing time
 
 ---
 
-### 3. 🔍 Archive Agent
-**Purpose:** Natural language search for archived content
+### 3. ⚖️ Compliance Agent
 
-**Features:**
-- Natural language query parsing
-- Date/time period extraction
-- Speaker/person detection
-- Topic analysis
-- Relevance scoring
-- Search insights and suggestions
+**Purpose:** 24/7 FCC compliance monitoring with violation detection
 
-**API Endpoint:** `POST /api/archive/search`
+**Capabilities:**
+| Feature | Demo Mode | Production Mode |
+|---------|-----------|-----------------|
+| Profanity Detection | Preset issues | Whisper + AI |
+| Political Ad Check | Mock alerts | Content analysis |
+| Sponsorship ID | Simulated | Vision detection |
+| EAS Compliance | Preset status | Real validation |
+| Risk Scoring | Fixed score | AI-calculated |
 
-**Input:**
-```json
-{
-  "query": "Find all Biden economy clips from Q3",
-  "filters": {}
-}
-```
+**FCC Rules Monitored:**
+- 47 U.S.C. § 326 - Indecent Content
+- 47 U.S.C. § 315 - Political Broadcasting
+- 47 U.S.C. § 317 - Sponsorship Identification
+- 47 CFR Part 11 - Emergency Alert System
 
-**Output:**
-```json
-{
-  "query": "Find all Biden economy clips from Q3",
-  "parsed_query": {
-    "topics": ["economy"],
-    "speakers": ["Biden"],
-    "date_filters": {"time_period": "Q3"}
-  },
-  "results": [...],
-  "insights": {
-    "summary": "Found 15 clips totaling 2:30:00",
-    "top_tags": ["economy", "politics"]
-  }
-}
-```
-
-**Value Proposition:** Instant archive access (vs. hours of manual searching)
+**API:** `POST /api/compliance/scan`
 
 ---
 
-### 4. ⚖️ Compliance Agent
-**Purpose:** 24/7 FCC violation monitoring
+### 4. 🔍 Archive Agent
 
-**Features:**
-- Profanity/indecency detection (FCC § 326)
-- Political ad disclosure checking (FCC § 315)
-- Sponsor identification verification (FCC § 317)
-- Caption quality compliance (47 CFR § 79.1)
-- Emergency Alert System compliance
-- Risk scoring and fine estimation
+**Purpose:** Natural language search with MAM system integration
 
-**API Endpoint:** `POST /api/compliance/scan`
+**Capabilities:**
+| Feature | Demo Mode | Production Mode |
+|---------|-----------|-----------------|
+| NL Query Parsing | Keyword match | AI semantic |
+| Search Results | Mock archive | MAM API query |
+| AI Tagging | Preset tags | GPT analysis |
+| Metadata Sync | Simulated | Bi-directional |
 
-**Input:** Video/audio file or transcript text
-
-**Output:**
-```json
-{
-  "issues": [
-    {
-      "type": "profanity",
-      "severity": "high",
-      "timestamp": "00:02:05,500",
-      "fcc_rule": "47 U.S.C. § 326",
-      "potential_fine": "$25,000 - $500,000",
-      "recommendation": "Review segment, consider bleeping"
-    }
-  ],
-  "risk_score": {"score": 65, "level": "medium"},
-  "stats": {
-    "total_issues": 4,
-    "potential_fines": "$35,000 - $550,000"
-  }
-}
+**MAM Integration:**
+```python
+# Avid Media Central connector
+from integrations.avid import AvidConnector
+connector = AvidConnector(settings)
+assets = await connector.search_assets(query)
 ```
 
-**Value Proposition:** Avoid $500K+ FCC fines
+**API:** `POST /api/archive/search`
 
 ---
 
 ### 5. 📱 Social Publishing Agent
-**Purpose:** Create and schedule social posts from broadcast content
 
-**Features:**
-- Multi-platform post generation (Twitter/X, Instagram, TikTok, Facebook, YouTube Shorts)
-- Platform-specific formatting
-- Optimal posting time scheduling
-- Hashtag recommendations
-- Performance predictions
-- Engagement rate estimation
+**Purpose:** Generate platform-optimized social media posts
 
-**API Endpoint:** `POST /api/social/generate`
+**Supported Platforms:**
+| Platform | Max Chars | Optimization |
+|----------|-----------|--------------|
+| Twitter/X | 280 | Hashtags, threads |
+| Instagram | 2,200 | Emojis, multi-image |
+| TikTok | 150 | Trending sounds |
+| Facebook | 63,206 | Long-form, video |
+| YouTube Shorts | 100 | SEO keywords |
 
-**Input:**
-```json
-{
-  "content": "highlight content or clip reference"
-}
-```
-
-**Output:**
-```json
-{
-  "posts": [
-    {
-      "platform": "twitter",
-      "content": "🔴 BREAKING: Major Development...",
-      "char_count": 180,
-      "best_time": "9:00 AM EST"
-    }
-  ],
-  "schedule": [...],
-  "hashtags": {
-    "trending": ["#Breaking", "#Viral"],
-    "niche": ["#BroadcastNews"]
-  },
-  "predictions": [
-    {
-      "predicted_reach": "50K",
-      "predicted_engagement": "5.2%"
-    }
-  ]
-}
-```
-
-**Value Proposition:** Always-on social presence
+**API:** `POST /api/social/generate`
 
 ---
 
 ### 6. 🌍 Localization Agent
-**Purpose:** Auto-translate captions and generate dubs
 
-**Features:**
-- Support for 12+ languages (Spanish, French, German, Chinese, Japanese, etc.)
-- AI translation with confidence scoring
-- Quality assessment (fluency, accuracy, cultural adaptation)
-- AI dubbing with voice selection
-- Lip-sync technology support
-- Multi-language workflow management
+**Purpose:** Translate captions and generate AI voice dubs
 
-**API Endpoint:** `POST /api/localization/translate`
+**Supported Languages:**
+| Language | Translation | Voice Dubbing |
+|----------|-------------|---------------|
+| Spanish | ✅ | ✅ ElevenLabs |
+| French | ✅ | ✅ ElevenLabs |
+| German | ✅ | ✅ ElevenLabs |
+| Chinese | ✅ | ✅ ElevenLabs |
+| Japanese | ✅ | ✅ ElevenLabs |
+| Arabic | ✅ | ✅ ElevenLabs |
+| Hindi | ✅ | ✅ ElevenLabs |
+| Portuguese | ✅ | ✅ ElevenLabs |
 
-**Input:**
-```json
-{
-  "content": "caption content",
-  "target_languages": ["es", "fr", "de", "zh"]
-}
+**Production Integration:**
+```python
+# ElevenLabs dubbing
+from services.dubbing import DubbingService
+service = DubbingService(settings)
+audio = await service.generate_dub(text, voice_id, language)
 ```
 
-**Output:**
-```json
-{
-  "translations": {
-    "es": {
-      "language_name": "Spanish",
-      "segments": [...],
-      "srt_content": "...",
-      "vtt_content": "..."
-    }
-  },
-  "dub_options": [...],
-  "workflow": {
-    "steps": [...],
-    "overall_progress": 14
-  },
-  "quality_report": {
-    "language_scores": {
-      "es": {"overall_score": 94.5, "fluency": 96}
-    }
-  }
-}
-```
-
-**Value Proposition:** Faster global distribution
+**API:** `POST /api/localization/translate`
 
 ---
 
 ### 7. 📜 Rights Agent
-**Purpose:** Track content licenses and monitor unauthorized usage
 
-**Features:**
-- License tracking and management
-- Expiry alerts (90/60/30 day warnings)
-- Unauthorized usage detection
-- DMCA takedown workflow
-- Territorial violation monitoring
-- Cost and damages tracking
+**Purpose:** Track licenses, detect violations, automate DMCA
 
-**API Endpoint:** `POST /api/rights/check`
+**Capabilities:**
+| Feature | Description |
+|---------|-------------|
+| License Tracking | Expiry alerts at 90/60/30 days |
+| Violation Detection | Platform monitoring + Content ID |
+| DMCA Automation | Auto-generate takedown requests |
+| Cost Analysis | Track licensing spend |
+| Compliance Scoring | Per-license compliance % |
 
-**Output:**
-```json
-{
-  "licenses": [
-    {
-      "id": "LIC001",
-      "content_title": "Premier League Highlights",
-      "license_type": "time_limited",
-      "end_date": "2024-12-31",
-      "cost": "$500,000/year",
-      "rights": ["broadcast", "streaming"]
-    }
-  ],
-  "expiring_soon": [...],
-  "violations": [
-    {
-      "type": "unauthorized_rebroadcast",
-      "detected_on": "YouTube",
-      "estimated_damages": "$25,000"
-    }
-  ],
-  "alerts": [...]
-}
-```
-
-**Value Proposition:** Avoid legal disputes
+**API:** `POST /api/rights/check`
 
 ---
 
 ### 8. 📈 Trending Agent
-**Purpose:** Monitor trends and alert newsroom to breaking stories
 
-**Features:**
-- Real-time social media monitoring (Twitter/X, TikTok, Reddit, etc.)
-- News wire integration (AP, Reuters, AFP, Bloomberg)
-- Trend velocity analysis
-- Sentiment analysis
-- Viral content detection
-- Newsroom alert generation
-- Story suggestions with coverage angles
+**Purpose:** Real-time trend monitoring and breaking news alerts
 
-**API Endpoint:** `POST /api/trending/monitor`
+**Data Sources:**
+- Social media (Twitter/X, TikTok, Reddit)
+- News wires (AP, Reuters, AFP)
+- Google Trends
+- Custom RSS feeds
 
-**Input:**
-```json
-{
-  "filters": {"category": "technology"}
-}
+**Metrics Tracked:**
+| Metric | Description |
+|--------|-------------|
+| Velocity Score | How fast topic is growing (0-100) |
+| Volume | Posts/mentions per hour |
+| Sentiment | Positive/Negative/Mixed |
+| Demographics | Age group breakdown |
+
+**API:** `POST /api/trending/monitor`
+
+---
+
+## 🤖 Autonomous Orchestrator
+
+### Overview
+
+The `orchestrator.py` provides autonomous background execution:
+
+```python
+from orchestrator import start_autonomous_agents
+
+# Start all agents running autonomously
+await start_autonomous_agents()
 ```
 
-**Output:**
-```json
-{
-  "trends": [
-    {
-      "topic": "AI Regulation Debate",
-      "velocity": "rising",
-      "velocity_score": 78,
-      "volume": "180K mentions/hour",
-      "sentiment": "mixed"
-    }
-  ],
-  "breaking_news": [...],
-  "viral_content": [...],
-  "alerts": [
-    {
-      "type": "breaking_news",
-      "priority": "high",
-      "title": "BREAKING: Major Economic Announcement"
-    }
-  ],
-  "story_suggestions": [...]
-}
+### Scheduled Jobs
+
+| Agent | Interval | Purpose |
+|-------|----------|---------|
+| Trending | 5 min | Monitor trends, detect breaking news |
+| Compliance | 10 min | Continuous FCC monitoring |
+| Rights | 1 hour | License expiration checks |
+| Archive | 6 hours | Index optimization |
+
+### Event System
+
+Events trigger automatic agent execution:
+
+| Event | Triggered By | Triggers Agents |
+|-------|--------------|-----------------|
+| `NEW_CONTENT` | File upload | Caption, Clip, Compliance, Archive |
+| `CAPTION_COMPLETE` | Caption Agent | Localization, Social |
+| `CLIP_DETECTED` | Clip Agent | Social Publishing |
+| `COMPLIANCE_ALERT` | Compliance Agent | Notification system |
+| `TRENDING_SPIKE` | Trending Agent | Social, Archive |
+| `LICENSE_EXPIRING` | Rights Agent | Alert system |
+| `BREAKING_NEWS` | Trending Agent | Social, Trending |
+
+### Task Queue
+
+Priority-based processing:
+
+```python
+class TaskPriority(Enum):
+    CRITICAL = 1  # Compliance violations, breaking news
+    HIGH = 2      # Expiring licenses, trending alerts
+    NORMAL = 3    # Regular processing
+    LOW = 4       # Background optimization
 ```
 
-**Value Proposition:** Never miss a story
+### Usage
+
+```python
+from orchestrator import orchestrator
+
+# Submit a task
+task_id = orchestrator.submit_task(
+    agent_type=AgentType.CAPTION,
+    input_data="/path/to/video.mp4",
+    priority=TaskPriority.NORMAL
+)
+
+# Check status
+status = orchestrator.get_task_status(task_id)
+
+# Submit content for all agents
+task_ids = submit_content_for_processing("/path/to/video.mp4", run_all=True)
+```
+
+---
+
+## 🔌 Integrations
+
+### Media Asset Management (MAM)
+
+**Avid Media Central Integration:**
+```python
+from integrations.avid import AvidConnector, AvidAuth
+
+# Authenticate
+auth = AvidAuth(settings)
+token = await auth.get_token()
+
+# Connect
+connector = AvidConnector(settings)
+await connector.connect()
+
+# Search assets
+assets = await connector.search_assets("election coverage")
+
+# Get asset metadata
+metadata = await connector.get_asset_metadata(asset_id)
+```
+
+### NMOS IP Infrastructure
+
+**Grass Valley NMOS Client (IS-04/IS-05):**
+```python
+from integrations.grass_valley import NMOSClient
+
+client = NMOSClient(settings)
+
+# Discover devices
+devices = await client.discover_devices()
+
+# Get senders/receivers
+senders = await client.get_senders()
+receivers = await client.get_receivers()
+
+# Make connection
+await client.make_connection(sender_id, receiver_id)
+```
+
+### Supported Protocols
+
+| Protocol | Use Case |
+|----------|----------|
+| REST API | MAM, Cloud services |
+| MOS Protocol | Broadcast automation |
+| NMOS IS-04 | Device discovery |
+| NMOS IS-05 | Connection management |
+| WebSocket | Real-time updates |
+| Webhooks | External notifications |
+
+---
+
+## ⚙️ Configuration
+
+### Environment Variables (.env)
+
+```bash
+# ===================
+# Mode Configuration
+# ===================
+PRODUCTION_MODE=false          # true = real AI, false = demo mode
+
+# ===================
+# AI Services
+# ===================
+OPENAI_API_KEY=sk-...         # Required for production mode
+OPENAI_MODEL=gpt-4-turbo-preview
+WHISPER_MODEL=whisper-1
+
+ELEVENLABS_API_KEY=...        # For voice dubbing
+ELEVENLABS_VOICE_ID=...       # Default voice
+
+# ===================
+# MAM Integration
+# ===================
+AVID_API_URL=https://your-avid-server/api
+AVID_USERNAME=api_user
+AVID_PASSWORD=...
+AVID_WORKSPACE_ID=default
+
+# ===================
+# NMOS Integration
+# ===================
+NMOS_REGISTRY_URL=http://nmos-registry:8080
+NMOS_NODE_ID=mediaagentiq-node-001
+
+# ===================
+# Database
+# ===================
+DATABASE_URL=sqlite:///./mediaagentiq.db
+```
+
+### Settings (settings.py)
+
+```python
+from pydantic_settings import BaseSettings
+
+class Settings(BaseSettings):
+    # Mode
+    PRODUCTION_MODE: bool = False
+
+    # OpenAI
+    OPENAI_API_KEY: str = ""
+    OPENAI_MODEL: str = "gpt-4-turbo-preview"
+
+    # ElevenLabs
+    ELEVENLABS_API_KEY: str = ""
+
+    # Computed properties
+    @property
+    def is_openai_configured(self) -> bool:
+        return bool(self.OPENAI_API_KEY)
+
+    class Config:
+        env_file = ".env"
+```
 
 ---
 
@@ -388,55 +491,96 @@ Open your browser: **http://localhost:8000**
 
 ```
 MediaAgentIQ/
-├── app.py                      # FastAPI main application (routes & endpoints)
-├── config.py                   # Configuration settings
-├── database.py                 # SQLite database setup & operations
-├── requirements.txt            # Python dependencies
-├── run.bat                     # Windows launcher script
+├── streamlit_app.py          # Streamlit UI (2400+ lines)
+├── orchestrator.py           # Autonomous Agent Orchestrator (580+ lines)
+├── app.py                    # FastAPI Backend
+├── settings.py               # Pydantic Configuration
+├── config.py                 # Legacy config
+├── database.py               # SQLite async setup
+├── requirements.txt          # Python dependencies
+├── .env.example              # Environment template
 │
-├── agents/                     # AI Agent implementations
-│   ├── __init__.py            # Agent exports & registry
-│   ├── base_agent.py          # Base agent class (abstract)
-│   ├── caption_agent.py       # Caption generation & QA
-│   ├── clip_agent.py          # Viral clip detection
-│   ├── archive_agent.py       # Content search & retrieval
-│   ├── compliance_agent.py    # FCC compliance monitoring
-│   ├── social_publishing_agent.py  # Social media post generation
-│   ├── localization_agent.py  # Translation & dubbing
-│   ├── rights_agent.py        # License & rights management
-│   └── trending_agent.py      # Trend monitoring & alerts
+├── agents/                   # AI Agent Implementations
+│   ├── __init__.py          # Exports all agents
+│   ├── base_agent.py        # Dual-mode base class
+│   ├── caption_agent.py     # Transcription + QA
+│   ├── clip_agent.py        # Viral detection
+│   ├── compliance_agent.py  # FCC monitoring
+│   ├── archive_agent.py     # MAM search
+│   ├── social_publishing_agent.py  # Social posts
+│   ├── localization_agent.py       # Translation + dubbing
+│   ├── rights_agent.py      # License management
+│   └── trending_agent.py    # Trend monitoring
 │
-├── templates/                  # Jinja2 HTML templates
-│   ├── index.html             # Dashboard home page
-│   ├── caption.html           # Caption Agent UI
-│   ├── clip.html              # Clip Agent UI
-│   ├── archive.html           # Archive Agent UI
-│   ├── compliance.html        # Compliance Agent UI
-│   ├── social.html            # Social Publishing Agent UI
-│   ├── localization.html      # Localization Agent UI
-│   ├── rights.html            # Rights Agent UI
-│   └── trending.html          # Trending Agent UI
+├── services/                 # AI Service Wrappers
+│   ├── __init__.py
+│   ├── transcription.py     # Whisper API wrapper
+│   ├── vision.py            # GPT-4 Vision wrapper
+│   └── dubbing.py           # ElevenLabs wrapper
 │
-├── static/
-│   ├── css/
-│   │   └── styles.css         # Custom CSS styles
-│   └── js/
-│       └── app.js             # Frontend JavaScript
+├── integrations/             # External System Integrations
+│   ├── __init__.py
+│   ├── base.py              # Base integration class
+│   ├── avid/                # Avid Media Central
+│   │   ├── __init__.py
+│   │   ├── auth.py          # Authentication
+│   │   ├── connector.py     # API connector
+│   │   └── models.py        # Data models
+│   └── grass_valley/        # NMOS Integration
+│       ├── __init__.py
+│       └── nmos_client.py   # IS-04/IS-05 client
 │
-├── uploads/                    # Uploaded media files (auto-created)
-├── outputs/                    # Generated outputs (auto-created)
-└── demo_data/                  # Sample data for demos (auto-created)
+├── templates/                # FastAPI HTML templates (9 pages)
+├── static/                   # CSS & JavaScript
+├── uploads/                  # User uploads (auto-created)
+└── outputs/                  # Generated files (auto-created)
+```
+
+---
+
+## 🌐 API Reference
+
+### Base URL
+```
+FastAPI: http://localhost:8000
+Streamlit: http://localhost:8501
+```
+
+### Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/` | Dashboard |
+| POST | `/api/caption/process` | Generate captions |
+| POST | `/api/clip/process` | Detect viral clips |
+| POST | `/api/archive/search` | Search archive |
+| POST | `/api/compliance/scan` | Compliance scan |
+| POST | `/api/social/generate` | Generate posts |
+| POST | `/api/localization/translate` | Translate content |
+| POST | `/api/rights/check` | Check licenses |
+| POST | `/api/trending/monitor` | Monitor trends |
+| GET | `/api/stats` | Dashboard stats |
+| GET | `/api/activity` | Recent activity |
+
+### WebSocket Events (Planned)
+
+```javascript
+const ws = new WebSocket('ws://localhost:8000/ws');
+
+ws.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    // Handle: task_complete, compliance_alert, trending_spike, etc.
+};
 ```
 
 ---
 
 ## 🗄️ Database Schema
 
-SQLite database (`mediaagentiq.db`) with these tables:
+### Tables
 
-### jobs
-Tracks all agent processing jobs
 ```sql
+-- Jobs tracking
 CREATE TABLE jobs (
     id INTEGER PRIMARY KEY,
     agent_type TEXT NOT NULL,
@@ -445,14 +589,10 @@ CREATE TABLE jobs (
     output_file TEXT,
     result_data TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    completed_at TIMESTAMP,
-    error_message TEXT
+    completed_at TIMESTAMP
 );
-```
 
-### archive
-Mock video archive for search
-```sql
+-- Archive content
 CREATE TABLE archive (
     id INTEGER PRIMARY KEY,
     title TEXT NOT NULL,
@@ -461,30 +601,10 @@ CREATE TABLE archive (
     date_recorded DATE,
     tags TEXT,
     speaker TEXT,
-    transcript TEXT,
-    thumbnail_url TEXT,
-    video_url TEXT
+    transcript TEXT
 );
-```
 
-### compliance_issues
-Compliance violations found
-```sql
-CREATE TABLE compliance_issues (
-    id INTEGER PRIMARY KEY,
-    job_id INTEGER,
-    issue_type TEXT NOT NULL,
-    severity TEXT NOT NULL,
-    timestamp_start REAL,
-    timestamp_end REAL,
-    description TEXT,
-    suggestion TEXT
-);
-```
-
-### activity_log
-Recent activity tracking
-```sql
+-- Activity log
 CREATE TABLE activity_log (
     id INTEGER PRIMARY KEY,
     agent_type TEXT NOT NULL,
@@ -496,232 +616,76 @@ CREATE TABLE activity_log (
 
 ---
 
-## 🛠️ Tech Stack
+## 🚀 Deployment
 
-| Component | Technology |
-|-----------|-----------|
-| **Backend** | Python 3.9+, FastAPI |
-| **Frontend** | HTML5, Tailwind CSS, Vanilla JavaScript |
-| **Database** | SQLite (aiosqlite for async) |
-| **AI** | OpenAI API (optional) or mock responses |
-| **Server** | Uvicorn ASGI server |
-| **Templates** | Jinja2 |
+### Docker
 
-### Dependencies (requirements.txt)
-```
-fastapi==0.104.1
-uvicorn==0.24.0
-python-multipart==0.0.6
-jinja2==3.1.2
-aiosqlite==0.19.0
-openai==1.3.5
-python-dotenv==1.0.0
-aiofiles==23.2.1
-```
-
----
-
-## 🔌 API Reference
-
-### Base URL
-```
-http://localhost:8000
-```
-
-### Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/` | Dashboard home |
-| GET | `/caption` | Caption Agent UI |
-| POST | `/api/caption/process` | Process media for captions |
-| GET | `/clip` | Clip Agent UI |
-| POST | `/api/clip/process` | Find viral clips |
-| GET | `/archive` | Archive Agent UI |
-| POST | `/api/archive/search` | Search archive |
-| GET | `/compliance` | Compliance Agent UI |
-| POST | `/api/compliance/scan` | Run compliance scan |
-| GET | `/social` | Social Publishing Agent UI |
-| POST | `/api/social/generate` | Generate social posts |
-| GET | `/localization` | Localization Agent UI |
-| POST | `/api/localization/translate` | Translate content |
-| GET | `/rights` | Rights Agent UI |
-| POST | `/api/rights/check` | Check licenses/rights |
-| GET | `/trending` | Trending Agent UI |
-| POST | `/api/trending/monitor` | Monitor trends |
-| GET | `/api/stats` | Get dashboard stats |
-| GET | `/api/activity` | Get recent activity |
-| GET | `/download/{filename}` | Download generated file |
-
----
-
-## 🎨 UI/UX Design
-
-### Color Scheme
-- **Background:** Slate-950 (#020617)
-- **Cards:** Slate-900 (#0f172a)
-- **Borders:** Slate-800 (#1e293b)
-- **Primary:** Indigo-500 (#6366f1)
-- **Secondary:** Purple-500 (#a855f7)
-
-### Agent Colors
-| Agent | Color |
-|-------|-------|
-| Clip | Purple |
-| Caption | Blue |
-| Compliance | Red |
-| Archive | Green |
-| Social | Pink |
-| Localization | Cyan |
-| Rights | Orange |
-| Trending | Yellow |
-
----
-
-## 🔧 Configuration
-
-### config.py Options
-
-```python
-# File paths
-BASE_DIR = Path(__file__).parent
-UPLOAD_DIR = BASE_DIR / "uploads"
-OUTPUT_DIR = BASE_DIR / "outputs"
-
-# Database
-DATABASE_PATH = BASE_DIR / "mediaagentiq.db"
-
-# OpenAI (optional)
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-USE_MOCK_AI = not OPENAI_API_KEY  # Uses mock if no key
-
-# Server
-HOST = "127.0.0.1"
-PORT = 8000
-DEBUG = True
-
-# Upload limits
-MAX_UPLOAD_SIZE = 100 * 1024 * 1024  # 100MB
-ALLOWED_VIDEO_EXTENSIONS = {".mp4", ".mov", ".avi", ".mkv", ".webm"}
-ALLOWED_AUDIO_EXTENSIONS = {".mp3", ".wav", ".m4a", ".aac"}
-```
-
-### Environment Variables
-```bash
-# Optional: Set OpenAI API key for real AI processing
-export OPENAI_API_KEY="sk-..."
-```
-
----
-
-## 🧪 Testing the Demo
-
-### 1. Caption Agent
-1. Go to http://localhost:8000/caption
-2. Upload any video/audio file
-3. View generated captions and QA report
-4. Download SRT/VTT files
-
-### 2. Clip Agent
-1. Go to http://localhost:8000/clip
-2. Upload a video file
-3. View detected viral moments with scores
-4. See suggested social posts
-
-### 3. Archive Agent
-1. Go to http://localhost:8000/archive
-2. Type natural language query: "Find election coverage"
-3. View matching results with relevance scores
-
-### 4. Compliance Agent
-1. Go to http://localhost:8000/compliance
-2. Click "Run Compliance Scan" (uses demo content)
-3. View detected issues, risk score, and recommendations
-
-### 5. Social Publishing Agent
-1. Go to http://localhost:8000/social
-2. Click "Generate Social Posts"
-3. View posts for Twitter, Instagram, TikTok
-4. Copy posts or schedule them
-
-### 6. Localization Agent
-1. Go to http://localhost:8000/localization
-2. Select target languages
-3. Click "Start Localization"
-4. View translations and quality scores
-
-### 7. Rights Agent
-1. Go to http://localhost:8000/rights
-2. Click "Check All Licenses & Rights"
-3. View licenses, expiring alerts, violations
-
-### 8. Trending Agent
-1. Go to http://localhost:8000/trending
-2. Auto-loads trending topics on page load
-3. Filter by category
-4. View newsroom alerts and story suggestions
-
----
-
-## 🚀 Production Deployment
-
-### Recommended Setup
-1. Use production ASGI server (Gunicorn + Uvicorn workers)
-2. Set up PostgreSQL instead of SQLite
-3. Use Redis for caching
-4. Deploy behind Nginx/Caddy reverse proxy
-5. Enable HTTPS
-6. Set proper CORS headers
-7. Add authentication (OAuth2/JWT)
-
-### Docker Deployment (Example)
 ```dockerfile
 FROM python:3.11-slim
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 COPY . .
-EXPOSE 8000
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+EXPOSE 8000 8501
+CMD ["sh", "-c", "streamlit run streamlit_app.py & uvicorn app:app --host 0.0.0.0"]
 ```
 
+### Docker Compose
+
+```yaml
+version: '3.8'
+services:
+  mediaagentiq:
+    build: .
+    ports:
+      - "8000:8000"
+      - "8501:8501"
+    environment:
+      - PRODUCTION_MODE=true
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    volumes:
+      - ./uploads:/app/uploads
+      - ./outputs:/app/outputs
+```
+
+### Production Recommendations
+
+1. **Reverse Proxy:** Nginx/Caddy for HTTPS
+2. **Database:** PostgreSQL for production
+3. **Cache:** Redis for session/task caching
+4. **Queue:** Redis/RabbitMQ for task queue
+5. **Monitoring:** Prometheus + Grafana
+6. **Logging:** ELK Stack or CloudWatch
+
 ---
 
-## 📈 Future Enhancements
+## 📈 Changelog
 
-### Phase 2 Features
-- [ ] Real OpenAI Whisper integration for transcription
-- [ ] Actual video processing with FFmpeg
-- [ ] User authentication & multi-tenancy
-- [ ] Real-time WebSocket updates
-- [ ] Email/Slack notifications
-- [ ] API rate limiting
-- [ ] Batch processing queue
-- [ ] Analytics dashboard
+### v2.0.0 (Latest)
+- ✅ Autonomous Agent Orchestrator
+- ✅ All-in-One Workflow
+- ✅ Integration Showcase
+- ✅ Real-time processing indicators
+- ✅ Dual-mode architecture
+- ✅ Service layer (Whisper, Vision, Dubbing)
+- ✅ MAM integration (Avid)
+- ✅ NMOS integration (IS-04/IS-05)
+- ✅ Enhanced Streamlit UI (2400+ lines)
 
-### Phase 3 Features
-- [ ] Custom model fine-tuning
-- [ ] Live broadcast monitoring
-- [ ] Automated publishing to social platforms
-- [ ] Integration with MAM systems
-- [ ] Mobile app companion
-
----
-
-## 📞 Support & Contact
-
-**Project Location:** `C:\Users\ranjith\Desktop\AI Kalari\MediaAgentIQ`
-
-**Created:** February 2026
-
-**Version:** 1.0.0
+### v1.0.0
+- Initial release
+- 8 AI agents (demo mode)
+- FastAPI backend
+- Basic Streamlit UI
 
 ---
 
 ## 📝 License
 
-This is a prototype/demo project for AI Kalari.
+MIT License - Built for Media & Broadcast professionals
 
 ---
 
-*MediaAgentIQ - AI-Powered Media Operations Platform*
+**MediaAgentIQ v2.0.0** | Enterprise AI Platform for Media Operations
+
+*Last Updated: February 2026*

@@ -45,6 +45,7 @@ class TaskPriority(Enum):
 
 class AgentType(Enum):
     """Available agent types."""
+    # Original 8 agents
     CAPTION = "caption"
     CLIP = "clip"
     ARCHIVE = "archive"
@@ -53,6 +54,13 @@ class AgentType(Enum):
     LOCALIZATION = "localization"
     RIGHTS = "rights"
     TRENDING = "trending"
+    # Future-Ready agents (market gaps)
+    DEEPFAKE_DETECTION = "deepfake_detection"
+    LIVE_FACT_CHECK = "live_fact_check"
+    AUDIENCE_INTELLIGENCE = "audience_intelligence"
+    AI_PRODUCTION_DIRECTOR = "ai_production_director"
+    BRAND_SAFETY = "brand_safety"
+    CARBON_INTELLIGENCE = "carbon_intelligence"
 
 
 @dataclass
@@ -165,14 +173,31 @@ class AgentOrchestrator:
 
         # Event subscriptions (which agents listen to which events)
         self.event_subscriptions = {
-            EventType.NEW_CONTENT: [AgentType.CAPTION, AgentType.CLIP, AgentType.COMPLIANCE, AgentType.ARCHIVE],
-            EventType.CAPTION_COMPLETE: [AgentType.LOCALIZATION, AgentType.SOCIAL],
+            # Original subscriptions
+            EventType.NEW_CONTENT: [
+                AgentType.CAPTION, AgentType.CLIP, AgentType.COMPLIANCE, AgentType.ARCHIVE,
+                # Future-Ready: scan all new content for deepfakes + brand safety
+                AgentType.DEEPFAKE_DETECTION, AgentType.BRAND_SAFETY,
+                # Future-Ready: start audience prediction for new content
+                AgentType.AUDIENCE_INTELLIGENCE,
+            ],
+            EventType.CAPTION_COMPLETE: [
+                AgentType.LOCALIZATION, AgentType.SOCIAL,
+                # Future-Ready: fact-check captions as they arrive
+                AgentType.LIVE_FACT_CHECK,
+            ],
             EventType.CLIP_DETECTED: [AgentType.SOCIAL],
-            EventType.COMPLIANCE_ALERT: [AgentType.SOCIAL],  # Post compliance notice
+            EventType.COMPLIANCE_ALERT: [AgentType.SOCIAL],
             EventType.TRENDING_SPIKE: [AgentType.SOCIAL, AgentType.ARCHIVE],
             EventType.LICENSE_EXPIRING: [AgentType.RIGHTS],
             EventType.VIOLATION_DETECTED: [AgentType.RIGHTS],
-            EventType.BREAKING_NEWS: [AgentType.SOCIAL, AgentType.TRENDING]
+            EventType.BREAKING_NEWS: [
+                AgentType.SOCIAL, AgentType.TRENDING,
+                # Future-Ready: production director handles live breaking coverage
+                AgentType.AI_PRODUCTION_DIRECTOR,
+                # Future-Ready: fact-check breaking news claims immediately
+                AgentType.LIVE_FACT_CHECK,
+            ],
         }
 
         logger.info("AgentOrchestrator initialized")
@@ -183,12 +208,17 @@ class AgentOrchestrator:
         logger.info(f"Registered agent: {agent_type.value}")
 
     def register_all_agents(self) -> None:
-        """Register all available agents."""
+        """Register all available agents - original 8 + 6 future-ready."""
         from agents import (
+            # Original 8
             CaptionAgent, ClipAgent, ArchiveAgent, ComplianceAgent,
-            SocialPublishingAgent, LocalizationAgent, RightsAgent, TrendingAgent
+            SocialPublishingAgent, LocalizationAgent, RightsAgent, TrendingAgent,
+            # Future-Ready 6
+            DeepfakeDetectionAgent, LiveFactCheckAgent, AudienceIntelligenceAgent,
+            AIProductionDirectorAgent, BrandSafetyAgent, CarbonIntelligenceAgent,
         )
 
+        # Original agents
         self.register_agent(AgentType.CAPTION, CaptionAgent())
         self.register_agent(AgentType.CLIP, ClipAgent())
         self.register_agent(AgentType.ARCHIVE, ArchiveAgent())
@@ -198,7 +228,15 @@ class AgentOrchestrator:
         self.register_agent(AgentType.RIGHTS, RightsAgent())
         self.register_agent(AgentType.TRENDING, TrendingAgent())
 
-        logger.info("All 8 agents registered")
+        # Future-Ready agents
+        self.register_agent(AgentType.DEEPFAKE_DETECTION, DeepfakeDetectionAgent())
+        self.register_agent(AgentType.LIVE_FACT_CHECK, LiveFactCheckAgent())
+        self.register_agent(AgentType.AUDIENCE_INTELLIGENCE, AudienceIntelligenceAgent())
+        self.register_agent(AgentType.AI_PRODUCTION_DIRECTOR, AIProductionDirectorAgent())
+        self.register_agent(AgentType.BRAND_SAFETY, BrandSafetyAgent())
+        self.register_agent(AgentType.CARBON_INTELLIGENCE, CarbonIntelligenceAgent())
+
+        logger.info("All 14 agents registered (8 original + 6 future-ready)")
 
     # ==================== Task Management ====================
 
@@ -343,7 +381,57 @@ class AgentOrchestrator:
             job_id="archive_optimize"
         )
 
-        logger.info("Default schedules configured")
+        # ========== Future-Ready Agent Schedules ==========
+
+        # Deepfake Detection - Scan all incoming content every 2 minutes
+        self.schedule_job(
+            AgentType.DEEPFAKE_DETECTION,
+            {"mode": "monitor_incoming"},
+            interval_seconds=120,  # 2 minutes
+            job_id="deepfake_monitor"
+        )
+
+        # Live Fact-Check - Check live broadcast transcript every 3 minutes
+        self.schedule_job(
+            AgentType.LIVE_FACT_CHECK,
+            {"mode": "live_monitor"},
+            interval_seconds=180,  # 3 minutes
+            job_id="fact_check_live"
+        )
+
+        # Audience Intelligence - Update retention predictions every 5 minutes
+        self.schedule_job(
+            AgentType.AUDIENCE_INTELLIGENCE,
+            {"mode": "live_prediction"},
+            interval_seconds=300,  # 5 minutes
+            job_id="audience_live"
+        )
+
+        # AI Production Director - Refresh production cues every minute (live)
+        self.schedule_job(
+            AgentType.AI_PRODUCTION_DIRECTOR,
+            {"mode": "live_assist"},
+            interval_seconds=60,  # 1 minute
+            job_id="production_director_live"
+        )
+
+        # Brand Safety - Score each segment every 2 minutes for ad decisions
+        self.schedule_job(
+            AgentType.BRAND_SAFETY,
+            {"mode": "segment_scan"},
+            interval_seconds=120,  # 2 minutes
+            job_id="brand_safety_monitor"
+        )
+
+        # Carbon Intelligence - Update energy/carbon metrics every 30 minutes
+        self.schedule_job(
+            AgentType.CARBON_INTELLIGENCE,
+            {"mode": "live_monitoring"},
+            interval_seconds=1800,  # 30 minutes
+            job_id="carbon_monitor"
+        )
+
+        logger.info("Default schedules configured (4 original + 6 future-ready)")
 
     def pause_job(self, job_id: str) -> bool:
         """Pause a scheduled job."""
@@ -734,6 +822,19 @@ def submit_content_for_processing(file_path: str, run_all: bool = True) -> Dict[
             AgentType.ARCHIVE, {"file": file_path, "mode": "index"}, TaskPriority.LOW
         )
 
+        # Future-Ready: Run deepfake scan on new content (CRITICAL priority)
+        task_ids["deepfake"] = orchestrator.submit_task(
+            AgentType.DEEPFAKE_DETECTION, {"file": file_path}, TaskPriority.CRITICAL
+        )
+        # Future-Ready: Score brand safety before ad insertion decisions
+        task_ids["brand_safety"] = orchestrator.submit_task(
+            AgentType.BRAND_SAFETY, {"file": file_path}, TaskPriority.HIGH
+        )
+        # Future-Ready: Start audience prediction for this content
+        task_ids["audience"] = orchestrator.submit_task(
+            AgentType.AUDIENCE_INTELLIGENCE, {"file": file_path}, TaskPriority.NORMAL
+        )
+
     # Emit event to trigger event-subscribed agents
     orchestrator.emit_event(Event(
         type=EventType.NEW_CONTENT,
@@ -757,7 +858,7 @@ if __name__ == "__main__":
         # Start orchestrator
         await start_autonomous_agents()
 
-        print("\n✅ All 8 agents are now running autonomously!")
+        print("\n✅ All 14 agents are now running autonomously! (8 original + 6 future-ready)")
         print("\nScheduled Jobs:")
         for job in orchestrator.get_scheduled_jobs():
             print(f"  - {job['agent_type']}: every {job['interval_seconds']}s")

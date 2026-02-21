@@ -691,9 +691,19 @@ with st.sidebar:
 
     page = st.radio(
         "Select Agent",
-        ["Dashboard", "🚀 All-in-One Workflow", "Caption Agent", "Clip Agent", "Archive Agent",
-         "Compliance Agent", "Social Publishing", "Localization",
-         "Rights Agent", "Trending Agent", "Integration Showcase"],
+        [
+            # Core
+            "Dashboard", "🚀 All-in-One Workflow",
+            # Original 8 agents
+            "Caption Agent", "Clip Agent", "Archive Agent", "Compliance Agent",
+            "Social Publishing", "Localization", "Rights Agent", "Trending Agent",
+            # ── Future-Ready Agents ──
+            "🔍 Deepfake Detection", "✅ Live Fact-Check",
+            "📊 Audience Intelligence", "🎬 AI Production Director",
+            "🛡️ Brand Safety", "🌿 Carbon Intelligence",
+            # System
+            "Integration Showcase",
+        ],
         label_visibility="collapsed"
     )
 
@@ -706,7 +716,8 @@ with st.sidebar:
     with col2:
         st.caption(f"{datetime.now().strftime('%H:%M:%S')}")
 
-    st.success("All 8 Agents Online")
+    st.success("All 14 Agents Online")
+    st.info("🔮 6 Future-Ready Agents Active")
 
     # Mode selector
     st.markdown("**Processing Mode**")
@@ -715,7 +726,7 @@ with st.sidebar:
         st.warning("Requires API keys in .env")
 
     st.divider()
-    st.caption("v2.0.0 | Enterprise Edition")
+    st.caption("v3.0.0 | Future-Ready Edition")
 
 
 # ============== Main Pages ==============
@@ -954,6 +965,79 @@ if page == "Dashboard":
 
     st.divider()
 
+    # ── Future-Ready Agents ──────────────────────────────────────────────────
+    st.subheader("🔮 Future-Ready Agents — Market Gap Innovation")
+    st.caption("Capabilities that don't yet exist in the broadcast market")
+
+    future_agents = [
+        {
+            "icon": "🔍",
+            "name": "Deepfake Detection",
+            "tagline": "Synthetic Media Forensics",
+            "capabilities": ["Voice clone detection", "Face swap analysis", "Metadata provenance", "Chain of custody", "Real-time scoring"],
+            "benefit": "News integrity protection",
+            "market_gap": "No integrated broadcast solution exists"
+        },
+        {
+            "icon": "✅",
+            "name": "Live Fact-Check",
+            "tagline": "Real-time Claim Verification",
+            "capabilities": ["Auto claim extraction", "8+ fact databases", "Live anchor alerts", "Graphic suggestions", "Historical tracking"],
+            "benefit": "On-air accuracy assurance",
+            "market_gap": "All tools require manual journalist input"
+        },
+        {
+            "icon": "📊",
+            "name": "Audience Intelligence",
+            "tagline": "Viewer Retention AI",
+            "capabilities": ["Drop-off prediction", "Intervention generator", "Demographic analysis", "Competitive migration", "Live pacing advice"],
+            "benefit": "Prevent viewer loss before it happens",
+            "market_gap": "No real-time live broadcast solution"
+        },
+        {
+            "icon": "🎬",
+            "name": "AI Production Director",
+            "tagline": "Autonomous Live Direction",
+            "capabilities": ["Camera cut AI", "Lower-third generation", "Rundown optimization", "Break timing", "Audio mix advice"],
+            "benefit": "Human director co-pilot",
+            "market_gap": "No autonomous broadcast director exists"
+        },
+        {
+            "icon": "🛡️",
+            "name": "Brand Safety",
+            "tagline": "Contextual Ad Intelligence",
+            "capabilities": ["GARM risk scoring", "IAB classification", "Advertiser impact", "CPM optimization", "Revenue protection"],
+            "benefit": "+15-28% ad revenue uplift",
+            "market_gap": "Digital only - no live TV solution"
+        },
+        {
+            "icon": "🌿",
+            "name": "Carbon Intelligence",
+            "tagline": "ESG Broadcast Tracking",
+            "capabilities": ["Energy monitoring", "Scope 1/2/3 carbon", "Green scheduling", "Offset management", "ESG reporting"],
+            "benefit": "ESG compliance & advertiser trust",
+            "market_gap": "No broadcast ESG tracking tool"
+        },
+    ]
+
+    future_cols = st.columns(3)
+    for i, agent in enumerate(future_agents):
+        with future_cols[i % 3]:
+            st.markdown(f"""
+            <div style="background: linear-gradient(135deg, #1e1b4b, #0f172a); padding: 16px; border-radius: 12px;
+                        border: 1px solid #7c3aed; margin-bottom: 12px;">
+                <h3 style="margin: 0; color: #c4b5fd;">{agent['icon']} {agent['name']}</h3>
+                <p style="color: #a78bfa; margin: 4px 0; font-size: 0.9rem;">{agent['tagline']}</p>
+                <ul style="color: #94a3b8; font-size: 0.8rem; margin: 8px 0; padding-left: 16px;">
+                    {''.join([f'<li>{cap}</li>' for cap in agent['capabilities'][:3]])}
+                </ul>
+                <p style="color: #22c55e; font-size: 0.85rem; margin: 4px 0 0 0;">✓ {agent['benefit']}</p>
+                <p style="color: #f59e0b; font-size: 0.75rem; margin: 4px 0 0 0;">⚡ Gap: {agent['market_gap']}</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+    st.divider()
+
     # Live Activity Feed
     col1, col2 = st.columns([2, 1])
 
@@ -961,12 +1045,17 @@ if page == "Dashboard":
         st.subheader("Live Activity Feed")
         activity = [
             {"agent": "📝 Caption Agent", "action": "Completed morning news broadcast transcription", "time": "Just now", "status": "success"},
+            {"agent": "🔍 Deepfake Detect", "action": "⚠️ SUSPICIOUS content flagged — UGC clip risk score 0.68 — HOLD for review", "time": "1 min ago", "status": "warning"},
             {"agent": "⚖️ Compliance", "action": "ALERT: Potential FCC violation detected - Review needed", "time": "2 min ago", "status": "warning"},
+            {"agent": "✅ Fact-Check", "action": "FALSE claim detected at 14:32 — anchor alert sent to producer", "time": "3 min ago", "status": "warning"},
             {"agent": "🎬 Clip Agent", "action": "Found 3 viral moments in warehouse fire coverage", "time": "5 min ago", "status": "success"},
+            {"agent": "📊 Audience Intel", "action": "DROP-OFF RISK at 22:00 — intervention: tease exclusive story", "time": "6 min ago", "status": "warning"},
+            {"agent": "🎬 AI Director", "action": "Camera 3 cut suggested → accepted | Lower-third auto-generated", "time": "7 min ago", "status": "success"},
             {"agent": "📈 Trending", "action": "#NashvilleFire trending - 45K posts/hour", "time": "8 min ago", "status": "info"},
+            {"agent": "🛡️ Brand Safety", "action": "BLOCKED: Pharma ads during crime segment (score: 52/100)", "time": "10 min ago", "status": "warning"},
             {"agent": "📜 Rights", "action": "WARNING: Wire Service license expires in 18 days", "time": "15 min ago", "status": "warning"},
+            {"agent": "🌿 Carbon Intel", "action": "Daily CO₂e: 428 kg | Renewable: 34% | Optimization: -15% available", "time": "20 min ago", "status": "info"},
             {"agent": "🌍 Localization", "action": "Spanish dub completed for breaking news segment", "time": "22 min ago", "status": "success"},
-            {"agent": "📱 Social", "action": "Auto-posted fire coverage to 5 platforms", "time": "30 min ago", "status": "success"},
         ]
 
         for act in activity:
@@ -1701,6 +1790,24 @@ elif page == "Archive Agent":
 
     st.divider()
 
+    # Demo Video Indexing Section
+    if DEMO_SAMPLE_AVAILABLE:
+        with st.expander("🎬 **Index Demo Video** - AI tagging and metadata extraction", expanded=False):
+            col1, col2 = st.columns([2, 1])
+            with col1:
+                st.markdown(f"**{DEMO_SAMPLE_VIDEO['title']}**")
+                video_path = get_demo_video_path()
+                if video_path.exists():
+                    st.video(str(video_path))
+            with col2:
+                st.markdown("**AI-Generated Metadata:**")
+                st.json(SAMPLE_ARCHIVE_METADATA)
+                if st.button("📥 Index to Archive", key="index_demo_archive"):
+                    with st.spinner("Indexing with AI..."):
+                        time.sleep(1)
+                    st.success("✅ Demo video indexed to archive!")
+                    st.markdown(f"**Tags:** {', '.join(SAMPLE_ARCHIVE_METADATA['ai_tags'])}")
+
     query = st.text_input("Search your archive using natural language", placeholder="Try: 'hurricane coverage from October' or 'interviews with tech executives'")
 
     st.markdown("**Quick searches:**")
@@ -2434,6 +2541,657 @@ elif page == "Trending Agent":
                 if not trend['our_coverage']:
                     st.button("📝 Create Story", key=f"story_{trend['topic']}", use_container_width=True)
                 st.button("📊 Full Analysis", key=f"analysis_{trend['topic']}", use_container_width=True)
+
+
+# ======================================================================
+# FUTURE-READY AGENTS (Market Gaps - Not Yet Available in the Industry)
+# ======================================================================
+
+elif page == "🔍 Deepfake Detection":
+    st.title("🔍 Deepfake & Synthetic Media Detection")
+    st.caption("MARKET GAP: No broadcast-integrated deepfake detection exists | 900% deepfake growth in 2025 | Real-time forensic analysis")
+
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #1e1b4b, #0f172a); padding: 16px; border-radius: 12px; border: 1px solid #7c3aed; margin-bottom: 16px;">
+    <h4 style="color: #a78bfa; margin: 0 0 8px 0;">⚡ Why This Doesn't Exist Yet</h4>
+    <p style="color: #c4b5fd; margin: 0;">
+    Deepfake detection capacity continues to <strong>lag far behind creation</strong>. Deepfakes grew 900% in 2025
+    (500K → 8M online). Voice cloning crossed the "indistinguishable threshold". No end-to-end broadcast-integrated
+    detection tool exists — this agent fills that critical gap.
+    </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("Deepfakes in 2025", "~8 Million", "+900% YoY")
+    with col2:
+        st.metric("Voice Clone Detection", "< 65% accuracy", "Industry average")
+    with col3:
+        st.metric("Real-time Detection", "First in market", "Integrated broadcast")
+
+    st.divider()
+
+    col1, col2 = st.columns([1, 1])
+
+    with col1:
+        st.subheader("Submit Content for Forensic Scan")
+        content_input = st.text_area("Content path / URL / description",
+                                      value="breaking_news_interview_clip.mp4",
+                                      height=80)
+        scan_type = st.multiselect("Detection layers",
+                                   ["Audio Layer (Voice Clone)", "Video Layer (Face Swap)", "Metadata Layer (Provenance)"],
+                                   default=["Audio Layer (Voice Clone)", "Video Layer (Face Swap)", "Metadata Layer (Provenance)"])
+        sensitivity = st.select_slider("Detection sensitivity", ["Lenient", "Balanced", "Strict"], value="Balanced")
+
+        if st.button("🔍 Run Forensic Scan", use_container_width=True, type="primary"):
+            with st.spinner("Running multi-layer forensic analysis..."):
+                import time as _time
+                steps = [
+                    ("🎵 Analyzing audio spectral fingerprint", 0.4),
+                    ("🎭 Scanning facial consistency & temporal artifacts", 0.7),
+                    ("🔗 Verifying metadata chain of custody", 0.85),
+                    ("🔄 Cross-modal consistency check (A/V sync)", 0.95),
+                    ("📊 Computing risk assessment", 1.0),
+                ]
+                prog = st.progress(0, text="Initializing scan...")
+                for step_text, prog_val in steps:
+                    _time.sleep(0.5)
+                    prog.progress(prog_val, text=step_text)
+                _time.sleep(0.3)
+                prog.empty()
+                st.session_state["deepfake_scanned"] = True
+
+    with col2:
+        st.subheader("Detection Layers")
+        st.markdown("""
+        | Layer | What's Checked | Indicator |
+        |---|---|---|
+        | 🎵 Audio | Spectral smoothness, prosody, breath sounds | GAN fingerprints |
+        | 🎭 Video | Facial blending, eye blinks, temporal flicker | Face swap seams |
+        | 📋 Metadata | File timestamps, GPS, C2PA chain | Provenance gaps |
+        | 🔄 Cross-modal | A/V sync, noise floor matching | Source mismatch |
+        """)
+
+    if st.session_state.get("deepfake_scanned"):
+        st.divider()
+
+        risk_score = round(random.uniform(0.15, 0.72), 3)
+        if risk_score < 0.25:
+            verdict, color, icon = "AUTHENTIC", "green", "✅"
+            broadcast_safe = True
+        elif risk_score < 0.60:
+            verdict, color, icon = "SUSPICIOUS - REVIEW", "orange", "⚠️"
+            broadcast_safe = False
+        else:
+            verdict, color, icon = "LIKELY SYNTHETIC", "red", "🚫"
+            broadcast_safe = False
+
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.metric("Overall Risk Score", f"{risk_score:.3f}", f"{'Safe' if broadcast_safe else 'Not Safe'}")
+        with col2:
+            st.metric("Audio Authenticity", f"{round(random.uniform(0.72, 0.96), 2)}", "Spectral analysis")
+        with col3:
+            st.metric("Video Authenticity", f"{round(random.uniform(0.68, 0.94), 2)}", "Frame analysis")
+        with col4:
+            st.metric("Metadata Trust", f"{round(random.uniform(0.75, 0.99), 2)}", "Chain of custody")
+
+        st.markdown(f"""
+        <div style="background: {'rgba(34,197,94,0.1)' if broadcast_safe else 'rgba(239,68,68,0.1)'};
+                    border-left: 4px solid {'#22c55e' if broadcast_safe else '#ef4444'};
+                    padding: 16px; border-radius: 8px; margin: 16px 0;">
+            <h3 style="margin: 0; color: {'#22c55e' if broadcast_safe else '#ef4444'};">{icon} Verdict: {verdict}</h3>
+            <p style="margin: 8px 0 0 0; color: #e2e8f0;">
+            {'✅ Content cleared for broadcast' if broadcast_safe else '🚫 HOLD: Route to verification team before broadcast'}
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        with st.expander("📋 Full Forensic Report", expanded=not broadcast_safe):
+            tabs = st.tabs(["Audio Analysis", "Video Analysis", "Metadata", "Provenance", "Recommendations"])
+
+            with tabs[0]:
+                st.markdown("**Audio Layer Findings**")
+                audio_score = round(random.uniform(0.65, 0.95), 3)
+                indicators = [
+                    {"type": "Spectral smoothness", "detail": "Unnaturally smooth freq transitions at 2.1-4.8kHz", "severity": "high" if audio_score < 0.80 else "low"},
+                    {"type": "Prosody pattern", "detail": "Pitch variation consistent with natural speech" if audio_score > 0.82 else "Unnatural pitch variation", "severity": "low" if audio_score > 0.82 else "medium"},
+                    {"type": "Breath sounds", "detail": "Natural breath sounds detected" if audio_score > 0.78 else "Missing breath sounds - potential TTS", "severity": "none" if audio_score > 0.78 else "high"},
+                ]
+                for ind in indicators:
+                    sev_color = {"high": "#ef4444", "medium": "#f59e0b", "low": "#22c55e", "none": "#22c55e"}.get(ind["severity"], "#94a3b8")
+                    st.markdown(f"**{ind['type']}** — <span style='color:{sev_color}'>{ind['detail']}</span>", unsafe_allow_html=True)
+
+            with tabs[1]:
+                st.markdown("**Video Layer Findings**")
+                vid_score = round(random.uniform(0.70, 0.96), 3)
+                st.markdown(f"- Temporal consistency score: **{round(random.uniform(0.75, 0.98), 3)}**")
+                st.markdown(f"- Facial boundary artifacts: **{'None detected' if vid_score > 0.85 else 'Detected at frames 147-189'}**")
+                st.markdown(f"- Eye blink frequency: **{round(random.uniform(14, 22), 1)} blinks/min** (Normal: 15-20/min)")
+                st.markdown(f"- Gaze naturalness: **{round(random.uniform(0.68, 0.97), 3)}**")
+
+            with tabs[2]:
+                st.markdown("**Metadata Analysis**")
+                st.json({
+                    "camera_model": "iPhone 15 Pro" if random.random() > 0.4 else "Unknown (stripped)",
+                    "creation_timestamp": "Consistent" if random.random() > 0.35 else "⚠️ Inconsistency detected",
+                    "gps_data": "Present" if random.random() > 0.3 else "Removed",
+                    "editing_traces": "None" if random.random() > 0.4 else "Adobe Premiere markers detected",
+                    "codec_signature": "Valid H.264",
+                    "c2pa_manifest": "Not present"
+                })
+
+            with tabs[3]:
+                st.markdown("**Chain of Custody**")
+                provenance_steps = [
+                    "📱 Source reported: UGC Upload",
+                    "📡 First seen: 47 min ago (Twitter @user12847)",
+                    f"🔍 Reverse image search: {random.randint(0, 8)} hits found",
+                    "🔗 C2PA chain: Not present",
+                    "📋 Edit history: 1 FFmpeg conversion detected"
+                ]
+                for step in provenance_steps:
+                    st.markdown(f"- {step}")
+
+            with tabs[4]:
+                st.markdown("**Recommendations**")
+                recs = [
+                    ("🚨 Urgent", "Submit to secondary verification (Sensity AI / Truepic) before any broadcast decision"),
+                    ("📋 Immediate", "Request original camera file with unbroken metadata chain from source"),
+                    ("⚙️ Process", "Enable C2PA (Content Authenticity Initiative) verification on all UGC ingest"),
+                    ("🔔 Policy", "Implement mandatory deepfake scan for all UGC and wire content before air"),
+                ]
+                for priority, action in recs:
+                    st.markdown(f"**{priority}:** {action}")
+
+
+elif page == "✅ Live Fact-Check":
+    st.title("✅ Live Fact-Check Agent")
+    st.caption("MARKET GAP: No broadcast-integrated real-time fact-checking | Automated claim verification during live broadcasts")
+
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #1e1b4b, #0f172a); padding: 16px; border-radius: 12px; border: 1px solid #0891b2; margin-bottom: 16px;">
+    <h4 style="color: #67e8f9; margin: 0 0 8px 0;">⚡ Why This Doesn't Exist Yet</h4>
+    <p style="color: #a5f3fc; margin: 0;">
+    Current fact-checking tools require <strong>manual journalist input</strong>. No system autonomously extracts claims
+    from live broadcasts and cross-references them in real-time. This agent enables on-air fact-checking
+    with anchor alerts and producer cues — without any manual intervention.
+    </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    col1, col2 = st.columns([2, 1])
+
+    with col1:
+        st.subheader("Live Broadcast Transcript Input")
+        transcript = st.text_area("Paste live broadcast transcript or captions",
+                                   value="""The unemployment rate is currently at 3.7%, the lowest in 50 years.
+This bill received bipartisan support with 67 votes in the Senate.
+Climate scientists confirm global temperatures have risen 1.2 degrees since pre-industrial times.
+The new vaccine shows 94% efficacy in Phase 3 clinical trials according to the manufacturer.
+The city's population has grown by 18% over the last decade, making it one of the fastest growing cities.""",
+                                   height=150)
+        if st.button("✅ Run Live Fact-Check", use_container_width=True, type="primary"):
+            with st.spinner("Extracting claims and verifying..."):
+                import time as _time
+                _time.sleep(1.8)
+                st.session_state["fact_checked"] = True
+
+    with col2:
+        st.subheader("Fact-Check Sources")
+        sources = ["AP Fact Check", "Reuters Fact Check", "PolitiFact", "FactCheck.org",
+                   "Snopes", "Full Fact", "IFCN Network", "WHO Mythbusters"]
+        for src in sources:
+            st.markdown(f"🔗 {src}")
+
+    if st.session_state.get("fact_checked"):
+        st.divider()
+        st.subheader("Fact-Check Results")
+
+        claims_data = [
+            {"claim": "Unemployment rate at 3.7%, lowest in 50 years", "verdict": "MOSTLY TRUE", "color": "#22c55e", "icon": "✔️",
+             "confidence": 0.87, "source": "Bureau of Labor Statistics", "note": "3.7% confirmed but 'lowest in 50 years' was 2019 level (3.5%)"},
+            {"claim": "Bill received 67 votes in the Senate", "verdict": "UNVERIFIED", "color": "#94a3b8", "icon": "❓",
+             "confidence": 0.62, "source": "Congressional Record", "note": "Unable to verify current bill vote count in real-time"},
+            {"claim": "Global temps risen 1.2°C since pre-industrial", "verdict": "TRUE", "color": "#22c55e", "icon": "✅",
+             "confidence": 0.97, "source": "IPCC AR6 Report", "note": "Confirmed by IPCC 2023 report: 1.1-1.2°C increase"},
+            {"claim": "Vaccine shows 94% efficacy in Phase 3 trials", "verdict": "MISLEADING", "color": "#f59e0b", "icon": "⚠️",
+             "confidence": 0.79, "source": "FDA Clinical Trial Database", "note": "94% was initial trial data; updated analysis shows 89.7%"},
+            {"claim": "City population grew 18% over last decade", "verdict": "FALSE", "color": "#ef4444", "icon": "❌",
+             "confidence": 0.83, "source": "US Census Bureau", "note": "Census data shows 12.3% growth, not 18%"},
+        ]
+
+        for i, claim in enumerate(claims_data):
+            with st.container():
+                col1, col2, col3 = st.columns([3, 1, 1])
+                with col1:
+                    st.markdown(f"""
+                    <div style="background: rgba(30,41,59,0.8); padding: 12px; border-radius: 8px;
+                                border-left: 4px solid {claim['color']}; margin: 4px 0;">
+                        <strong>{claim['icon']} {claim['verdict']}</strong><br>
+                        <span style="color: #e2e8f0;">{claim['claim']}</span><br>
+                        <span style="color: #94a3b8; font-size: 0.85rem;">📚 {claim['source']} | {claim['note']}</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+                with col2:
+                    st.metric("Confidence", f"{claim['confidence']:.0%}")
+                with col3:
+                    if claim["verdict"] in ["FALSE", "MISLEADING"]:
+                        st.button(f"🔔 Alert Anchor", key=f"alert_{i}", use_container_width=True)
+
+        st.divider()
+        col1, col2, col3 = st.columns(3)
+        false_count = sum(1 for c in claims_data if c["verdict"] in ["FALSE", "MISLEADING"])
+        with col1:
+            st.metric("Claims Checked", len(claims_data))
+        with col2:
+            st.metric("Problematic Claims", false_count, delta=f"{'🚨 Alert Producers' if false_count > 0 else 'Clear'}")
+        with col3:
+            st.metric("Avg Confidence", f"{sum(c['confidence'] for c in claims_data)/len(claims_data):.0%}")
+
+
+elif page == "📊 Audience Intelligence":
+    st.title("📊 Audience Intelligence & Retention Prediction")
+    st.caption("MARKET GAP: No real-time viewer drop-off prediction for live broadcast | Predict & prevent audience loss BEFORE it happens")
+
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #1e1b4b, #0f172a); padding: 16px; border-radius: 12px; border: 1px solid #0d9488; margin-bottom: 16px;">
+    <h4 style="color: #5eead4; margin: 0 0 8px 0;">⚡ Why This Doesn't Exist Yet</h4>
+    <p style="color: #99f6e4; margin: 0;">
+    Streaming platforms have basic recommendation engines, but <strong>no real-time viewer retention prediction
+    exists for live broadcast TV</strong>. This agent predicts second-by-second drop-off risk and generates
+    producer interventions <em>before viewers leave</em>, protecting ratings in real-time.
+    </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        content_type = st.selectbox("Content Type", ["hard_news", "breaking_news", "weather", "sports", "human_interest", "interview"])
+    with col2:
+        st.metric("Current Viewers", f"{random.randint(250, 850):,}K", f"+{random.randint(2, 15)}K/min")
+    with col3:
+        st.metric("Retention Risk", f"{random.randint(18, 45)}%", "next 10 min")
+    with col4:
+        st.metric("Predicted Peak", f"{random.randint(480, 1200):,}K", f"in {random.randint(8, 22)} min")
+
+    if st.button("📊 Generate Audience Prediction", use_container_width=True, type="primary"):
+        with st.spinner("Generating retention curve & intervention plan..."):
+            import time as _time
+            _time.sleep(1.5)
+            st.session_state["audience_done"] = True
+
+    if st.session_state.get("audience_done"):
+        st.divider()
+
+        # Retention curve mock data
+        minutes = list(range(0, 60, 5))
+        base_retention = {"hard_news": 72, "breaking_news": 88, "weather": 65, "sports": 78, "human_interest": 71, "interview": 69}.get(content_type, 72)
+        import math
+        retention_values = [min(100, base_retention + random.randint(-3, 8) - i * 0.8 + (5 if i == 10 else 0)) for i in range(len(minutes))]
+
+        col1, col2 = st.columns([2, 1])
+
+        with col1:
+            st.subheader("Predicted Retention Curve")
+            import pandas as pd
+            chart_data = pd.DataFrame({"Minutes": minutes, "Retention %": [round(r, 1) for r in retention_values]})
+            st.line_chart(chart_data.set_index("Minutes"), color="#0d9488")
+
+            # Drop-off warnings
+            st.subheader("⚠️ Drop-off Risk Points")
+            drop_risks = [
+                {"minute": 15, "risk": "high", "drop_pct": 8.2, "cause": "Single-topic coverage fatigue", "intervention": "Cut to field reporter for new angle"},
+                {"minute": 25, "risk": "medium", "drop_pct": 5.1, "cause": "Pre-commercial break natural exit", "intervention": "Tease exclusive story to hold viewers"},
+                {"minute": 40, "risk": "medium", "drop_pct": 4.7, "cause": "Competing story on rival channel", "intervention": "Introduce interactive viewer poll"},
+            ]
+            for risk in drop_risks:
+                risk_color = "#ef4444" if risk["risk"] == "high" else "#f59e0b"
+                st.markdown(f"""
+                <div style="background: rgba(30,41,59,0.8); padding: 12px; border-radius: 8px;
+                            border-left: 4px solid {risk_color}; margin: 8px 0;">
+                    <strong>{risk['minute']}:00 - {risk['risk'].upper()} RISK: -{risk['drop_pct']}% drop predicted</strong><br>
+                    <span style="color: #94a3b8;">Cause: {risk['cause']}</span><br>
+                    <span style="color: #5eead4;">💡 Intervention: {risk['intervention']}</span>
+                </div>
+                """, unsafe_allow_html=True)
+
+        with col2:
+            st.subheader("Demographic Breakdown")
+            demos = {"18-34": random.randint(55, 75), "35-54": random.randint(70, 88), "55-64": random.randint(65, 82), "65+": random.randint(58, 78)}
+            for demo, pct in demos.items():
+                st.progress(pct / 100, text=f"{demo}: {pct}% retention")
+
+            st.subheader("Competitive Analysis")
+            competitors = {"CNN": random.randint(8, 25), "Fox News": random.randint(10, 30), "MSNBC": random.randint(6, 20), "Streaming": random.randint(15, 40)}
+            for ch, pct in competitors.items():
+                st.markdown(f"→ {pct}% of dropoffs go to **{ch}**")
+
+            st.subheader("Live Metrics")
+            st.metric("Social Chatter", f"{random.randint(1200, 8500):,}/min")
+            st.metric("Second Screen", f"{random.randint(18, 42)}%")
+            st.metric("Sentiment", f"{round(random.uniform(0.45, 0.82), 2)}")
+
+
+elif page == "🎬 AI Production Director":
+    st.title("🎬 AI Production Director")
+    st.caption("MARKET GAP: No autonomous AI production director exists for live broadcast | Camera cuts, graphics, rundown optimization")
+
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #1e1b4b, #0f172a); padding: 16px; border-radius: 12px; border: 1px solid #d97706; margin-bottom: 16px;">
+    <h4 style="color: #fcd34d; margin: 0 0 8px 0;">⚡ Why This Doesn't Exist Yet</h4>
+    <p style="color: #fde68a; margin: 0;">
+    Every camera cut, graphics call, and break decision currently requires a human director.
+    This agent acts as an <strong>autonomous AI co-pilot</strong> for the production director —
+    suggesting real-time camera cuts, auto-generating lower-thirds, optimizing rundown order,
+    and timing commercial breaks for maximum viewer retention.
+    </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    if st.button("🎬 Generate Production Direction Package", use_container_width=True, type="primary"):
+        with st.spinner("Analyzing rundown and generating production directions..."):
+            import time as _time
+            _time.sleep(1.5)
+            st.session_state["prod_done"] = True
+
+    if st.session_state.get("prod_done"):
+        tabs = st.tabs(["📷 Camera Plan", "📝 Lower Thirds", "📋 Rundown", "⏰ Break Strategy", "🔊 Audio", "⚙️ Technical"])
+
+        with tabs[0]:
+            st.subheader("Recommended Camera Shot Plan (Next 15 min)")
+            shots = [
+                {"shot": 1, "camera": "Camera 2", "type": "Medium", "use": "Anchor open", "duration": "8s", "confidence": 0.94},
+                {"shot": 2, "camera": "Camera 4", "type": "Wide", "use": "Studio establishing", "duration": "5s", "confidence": 0.88},
+                {"shot": 3, "camera": "Camera 1", "type": "Close-up", "use": "Anchor emphasis", "duration": "6s", "confidence": 0.91},
+                {"shot": 4, "camera": "Remote Feed", "type": "Remote Guest", "use": "Washington DC guest", "duration": "45s", "confidence": 0.96},
+                {"shot": 5, "camera": "Camera 3", "type": "OTS", "use": "Two-shot transition", "duration": "4s", "confidence": 0.85},
+                {"shot": 6, "camera": "B-Roll", "type": "B-Roll", "use": "Illustrative footage", "duration": "20s", "confidence": 0.99},
+            ]
+            import pandas as pd
+            df = pd.DataFrame(shots)
+            st.dataframe(df, use_container_width=True, hide_index=True)
+            st.caption(f"AI acceptance rate today: {random.randint(75, 92)}% | Human overrides: {random.randint(3, 12)}")
+
+        with tabs[1]:
+            st.subheader("Auto-Generated Lower Thirds")
+            lowers = [
+                {"line1": "SARAH JOHNSON", "line2": "Chief Political Correspondent", "style": "Standard", "trigger": "On cut to reporter"},
+                {"line1": "BREAKING NEWS", "line2": "Economic Announcement Expected", "style": "⚡ Breaking (Red)", "trigger": "Manual"},
+                {"line1": "LIVE", "line2": "Washington D.C.", "style": "Live (Green)", "trigger": "On live remote"},
+                {"line1": f"DOW {random.randint(36000,42000):,} ▲ {round(random.uniform(0.1,2.1),2)}%", "line2": "NASDAQ S&P500", "style": "Ticker", "trigger": "Business segment"},
+            ]
+            for lt in lowers:
+                st.markdown(f"""
+                <div style="background: #1e293b; padding: 10px; border-radius: 6px; margin: 6px 0; border-left: 3px solid #d97706;">
+                    <strong>{lt['line1']}</strong> | <span style="color: #94a3b8;">{lt['line2']}</span><br>
+                    <small>Style: {lt['style']} | Trigger: {lt['trigger']}</small>
+                </div>
+                """, unsafe_allow_html=True)
+
+        with tabs[2]:
+            st.subheader("Rundown Analysis & Optimization")
+            rundown = [
+                {"pos": 1, "slug": "ELECTION-UPDATE", "type": "Hard News", "planned": "3:00", "score": 9.2, "suggestion": "✅ Keep as lead"},
+                {"pos": 2, "slug": "WEATHER-LEAD", "type": "Weather", "planned": "2:00", "score": 7.1, "suggestion": "⬇️ Move to pos 3"},
+                {"pos": 3, "slug": "MARKET-CLOSE", "type": "Business", "planned": "2:30", "score": 8.0, "suggestion": "⬆️ Move to pos 2 (markets closing NOW)"},
+                {"pos": 4, "slug": "SPORTS-HIGHLIGHTS", "type": "Sports", "planned": "4:00", "score": 6.8, "suggestion": "✂️ Trim to 3:00 (drop-off at 3min)"},
+                {"pos": 5, "slug": "HUMAN-INTEREST-DOG", "type": "Human Interest", "planned": "2:00", "score": 4.5, "suggestion": "✅ Keep as kicker"},
+            ]
+            import pandas as pd
+            df = pd.DataFrame(rundown)
+            st.dataframe(df, use_container_width=True, hide_index=True)
+
+        with tabs[3]:
+            st.subheader("Commercial Break Optimization")
+            breaks = [
+                {"break": 1, "planned": "10:00", "ai_suggest": "11:30", "reason": "Post story-arc completion at 11:30 creates natural exit", "return_rate": "76%"},
+                {"break": 2, "planned": "24:00", "ai_suggest": "22:45", "reason": "Competitor breaking story emerging — break early, tease exclusive", "return_rate": "71%"},
+                {"break": 3, "planned": "38:00", "ai_suggest": "38:00", "reason": "Optimal timing confirmed — no adjustment needed", "return_rate": "68%"},
+            ]
+            for b in breaks:
+                st.markdown(f"""
+                <div style="background: #1e293b; padding: 12px; border-radius: 8px; margin: 8px 0;">
+                    <strong>Break {b['break']}:</strong> Planned {b['planned']} →
+                    <span style="color: #fcd34d;">AI Suggests {b['ai_suggest']}</span><br>
+                    <span style="color: #94a3b8;">{b['reason']}</span><br>
+                    <span style="color: #22c55e;">Projected return rate: {b['return_rate']}</span>
+                </div>
+                """, unsafe_allow_html=True)
+
+        with tabs[4]:
+            st.subheader("Audio Mix Recommendations")
+            audio_sources = [
+                {"source": "Studio anchor mic", "level": "-16.0 dBFS", "status": "✅ Good"},
+                {"source": "Remote guest (Washington)", "level": "-21.5 dBFS", "status": "⚠️ Boost +5dB"},
+                {"source": "Studio ambient", "level": "-38.0 dBFS", "status": "✅ Good"},
+            ]
+            for a in audio_sources:
+                st.markdown(f"**{a['source']}** — {a['level']} — {a['status']}")
+
+        with tabs[5]:
+            st.subheader("Technical Health")
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("Main Feed", f"{round(random.uniform(12, 22), 1)} Mbps", "Healthy")
+                st.metric("Remote Feed", f"{round(random.uniform(6, 12), 1)} Mbps", f"{random.randint(80, 320)}ms latency")
+            with col2:
+                st.metric("Vizrt Graphics", f"{random.randint(12, 35)}ms", "Online")
+                st.metric("Chyron", f"{random.randint(10, 25)}ms", "Online")
+            with col3:
+                st.metric("Loudness", f"{round(random.uniform(-22, -18), 1)} LUFS", "ITU-R BS.1770")
+                st.metric("Stream Health", "Excellent", "All CDNs stable")
+
+
+elif page == "🛡️ Brand Safety":
+    st.title("🛡️ Brand Safety & Contextual Ad Intelligence")
+    st.caption("MARKET GAP: No real-time brand safety scoring for live broadcast | Protect advertiser relationships & maximize ad revenue")
+
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #1e1b4b, #0f172a); padding: 16px; border-radius: 12px; border: 1px solid #dc2626; margin-bottom: 16px;">
+    <h4 style="color: #fca5a5; margin: 0 0 8px 0;">⚡ Why This Doesn't Exist Yet</h4>
+    <p style="color: #fecaca; margin: 0;">
+    Brand safety tools exist for <strong>digital/programmatic</strong> advertising, but NO real-time
+    contextual brand safety scoring exists for <strong>live broadcast TV</strong>. Advertisers currently
+    have zero visibility into adjacent content until AFTER air. This agent scores content in real-time
+    to protect brand relationships and optimize CPM pricing.
+    </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("Current Safety Score", f"{random.randint(68, 94)}/100", "GARM compliant")
+    with col2:
+        st.metric("Active Advertisers", f"{random.randint(18, 45)}", f"{random.randint(2, 6)} blocked")
+    with col3:
+        st.metric("Premium Windows", f"{random.randint(3, 8)} today", f"+{round(random.uniform(12, 28), 1)}% CPM")
+    with col4:
+        st.metric("Revenue Protected", f"${random.randint(8, 65)}K", "This broadcast")
+
+    content_input = st.text_area("Paste current broadcast segment transcript for analysis",
+                                  value="Tonight on WKRN: We continue to follow the developing story on the federal economic announcement. Markets have responded sharply to today's Fed decision. Our financial correspondent breaks down what this means for your portfolio. Later: the city council votes on the downtown development project, and a heartwarming story of community resilience.",
+                                  height=100)
+
+    if st.button("🛡️ Run Brand Safety Analysis", use_container_width=True, type="primary"):
+        with st.spinner("Scoring content for brand safety..."):
+            import time as _time
+            _time.sleep(1.3)
+            st.session_state["brand_safety_done"] = True
+
+    if st.session_state.get("brand_safety_done"):
+        st.divider()
+
+        overall_score = random.randint(72, 92)
+        level = "Premium Safe" if overall_score >= 85 else "Standard Safe" if overall_score >= 70 else "Caution"
+        level_color = "#22c55e" if overall_score >= 85 else "#f59e0b" if overall_score >= 70 else "#ef4444"
+
+        col1, col2 = st.columns([1, 2])
+
+        with col1:
+            st.markdown(f"""
+            <div style="background: rgba(30,41,59,0.8); padding: 20px; border-radius: 12px; text-align: center; border: 2px solid {level_color};">
+                <h1 style="color: {level_color}; margin: 0;">{overall_score}</h1>
+                <p style="color: {level_color}; margin: 4px 0; font-size: 1.1rem;">{level}</p>
+                <p style="color: #94a3b8; margin: 0; font-size: 0.85rem;">GARM Standard Score</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+            st.markdown("**GARM Risk Flags**")
+            garm_items = [("Controversial News", "medium", "⚠️"), ("Violence/Gore", "none", "✅"), ("Hate Speech", "none", "✅"), ("Adult Content", "none", "✅"), ("Profanity", "none", "✅")]
+            for item, sev, icon in garm_items:
+                color = "#f59e0b" if sev == "medium" else "#22c55e"
+                st.markdown(f"<span style='color:{color}'>{icon} {item}</span>", unsafe_allow_html=True)
+
+        with col2:
+            st.subheader("Advertiser Impact Assessment")
+            advertisers = [
+                {"name": "Luxury Auto", "min_score": 80, "status": "Safe" if overall_score >= 80 else "Blocked", "cpm": f"${round(random.uniform(45, 85), 2)}"},
+                {"name": "Pharmaceutical", "min_score": 75, "status": "Safe" if overall_score >= 75 else "Blocked", "cpm": f"${round(random.uniform(38, 72), 2)}"},
+                {"name": "Financial Services", "min_score": 70, "status": "Safe" if overall_score >= 70 else "Blocked", "cpm": f"${round(random.uniform(30, 65), 2)}"},
+                {"name": "Family Products", "min_score": 85, "status": "Safe" if overall_score >= 85 else "⚠️ Review", "cpm": f"${round(random.uniform(25, 55), 2)}"},
+                {"name": "Fast Food", "min_score": 60, "status": "Safe", "cpm": f"${round(random.uniform(18, 40), 2)}"},
+                {"name": "Consumer Tech", "min_score": 65, "status": "Safe", "cpm": f"${round(random.uniform(22, 50), 2)}"},
+            ]
+            import pandas as pd
+            df = pd.DataFrame(advertisers)
+            st.dataframe(df, use_container_width=True, hide_index=True)
+
+            st.subheader("Revenue Optimization")
+            col3, col4 = st.columns(2)
+            with col3:
+                st.metric("Current CPM", f"${round(random.uniform(22, 45), 2)}")
+                st.metric("Optimized CPM", f"${round(random.uniform(35, 68), 2)}", f"+{round(random.uniform(15, 38), 1)}%")
+            with col4:
+                st.metric("Revenue at Risk", f"${random.randint(2000, 15000):,}")
+                st.metric("Premium Opportunity", f"+${random.randint(3000, 18000):,}")
+
+
+elif page == "🌿 Carbon Intelligence":
+    st.title("🌿 Carbon Intelligence & ESG Broadcast Agent")
+    st.caption("MARKET GAP: No integrated carbon tracking for broadcast operations | ESG compliance for advertisers & regulators")
+
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #1e1b4b, #0f172a); padding: 16px; border-radius: 12px; border: 1px solid #16a34a; margin-bottom: 16px;">
+    <h4 style="color: #86efac; margin: 0 0 8px 0;">⚡ Why This Doesn't Exist Yet</h4>
+    <p style="color: #bbf7d0; margin: 0;">
+    The broadcast industry faces increasing <strong>ESG pressure from advertisers and regulators</strong>, but
+    NO integrated carbon tracking tool exists for broadcast operations. This agent provides real-time
+    energy monitoring, Scope 1/2/3 emissions tracking, and auto-generates ESG reports for
+    stakeholders — a genuine first-to-market capability.
+    </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    broadcast_type = st.selectbox("Broadcast Type", ["standard_news", "breaking_news", "live_event", "sports_broadcast", "remote_production"])
+
+    if st.button("🌿 Generate Carbon Intelligence Report", use_container_width=True, type="primary"):
+        with st.spinner("Calculating broadcast carbon footprint..."):
+            import time as _time
+            _time.sleep(1.5)
+            st.session_state["carbon_done"] = True
+
+    if st.session_state.get("carbon_done"):
+        st.divider()
+
+        # Key metrics
+        co2_today = round(random.uniform(320, 780), 1)
+        renewable_pct = round(random.uniform(22, 58), 1)
+        esg_score = round(random.uniform(58, 82), 1)
+
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.metric("CO₂e Today", f"{co2_today} kg", f"vs {round(co2_today*random.uniform(0.9, 1.15), 1)} kg yesterday")
+        with col2:
+            st.metric("Annual CO₂e", f"{round(co2_today * 365 / 1000, 1)} tonnes", "Scope 1+2+3")
+        with col3:
+            st.metric("Renewable Mix", f"{renewable_pct}%", f"Grid: {100-renewable_pct:.0f}% fossil")
+        with col4:
+            st.metric("ESG Score", f"{esg_score}/100", f"Rating: {'A' if esg_score >= 80 else 'B+' if esg_score >= 70 else 'B'}")
+
+        tabs = st.tabs(["⚡ Energy Breakdown", "🌍 Carbon Footprint", "📊 Optimizations", "♻️ Offsets", "📋 ESG Report"])
+
+        with tabs[0]:
+            st.subheader("Equipment Energy Consumption")
+            import pandas as pd
+            equipment = [
+                {"Equipment": "Main Transmitter (12kW)", "Category": "Broadcast", "kWh Today": round(12*18, 1), "Status": "Active"},
+                {"Equipment": "Server Farm (18kW)", "Category": "IT", "kWh Today": round(18*24, 1), "Status": "Active"},
+                {"Equipment": "Studio HVAC (22kW)", "Category": "Facility", "kWh Today": round(22*18, 1), "Status": "Active"},
+                {"Equipment": "Studio A Lighting (4.5kW)", "Category": "Studio", "kWh Today": round(4.5*10, 1), "Status": "Active"},
+                {"Equipment": "CDN Streaming (5kW)", "Category": "Digital", "kWh Today": round(5*24, 1), "Status": "Active"},
+                {"Equipment": "OB Truck (35kW)" if broadcast_type == "live_event" else "OB Truck (standby)", "Category": "Remote", "kWh Today": round(35*8, 1) if broadcast_type == "live_event" else 0, "Status": "Active" if broadcast_type == "live_event" else "Standby"},
+            ]
+            df = pd.DataFrame(equipment)
+            st.dataframe(df, use_container_width=True, hide_index=True)
+            st.metric("Total Energy Today", f"{sum(e['kWh Today'] for e in equipment):,.0f} kWh")
+
+        with tabs[1]:
+            st.subheader("Carbon Footprint Breakdown")
+            col1, col2 = st.columns(2)
+            with col1:
+                st.markdown("**Scope Breakdown**")
+                scope1 = round(co2_today * 0.15, 1)
+                scope2 = round(co2_today * 0.70, 1)
+                scope3 = round(co2_today * 0.15, 1)
+                st.progress(scope1/co2_today, text=f"Scope 1 (Direct): {scope1} kg")
+                st.progress(scope2/co2_today, text=f"Scope 2 (Grid electricity): {scope2} kg")
+                st.progress(scope3/co2_today, text=f"Scope 3 (Supply chain, travel): {scope3} kg")
+            with col2:
+                st.markdown("**Carbon Equivalents**")
+                st.markdown(f"🚗 **{round(co2_today * 2.48):,} miles** driven by car")
+                st.markdown(f"✈️ **{round(co2_today/286, 2)} flights** NYC → LA")
+                st.markdown(f"📱 **{round(co2_today * 121):,} smartphones** charged")
+                st.markdown(f"🌳 **{round(co2_today * 365 / 21000, 1)} acres** forest/year to offset")
+
+        with tabs[2]:
+            st.subheader("Carbon Reduction Opportunities")
+            optimizations = [
+                {"priority": "🔴 High", "action": "Shift batch video encoding to 2AM-6AM (40% lower grid carbon intensity)", "CO₂ Savings/month": f"{round(random.uniform(180, 450), 0):.0f} kg", "Cost Savings": f"${random.randint(800, 3200):,}"},
+                {"priority": "🔴 High", "action": "Procure 100% renewable energy PPA (current mix 28%)", "CO₂ Savings/month": f"{round(co2_today*0.85*30, 0):.0f} kg", "Cost Savings": f"${random.randint(-500, 2000):,}"},
+                {"priority": "🟡 Medium", "action": "Replace studio HMI/tungsten lighting with LED", "CO₂ Savings/month": f"{round(random.uniform(120, 380), 0):.0f} kg", "Cost Savings": f"${random.randint(600, 2400):,}"},
+                {"priority": "🟡 Medium", "action": "Replace OB truck with cloud REMI production model", "CO₂ Savings/event": f"{round(random.uniform(200, 800), 0):.0f} kg", "Cost Savings": f"${random.randint(5000, 25000):,}"},
+                {"priority": "🟢 Low", "action": "Migrate CDN to AWS eu-west (lower carbon region)", "CO₂ Savings/month": f"{round(random.uniform(40, 180), 0):.0f} kg", "Cost Savings": f"${random.randint(200, 800):,}"},
+            ]
+            import pandas as pd
+            df = pd.DataFrame(optimizations)
+            st.dataframe(df, use_container_width=True, hide_index=True)
+
+        with tabs[3]:
+            st.subheader("Carbon Offset Recommendations")
+            annual_tonnes = round(co2_today * 365 / 1000, 1)
+            offsets = [
+                {"Project": "US Forestry (Gold Standard)", "Type": "Nature-based", "$/tonne": "$18", "Annual Cost": f"${round(annual_tonnes * 18):,}", "Rating": "⭐⭐⭐⭐⭐"},
+                {"Project": "Wind Farm Dev - South Asia", "Type": "Renewable Energy", "$/tonne": "$9", "Annual Cost": f"${round(annual_tonnes * 9):,}", "Rating": "⭐⭐⭐⭐"},
+                {"Project": "Direct Air Capture (Climeworks)", "Type": "Technological", "$/tonne": "$550", "Annual Cost": f"${round(annual_tonnes * 550):,}", "Rating": "⭐⭐⭐⭐⭐ (permanent)"},
+            ]
+            import pandas as pd
+            df = pd.DataFrame(offsets)
+            st.dataframe(df, use_container_width=True, hide_index=True)
+            st.info(f"💡 Recommended: US Forestry offset at $18/tonne. Annual cost to offset all Scope 2: **${round(co2_today * 0.7 * 365 / 1000 * 18):,}**")
+
+        with tabs[4]:
+            st.subheader("ESG Report Summary")
+            rating = "A" if esg_score >= 80 else "B+" if esg_score >= 70 else "B"
+            st.markdown(f"""
+            **Report Period:** {datetime.now().strftime('%B %Y')}
+
+            **Executive Summary:**
+            This broadcast facility achieved an ESG score of **{esg_score}/100** (Rating: **{rating}**) this period.
+            Total carbon footprint: **{round(co2_today * 365 / 1000, 1)} tCO₂e annually**.
+            Renewable energy mix: **{renewable_pct}%**. Net Zero target: **2035**.
+
+            **Key Metrics:**
+            - 📊 Annual CO₂e: {round(co2_today * 365 / 1000, 1)} tonnes
+            - ⚡ Renewable Energy: {renewable_pct}%
+            - 🏭 Energy Intensity: {round(random.uniform(85, 245), 1)} kWh/broadcast-hour
+            - 📋 Frameworks Aligned: GRI 305, TCFD, GHG Protocol
+            - ✅ Advertiser ESG Compliant: {'Yes' if esg_score >= 60 else 'No'}
+            - 📅 Next Audit: {(datetime.now() + timedelta(days=90)).strftime('%Y-%m-%d')}
+            """)
+            if st.button("📄 Export ESG Report (PDF)", use_container_width=True):
+                st.info("Production mode: Generates full GRI 305-compliant PDF report for stakeholder disclosure")
 
 
 elif page == "Integration Showcase":
