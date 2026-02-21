@@ -1,15 +1,16 @@
-# MediaAgentIQ v2.0 - Complete Documentation
+# MediaAgentIQ v3.0 - Complete Documentation
 
 ## 📋 Overview
 
-MediaAgentIQ is an enterprise AI-powered agent platform for media and broadcast organizations. It provides **8 specialized AI agents** that run **autonomously** to automate critical workflows - from captioning to compliance monitoring, viral clip detection to rights management.
+MediaAgentIQ is an enterprise AI-powered agent platform for media and broadcast organizations. It provides **14 specialized AI agents** that run **autonomously** to automate critical workflows — from captioning to deepfake detection, viral clip detection to carbon ESG reporting.
 
 **Key Features:**
 - 🤖 **Autonomous Operation** - Agents run 24/7 without manual intervention
 - 🔄 **Dual-Mode Architecture** - Demo mode for showcasing, Production mode with real AI
-- 🚀 **All-in-One Workflow** - Process through all 8 agents simultaneously
+- 🚀 **All-in-One Workflow** - Process through all 14 agents simultaneously
 - 🔌 **Enterprise Integrations** - MAM, NMOS, broadcast automation connectivity
 - ⚡ **Event-Driven** - Agents trigger each other automatically
+- 🔮 **Future-Ready** - 6 market-gap agents addressing problems no broadcast vendor has solved
 
 ---
 
@@ -113,7 +114,11 @@ class BaseAgent:
 
 ---
 
-## 🤖 The 8 AI Agents
+## 🤖 The 14 AI Agents
+
+---
+
+### — Original 8 Agents —
 
 ### 1. 📝 Caption Agent
 
@@ -296,6 +301,160 @@ audio = await service.generate_dub(text, voice_id, language)
 
 ---
 
+### — Future-Ready 6 Agents (Market Gaps) —
+
+### 9. 🕵️ Deepfake Detection Agent
+
+**Market Gap:** AI synthetic media grew 900% in 2025 (500K → 8M deepfakes). No broadcast vendor offers real-time forensic detection integrated into the broadcast chain.
+
+**Capabilities:**
+| Feature | Demo Mode | Production Mode |
+|---------|-----------|-----------------|
+| Audio spectral analysis | Mock forensic scores | GPT-4 + spectral AI |
+| Video facial consistency | Simulated GAN detection | Frame-by-frame forensics |
+| Metadata provenance (C2PA) | Preset results | C2PA standard verification |
+| Cross-modal A/V sync check | Simulated | Real-time analysis |
+| Auto-hold from broadcast | Configurable | Real hold signal |
+
+**Risk Levels:** `authentic` → `suspicious` → `likely_fake` → `confirmed_fake`
+
+**Key Settings:**
+```bash
+DEEPFAKE_RISK_THRESHOLD=0.60    # Auto-hold above this score
+DEEPFAKE_AUTO_HOLD=true
+DEEPFAKE_SENSITIVITY=balanced   # strict | balanced | lenient
+```
+
+**Auto-triggered:** On every new content upload (CRITICAL priority)
+
+---
+
+### 10. ✅ Live Fact-Check Agent
+
+**Market Gap:** Fact-checking tools exist but none are integrated into the live broadcast chain with real-time anchor alerts and on-screen graphic suggestions.
+
+**Capabilities:**
+| Feature | Demo Mode | Production Mode |
+|---------|-----------|-----------------|
+| Claim extraction | Mock claims | GPT-4 NLP extraction |
+| Database verification | Preset verdicts | 8 live fact databases |
+| Anchor alert generation | Simulated | Real-time alerts |
+| On-screen graphic suggestions | Mock | AI-generated chyrons |
+| Broadcast risk score | Fixed | Multi-claim aggregation |
+
+**Verdict Scale:** `true` → `mostly_true` → `half_true` → `misleading` → `false` → `unverified` → `outdated`
+
+**Databases Queried:** AP, Reuters, PolitiFact, FactCheck.org, Snopes, Full Fact, IFCN, WHO
+
+**Auto-triggered:** On CAPTION_COMPLETE and BREAKING_NEWS events
+
+---
+
+### 11. 📊 Audience Intelligence Agent
+
+**Market Gap:** Nielsen/Comscore measure past performance. No tool predicts second-by-second retention during a live broadcast to prevent drop-offs before they happen.
+
+**Capabilities:**
+| Feature | Demo Mode | Production Mode |
+|---------|-----------|-----------------|
+| Retention curve prediction | Mock curve | GPT-4 content analysis |
+| Drop-off risk detection | Preset points | AI pattern matching |
+| Demographic breakdown | Simulated | Real-time segmentation |
+| Competitive migration analysis | Mock data | Platform correlation |
+| Emotional resonance mapping | Fixed scores | Sentiment + engagement AI |
+
+**Demographics Tracked:** 18-24, 25-34, 35-44, 45-54, 55-64, 65+
+
+**Key Settings:**
+```bash
+AUDIENCE_PREDICTION_INTERVAL_SECS=300
+AUDIENCE_DROP_OFF_ALERT_THRESHOLD=0.04   # 4% drop = producer alert
+```
+
+**Scheduled:** Every 5 minutes
+
+---
+
+### 12. 🎬 AI Production Director Agent
+
+**Market Gap:** Production automation tools handle cameras or graphics separately. No AI system autonomously orchestrates the full production — cameras, lower-thirds, rundown, commercial breaks — in one integrated agent.
+
+**Capabilities:**
+| Feature | Demo Mode | Production Mode |
+|---------|-----------|-----------------|
+| Camera shot plan | Preset compositions | GPT-4 scene analysis |
+| Lower-thirds generation | 4 template types | AI-contextual chyrons |
+| Rundown optimization | Mock reordering | Story priority AI |
+| Commercial break timing | Fixed windows | Audience retention-aware |
+| Audio mix recommendations | Preset levels | Real-time level analysis |
+| Technical health dashboard | Simulated | Live signal monitoring |
+
+**Human Approval Gate:** `PRODUCTION_DIRECTOR_AUTO_ACCEPT=false` (default) — all decisions require producer sign-off.
+
+**Scheduled:** Every 1 minute
+
+---
+
+### 13. 🛡️ Brand Safety Agent
+
+**Market Gap:** Brand safety tools scan ad exchanges after content is classified. No broadcast tool scores content contextually in real-time during air for dynamic ad insertion decisions.
+
+**Capabilities:**
+| Feature | Demo Mode | Production Mode |
+|---------|-----------|-----------------|
+| GARM 10-category risk detection | Mock scores | GPT-4 content scoring |
+| IAB Tech Lab taxonomy | Preset categories | 36-category classification |
+| Advertiser profile impact | 6 profiles | Per-advertiser rules |
+| CPM modifier calculation | Fixed rates | Dynamic pricing model |
+| Revenue impact estimation | Simulated | Real ad inventory data |
+| Ad placement windows | Mock windows | Real-time scoring |
+
+**GARM Categories:** Adult content, Arms/ammunition, Hate speech, Violence, Terrorism, Drugs, Profanity, Controversy, Tragedy/conflict, Crime
+
+**Advertiser Profiles:** Luxury auto, Pharma, Financial services, Fast food, Family brands, Tech
+
+**Key Settings:**
+```bash
+BRAND_SAFETY_DEFAULT_FLOOR=70    # Min score for ad insertion (0-100)
+BRAND_SAFETY_AUTO_BLOCK=true     # Block when GARM critical flags detected
+BRAND_SAFETY_GARM_ENABLED=true
+```
+
+**Auto-triggered:** On every new content upload (HIGH priority)
+
+---
+
+### 14. 🌿 Carbon Intelligence Agent
+
+**Market Gap:** No broadcast vendor tracks or reports carbon footprint of productions. ESG reporting for broadcast is entirely manual. This agent automates GHG Protocol Scope 1/2/3 tracking.
+
+**Capabilities:**
+| Feature | Demo Mode | Production Mode |
+|---------|-----------|-----------------|
+| Equipment energy tracking | 12 device profiles | Real wattage monitoring |
+| Grid carbon intensity | 9 regional grids | Live grid data |
+| Scope 1/2/3 breakdown | Mock GHG data | GHG Protocol calculation |
+| ESG score calculation | Preset score | Environmental/Social/Governance |
+| Carbon offset recommendations | 3 project types | Market-rate pricing |
+| Green scheduling optimization | Mock windows | Low-carbon grid timing |
+| ESG report generation | Demo report | GRI 305 / TCFD / GHG aligned |
+
+**Grid Regions:** US_Northeast, US_Southeast, US_Midwest, US_West, EU_West, EU_East, UK, Asia_Pacific, Global_Average
+
+**Compliance Frameworks:** GRI 305, TCFD (Task Force on Climate-related Financial Disclosures), GHG Protocol
+
+**Key Settings:**
+```bash
+CARBON_GRID_REGION=US_Northeast
+CARBON_ESG_REPORT_ENABLED=true
+CARBON_RENEWABLE_PPA=0.0         # % electricity from renewable PPAs
+CARBON_REPORTING_INTERVAL_SECS=1800
+```
+
+**Scheduled:** Every 30 minutes
+
+---
+
 ## 🤖 Autonomous Orchestrator
 
 ### Overview
@@ -317,6 +476,12 @@ await start_autonomous_agents()
 | Compliance | 10 min | Continuous FCC monitoring |
 | Rights | 1 hour | License expiration checks |
 | Archive | 6 hours | Index optimization |
+| Deepfake Detection | 2 min | Scan incoming content |
+| Live Fact-Check | 3 min | Verify live transcript claims |
+| Audience Intelligence | 5 min | Retention curve updates |
+| AI Production Director | 1 min | Production decision cycle |
+| Brand Safety | 2 min | Ad safety re-evaluation |
+| Carbon Intelligence | 30 min | ESG metric updates |
 
 ### Event System
 
@@ -324,13 +489,13 @@ Events trigger automatic agent execution:
 
 | Event | Triggered By | Triggers Agents |
 |-------|--------------|-----------------|
-| `NEW_CONTENT` | File upload | Caption, Clip, Compliance, Archive |
-| `CAPTION_COMPLETE` | Caption Agent | Localization, Social |
+| `NEW_CONTENT` | File upload | Caption, Clip, Compliance, Archive, Deepfake, Brand Safety, Audience |
+| `CAPTION_COMPLETE` | Caption Agent | Localization, Social, Live Fact-Check |
 | `CLIP_DETECTED` | Clip Agent | Social Publishing |
 | `COMPLIANCE_ALERT` | Compliance Agent | Notification system |
 | `TRENDING_SPIKE` | Trending Agent | Social, Archive |
 | `LICENSE_EXPIRING` | Rights Agent | Alert system |
-| `BREAKING_NEWS` | Trending Agent | Social, Trending |
+| `BREAKING_NEWS` | Trending Agent | AI Production Director, Live Fact-Check |
 
 ### Task Queue
 
@@ -500,17 +665,25 @@ MediaAgentIQ/
 ├── requirements.txt          # Python dependencies
 ├── .env.example              # Environment template
 │
-├── agents/                   # AI Agent Implementations
-│   ├── __init__.py          # Exports all agents
-│   ├── base_agent.py        # Dual-mode base class
-│   ├── caption_agent.py     # Transcription + QA
-│   ├── clip_agent.py        # Viral detection
-│   ├── compliance_agent.py  # FCC monitoring
-│   ├── archive_agent.py     # MAM search
-│   ├── social_publishing_agent.py  # Social posts
-│   ├── localization_agent.py       # Translation + dubbing
-│   ├── rights_agent.py      # License management
-│   └── trending_agent.py    # Trend monitoring
+├── agents/                            # AI Agent Implementations (14 total)
+│   ├── __init__.py                   # Exports all 14 agents + AGENTS registry
+│   ├── base_agent.py                 # Dual-mode base class
+│   │   — Original 8 —
+│   ├── caption_agent.py              # Transcription + QA
+│   ├── clip_agent.py                 # Viral detection
+│   ├── compliance_agent.py           # FCC monitoring
+│   ├── archive_agent.py              # MAM search
+│   ├── social_publishing_agent.py    # Social posts
+│   ├── localization_agent.py         # Translation + dubbing
+│   ├── rights_agent.py               # License management
+│   ├── trending_agent.py             # Trend monitoring
+│   │   — Future-Ready 6 —
+│   ├── deepfake_detection_agent.py   # C2PA forensic AI detection
+│   ├── live_fact_check_agent.py      # 8-database real-time verification
+│   ├── audience_intelligence_agent.py# Retention curve prediction
+│   ├── ai_production_director_agent.py # Autonomous broadcast production
+│   ├── brand_safety_agent.py         # GARM contextual ad scoring
+│   └── carbon_intelligence_agent.py  # GHG Protocol ESG reporting
 │
 ├── services/                 # AI Service Wrappers
 │   ├── __init__.py
@@ -661,7 +834,19 @@ services:
 
 ## 📈 Changelog
 
-### v2.0.0 (Latest)
+### v3.0.0 (Latest) — Future-Ready Edition
+- ✅ DeepfakeDetectionAgent - 3-layer C2PA forensic AI synthetic media detection
+- ✅ LiveFactCheckAgent - Real-time claim verification across 8 fact databases
+- ✅ AudienceIntelligenceAgent - Second-by-second viewer retention prediction
+- ✅ AIProductionDirectorAgent - Autonomous camera/lower-thirds/rundown AI
+- ✅ BrandSafetyAgent - GARM-standard real-time contextual ad safety scoring
+- ✅ CarbonIntelligenceAgent - GHG Protocol Scope 1/2/3 + GRI 305 ESG reporting
+- ✅ Extended orchestrator: 6 new AgentType values, event subscriptions, scheduled jobs
+- ✅ Extended settings.py: 20+ new typed config keys
+- ✅ Updated Streamlit UI: 6 new interactive agent pages (v3.0.0)
+- ✅ All 14 agents verified working in demo mode
+
+### v2.0.0
 - ✅ Autonomous Agent Orchestrator
 - ✅ All-in-One Workflow
 - ✅ Integration Showcase
@@ -670,7 +855,7 @@ services:
 - ✅ Service layer (Whisper, Vision, Dubbing)
 - ✅ MAM integration (Avid)
 - ✅ NMOS integration (IS-04/IS-05)
-- ✅ Enhanced Streamlit UI (2400+ lines)
+- ✅ Enhanced Streamlit UI
 
 ### v1.0.0
 - Initial release
@@ -686,6 +871,6 @@ MIT License - Built for Media & Broadcast professionals
 
 ---
 
-**MediaAgentIQ v2.0.0** | Enterprise AI Platform for Media Operations
+**MediaAgentIQ v3.0.0** | Enterprise AI Platform for Media Operations — Future-Ready Edition
 
 *Last Updated: February 2026*
