@@ -363,6 +363,278 @@ SAMPLE_ARCHIVE_METADATA = {
     "best_platforms": ["TikTok", "Instagram Reels", "YouTube Shorts"]
 }
 
+# ============== TRENDING AGENT - BREAKING NEWS ==============
+# Entertainment-themed breaking/trending news connected to demo video
+SAMPLE_BREAKING_NEWS = [
+    {
+        "headline": "🔥 TRENDING: Entertainment Showcase Clip Hits 5M Views in 24 Hours",
+        "summary": "The 15-second high-energy performance video has exploded across TikTok, Instagram Reels and YouTube Shorts. Engagement rates 3x above platform benchmarks.",
+        "source": "Social Media Analytics / TikTok Trends",
+        "time": "Just now",
+        "urgency": "high",
+        "action": "Boost organic reach immediately. Create extended version for YouTube. Capitalize on trending window.",
+        "confidence": 0.96
+    },
+    {
+        "headline": "🎵 Grammy Awards: Short-Form Entertainment Content Dominates Social",
+        "summary": "Post-Grammy announcement: entertainment and performance content trending across all demographics. Brands reporting 2.4x higher engagement on entertainment clips.",
+        "source": "AP Entertainment / Grammy.com",
+        "time": "12 min ago",
+        "urgency": "medium",
+        "action": "Align entertainment content release with Grammy coverage window for maximum reach.",
+        "confidence": 0.89
+    },
+]
+
+# ============== DEEPFAKE DETECTION AGENT DATA ==============
+# Results for Entertainment Showcase demo video - AUTHENTIC original content
+SAMPLE_DEEPFAKE_RESULT = {
+    "risk_score": 0.062,
+    "verdict": "AUTHENTIC",
+    "broadcast_safe": True,
+    "audio_authenticity": 0.971,
+    "video_authenticity": 0.964,
+    "metadata_trust": 0.989,
+    "audio_findings": [
+        {"type": "Spectral smoothness", "detail": "Natural frequency transitions — consistent with live recording", "severity": "none"},
+        {"type": "Prosody pattern", "detail": "Natural pitch variation and rhythm consistent with live performance", "severity": "none"},
+        {"type": "Breath sounds / room tone", "detail": "Natural room acoustics and crowd ambience detected", "severity": "none"},
+        {"type": "GAN fingerprint scan", "detail": "No generative model artifacts detected in audio spectrum", "severity": "none"},
+    ],
+    "video_findings": {
+        "temporal_consistency": 0.982,
+        "facial_boundary_artifacts": "None detected",
+        "eye_blink_frequency": "18.2 blinks/min (Normal: 15-20/min)",
+        "gaze_naturalness": 0.961,
+        "motion_flow": "Natural motion vectors — no deepfake blending seams",
+    },
+    "metadata_findings": {
+        "camera_model": "Sony FX6 (Professional Cinema Camera)",
+        "creation_timestamp": "Consistent — no tampering detected",
+        "gps_data": "Present — venue location embedded",
+        "editing_traces": "Adobe Premiere Pro — standard post-production edit",
+        "codec_signature": "Valid H.264/AVC — professional encode",
+        "c2pa_manifest": "Partial C2PA chain present — creation event recorded",
+    },
+    "provenance": [
+        "🎥 Source: Professional production camera capture",
+        "📁 Original file: Unbroken metadata chain from camera to edit suite",
+        "🔍 Reverse image search: 0 prior uses found — original content confirmed",
+        "🔗 C2PA chain: Partial — creation event recorded, export chain present",
+        "📋 Edit history: Standard color grade + 1 export pass detected",
+    ],
+    "recommendations": [
+        ("✅ Cleared", "Content is authentic — cleared for broadcast and all digital distribution"),
+        ("📋 Recommended", "Complete full C2PA chain by adding distribution manifest on export"),
+        ("⚙️ Best Practice", "Embed content authenticity credentials (CAI) before social distribution"),
+        ("🔔 Policy", "Archive original camera file for chain-of-custody record"),
+    ]
+}
+
+# ============== LIVE FACT-CHECK AGENT DATA ==============
+# Claims extracted from / about the entertainment video content
+SAMPLE_FACT_CHECK_CLAIMS = [
+    {
+        "claim": "High-energy performance content with live crowd attendance",
+        "verdict": "VERIFIED",
+        "color": "#22c55e",
+        "icon": "✅",
+        "confidence": 0.94,
+        "source": "Visual & Audio Analysis",
+        "note": "Crowd ambience, energy levels and venue acoustics confirmed via audio fingerprint"
+    },
+    {
+        "claim": "Music is original composition — not a cover",
+        "verdict": "UNVERIFIED",
+        "color": "#94a3b8",
+        "icon": "❓",
+        "confidence": 0.61,
+        "source": "Music rights databases (ASCAP / BMI)",
+        "note": "Audio fingerprint not matched to existing registered tracks — likely original, but licensing confirmation recommended"
+    },
+    {
+        "claim": "Content suitable for all audiences (G-rated)",
+        "verdict": "TRUE",
+        "color": "#22c55e",
+        "icon": "✅",
+        "confidence": 0.99,
+        "source": "AI Content Safety Scan",
+        "note": "No mature content, violence, hate speech or inappropriate material detected. Safe for all audiences."
+    },
+    {
+        "claim": "Performance captured in 4K / broadcast quality",
+        "verdict": "MOSTLY TRUE",
+        "color": "#22c55e",
+        "icon": "✔️",
+        "confidence": 0.88,
+        "source": "Technical metadata analysis",
+        "note": "Video encoded at 1080p HD — broadcast quality confirmed. Source camera capable of 4K but this file at 1080p."
+    },
+    {
+        "claim": "15-second clip format optimal for viral social media",
+        "verdict": "TRUE",
+        "color": "#22c55e",
+        "icon": "✅",
+        "confidence": 0.97,
+        "source": "TikTok / Instagram Reels platform data (2025)",
+        "note": "Platform analytics confirm 12-20 second clips achieve highest completion rates and share velocity"
+    },
+]
+
+# ============== AUDIENCE INTELLIGENCE AGENT DATA ==============
+# Retention and audience data for a 15-second entertainment clip
+SAMPLE_AUDIENCE_DATA = {
+    "content_type": "entertainment",
+    "current_viewers": 847000,
+    "viewer_trend": "+18K/min",
+    "retention_risk": 12,
+    "predicted_peak": 1240000,
+    "peak_in_min": 6,
+    "retention_curve": {
+        "seconds": [0, 2, 4, 6, 8, 10, 12, 14, 15],
+        "values":  [100, 98, 96, 99, 97, 94, 91, 88, 85],
+        "note": "Spike at 6-8s = beat drop moment — strong viewer hook"
+    },
+    "drop_risks": [
+        {
+            "second": 13,
+            "risk": "low",
+            "drop_pct": 3.1,
+            "cause": "Natural content conclusion — fade out begins",
+            "intervention": "Loop seamlessly into extended version or related content"
+        },
+    ],
+    "demographics": {
+        "18-24": 42,
+        "25-34": 31,
+        "35-44": 15,
+        "45-54": 8,
+        "55-64": 3,
+        "65+": 1,
+    },
+    "competitors": {
+        "YouTube": 22,
+        "TikTok": 18,
+        "Instagram": 14,
+        "Netflix/Streaming": 11,
+    },
+    "live_metrics": {
+        "social_chatter": 6840,
+        "second_screen_pct": 38,
+        "sentiment_score": 0.84,
+    },
+}
+
+# ============== AI PRODUCTION DIRECTOR AGENT DATA ==============
+# Production direction for the entertainment showcase video
+SAMPLE_PRODUCTION_DATA = {
+    "shots": [
+        {"shot": 1, "camera": "Camera A", "type": "Wide", "use": "Opening establishing shot — performer + stage", "duration": "2s", "confidence": 0.96},
+        {"shot": 2, "camera": "Camera B", "type": "Medium Close-Up", "use": "Artist face — audience connection", "duration": "2.5s", "confidence": 0.93},
+        {"shot": 3, "camera": "Camera C", "type": "Action Close-Up", "use": "Hands/instrument — beat drop emphasis", "duration": "1.5s", "confidence": 0.91},
+        {"shot": 4, "camera": "Camera A", "type": "Wide + Crowd", "use": "Crowd reaction — social proof moment", "duration": "2s", "confidence": 0.88},
+        {"shot": 5, "camera": "Drone", "type": "Aerial Wide", "use": "Scale of performance — maximum impact", "duration": "3s", "confidence": 0.94},
+        {"shot": 6, "camera": "Camera B", "type": "Close-Up Finish", "use": "Climax + hold on performer for end card", "duration": "4s", "confidence": 0.97},
+    ],
+    "lower_thirds": [
+        {"line1": "ENTERTAINMENT SHOWCASE", "line2": "Live Performance 2025", "style": "Standard", "trigger": "Opening 0-3s"},
+        {"line1": "WATCH FULL PERFORMANCE", "line2": "Link in Bio / Description", "style": "CTA (Green)", "trigger": "Final 3s"},
+        {"line1": "TRENDING NOW", "line2": "#Entertainment #Viral", "style": "Ticker", "trigger": "Mid-clip 7-10s"},
+        {"line1": "🔴 LIVE CONTENT", "line2": "Authentic Performance", "style": "Live (Red)", "trigger": "Manual override"},
+    ],
+    "rundown": [
+        {"pos": 1, "slug": "ENTERTAINMENT-HOOK", "type": "Opening", "planned": "0-3s", "score": 9.4, "suggestion": "✅ Perfect hook — keep as open"},
+        {"pos": 2, "slug": "BEAT-DROP", "type": "Peak Energy", "planned": "5-8s", "score": 9.8, "suggestion": "🚀 Highest viral potential — do NOT cut here"},
+        {"pos": 3, "slug": "CROWD-REACTION", "type": "Social Proof", "planned": "8-11s", "score": 8.9, "suggestion": "✅ Strong — crowd validates performance"},
+        {"pos": 4, "slug": "CLIMAX-FINISH", "type": "Outro", "planned": "12-15s", "score": 9.1, "suggestion": "✅ Satisfying close — loop-ready ending"},
+    ],
+    "break_strategy": [
+        {"break": "N/A", "planned": "No breaks", "ai_suggest": "No breaks — 15s clip plays complete", "reason": "Content is 15 seconds — interrupting would destroy engagement", "return_rate": "N/A"},
+    ],
+    "audio_recommendations": [
+        {"source": "Music track (primary)", "level": "-14.0 LUFS", "status": "✅ Broadcast loudness compliant (CALM Act)"},
+        {"source": "Crowd ambience", "level": "-24.0 dBFS", "status": "✅ Balanced — adds authenticity"},
+        {"source": "Bass frequencies", "level": "Peak at -6dBFS", "status": "⚠️ Check low-freq limiting for broadcast"},
+    ],
+    "technical": {
+        "main_feed_mbps": 18.4,
+        "stream_latency_ms": 85,
+        "graphics_latency_ms": 18,
+        "loudness_lufs": -14.0,
+        "stream_health": "Excellent",
+    },
+}
+
+# ============== BRAND SAFETY AGENT DATA ==============
+# Brand safety scoring for the entertainment video
+SAMPLE_BRAND_SAFETY_DATA = {
+    "overall_score": 96,
+    "level": "Premium Safe",
+    "level_color": "#22c55e",
+    "garm_flags": [
+        ("Adult Content", "none", "✅"),
+        ("Violence/Gore", "none", "✅"),
+        ("Hate Speech", "none", "✅"),
+        ("Profanity", "none", "✅"),
+        ("Controversial Topics", "none", "✅"),
+        ("Illegal Content", "none", "✅"),
+        ("Misinformation", "none", "✅"),
+        ("Dangerous Activities", "none", "✅"),
+    ],
+    "advertisers": [
+        {"name": "Luxury Auto", "min_score": 80, "status": "✅ Premium Safe", "cpm": "$78.40"},
+        {"name": "Pharmaceutical", "min_score": 75, "status": "✅ Premium Safe", "cpm": "$65.20"},
+        {"name": "Financial Services", "min_score": 70, "status": "✅ Premium Safe", "cpm": "$58.80"},
+        {"name": "Family Products", "min_score": 85, "status": "✅ Premium Safe", "cpm": "$52.30"},
+        {"name": "Fast Food", "min_score": 60, "status": "✅ Premium Safe", "cpm": "$38.60"},
+        {"name": "Consumer Tech", "min_score": 65, "status": "✅ Premium Safe", "cpm": "$61.10"},
+    ],
+    "current_cpm": 42.50,
+    "optimized_cpm": 61.80,
+    "cpm_uplift_pct": 45.4,
+    "revenue_at_risk": 0,
+    "premium_opportunity": 28400,
+    "active_advertisers": 42,
+    "blocked_advertisers": 0,
+    "premium_windows_today": 8,
+}
+
+# ============== CARBON INTELLIGENCE AGENT DATA ==============
+# Carbon footprint for producing + distributing the 15-second entertainment clip
+SAMPLE_CARBON_DATA = {
+    "broadcast_type": "entertainment_clip",
+    "duration_seconds": 15,
+    "total_co2e_kg": 12.4,
+    "scope1_kg": 1.8,   # Direct — production equipment fuel
+    "scope2_kg": 6.9,   # Indirect — electricity (studio, encode, CDN)
+    "scope3_kg": 3.7,   # Value chain — remote crew travel, viewer devices
+    "renewable_pct": 34,
+    "grid_region": "US_Northeast",
+    "esg_score": 81,
+    "carbon_intensity_per_min": 49.6,   # kg CO2e/min
+    "vs_industry_avg_pct": -28,         # 28% below industry average
+    "optimization_potential_pct": 18,
+    "energy_kwh": 28.4,
+    "equipment_breakdown": {
+        "Production cameras (x3)": 1.2,
+        "Studio lighting rig": 3.8,
+        "Encoding / transcoding": 2.1,
+        "CDN distribution (global)": 3.6,
+        "Social platform hosting": 1.7,
+    },
+    "social_distribution_co2e": 4.8,   # Per 1M views
+    "offset_recommended_kg": 5.0,
+    "offset_cost_usd": 2.50,
+    "green_schedule_saving_pct": 12,
+    "esg_report_standards": ["GRI 305", "TCFD", "SBTi"],
+    "renewable_options": [
+        {"option": "Switch CDN to renewable-powered region (EU-West)", "saving_pct": 8, "cost": "$0"},
+        {"option": "Carbon offset via verified project", "saving_pct": 40, "cost": "$2.50"},
+        {"option": "Green production equipment upgrade", "saving_pct": 22, "cost": "$12K capex"},
+    ],
+}
+
+
 def get_demo_video_path():
     """Get the full path to the demo sample video."""
     base_dir = Path(__file__).parent

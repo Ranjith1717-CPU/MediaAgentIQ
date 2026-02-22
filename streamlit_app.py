@@ -16,7 +16,11 @@ try:
         DEMO_SAMPLE_VIDEO,
         SAMPLE_CAPTIONS, SAMPLE_QA_ISSUES, SAMPLE_VIRAL_MOMENTS,
         SAMPLE_COMPLIANCE_ISSUES, SAMPLE_SOCIAL_POSTS, SAMPLE_TRANSLATIONS,
-        SAMPLE_LICENSES, SAMPLE_TRENDS, SAMPLE_ARCHIVE_METADATA,
+        SAMPLE_LICENSES, SAMPLE_VIOLATIONS, SAMPLE_TRENDS, SAMPLE_ARCHIVE_METADATA,
+        SAMPLE_BREAKING_NEWS,
+        SAMPLE_DEEPFAKE_RESULT, SAMPLE_FACT_CHECK_CLAIMS,
+        SAMPLE_AUDIENCE_DATA, SAMPLE_PRODUCTION_DATA,
+        SAMPLE_BRAND_SAFETY_DATA, SAMPLE_CARBON_DATA,
         get_demo_video_path, is_demo_video_available
     )
     DEMO_SAMPLE_AVAILABLE = is_demo_video_available()
@@ -193,6 +197,7 @@ DEMO_VIRAL_MOMENTS = [
 
 # Archive Agent - Demo Archive Content
 DEMO_ARCHIVE = [
+    {"id": 0, "title": "Entertainment Showcase - Dynamic Performance (DEMO)", "duration": "0:15", "date": "2025-02-22", "speaker": "Performance Artist", "tags": "entertainment, music, performance, viral, trending, high-energy", "description": "High-energy 15-second entertainment clip — viral potential score 92%. Indexed from demo_sample_video.mp4", "format": "HD 1080p", "size": "1.5 GB"},
     {"id": 1, "title": "Presidential Debate 2024 - Full Coverage", "duration": "2:15:00", "date": "2024-09-10", "speaker": "Multiple", "tags": "politics, election, debate", "description": "Complete coverage of the presidential debate including pre and post analysis", "format": "HD 1080p", "size": "4.2 GB"},
     {"id": 2, "title": "Hurricane Milton - 72 Hour Coverage Compilation", "duration": "4:30:00", "date": "2024-10-09", "speaker": "Weather Team", "tags": "weather, hurricane, florida, emergency", "description": "Complete storm coverage from formation to landfall", "format": "HD 1080p", "size": "8.1 GB"},
     {"id": 3, "title": "Super Bowl LVIII Halftime Show - Usher", "duration": "00:14:30", "date": "2024-02-11", "speaker": "Commentary Team", "tags": "sports, superbowl, halftime, entertainment", "description": "Full halftime performance with commentary", "format": "4K UHD", "size": "2.8 GB"},
@@ -679,6 +684,27 @@ def simulate_realtime_processing(steps, container):
     status_text.markdown("**✅ Processing complete!**")
     time.sleep(0.3)
     return True
+
+
+def show_demo_video_player(label="🎬 Demo Video — Entertainment Showcase (15s)", auto_expand=True):
+    """Show the demo video player inline on any agent page."""
+    if not DEMO_SAMPLE_AVAILABLE:
+        return
+    video_path = get_demo_video_path()
+    if not video_path.exists():
+        return
+    with st.expander(label, expanded=auto_expand):
+        col1, col2 = st.columns([2, 1])
+        with col1:
+            st.video(str(video_path))
+        with col2:
+            st.markdown(f"**{DEMO_SAMPLE_VIDEO['title']}**")
+            st.caption(f"⏱ Duration: {DEMO_SAMPLE_VIDEO['duration']}")
+            st.caption(f"📐 Resolution: {DEMO_SAMPLE_VIDEO['resolution']}")
+            st.caption(f"🎞 Format: {DEMO_SAMPLE_VIDEO['format']}")
+            st.caption(f"📦 Size: {DEMO_SAMPLE_VIDEO['size_mb']} MB")
+            st.caption(f"🎭 Type: {DEMO_SAMPLE_VIDEO['content_type']}")
+            st.success("✅ Agent analyzing this video")
 
 
 # ============== Sidebar ==============
@@ -1404,6 +1430,7 @@ elif page == "🚀 All-in-One Workflow":
 elif page == "Caption Agent":
     st.title("Caption Agent")
     st.caption("AI-Powered Transcription with Real-time QA | Speaker Diarization | Multi-format Export")
+    show_demo_video_player()
 
     # Capabilities showcase
     with st.expander("**Agent Capabilities** - Click to expand", expanded=False):
@@ -1610,6 +1637,7 @@ elif page == "Caption Agent":
 elif page == "Clip Agent":
     st.title("Clip Agent")
     st.caption("AI-Powered Viral Moment Detection | Emotion Analysis | Multi-Platform Optimization")
+    show_demo_video_player()
 
     # Capabilities showcase
     with st.expander("**Agent Capabilities** - Click to expand", expanded=False):
@@ -1759,6 +1787,7 @@ elif page == "Clip Agent":
 elif page == "Archive Agent":
     st.title("Archive Agent")
     st.caption("Natural Language Search | AI-Powered Tagging | MAM Integration")
+    show_demo_video_player()
 
     # Capabilities showcase
     with st.expander("**Agent Capabilities** - Click to expand", expanded=False):
@@ -1864,6 +1893,7 @@ elif page == "Archive Agent":
 elif page == "Compliance Agent":
     st.title("Compliance Agent")
     st.caption("24/7 FCC Compliance Monitoring | Real-time Violation Detection | Avoid $500K+ Fines")
+    show_demo_video_player()
 
     # Capabilities showcase
     with st.expander("**Agent Capabilities** - Click to expand", expanded=False):
@@ -1908,7 +1938,13 @@ elif page == "Compliance Agent":
     with col1:
         st.subheader("Scan Content")
         uploaded = st.file_uploader("Upload broadcast for compliance scanning", type=["mp4", "mov", "wav", "mp3"])
-        demo_mode = st.checkbox("Use demo: Morning broadcast with compliance issues", value=True)
+        compliance_demo_options = ["Upload your own file"]
+        if DEMO_SAMPLE_AVAILABLE:
+            compliance_demo_options.insert(0, f"🎬 Sample Video: {DEMO_SAMPLE_VIDEO['title']} ({DEMO_SAMPLE_VIDEO['duration']})")
+        compliance_demo_options.append("📺 News Broadcast Demo (4 hrs)")
+        compliance_demo_sel = st.radio("**Or use demo content:**", compliance_demo_options, index=0 if DEMO_SAMPLE_AVAILABLE else len(compliance_demo_options)-1, key="compliance_demo_sel")
+        use_sample_compliance = DEMO_SAMPLE_AVAILABLE and "Sample Video" in compliance_demo_sel
+        demo_mode = "News Broadcast" in compliance_demo_sel
 
         if st.button("Run Full Compliance Scan", type="primary", use_container_width=True):
             processing_container = st.container()
@@ -1938,14 +1974,19 @@ elif page == "Compliance Agent":
     if st.session_state.get("compliance_done"):
         st.divider()
 
-        # Risk Score Dashboard
-        risk_score = 42  # Lower is better
+        # Select data based on demo type
+        compliance_data = SAMPLE_COMPLIANCE_ISSUES if use_sample_compliance else DEMO_COMPLIANCE_ISSUES
+        critical_count = sum(1 for i in compliance_data if i["severity"] == "critical")
+        high_count = sum(1 for i in compliance_data if i["severity"] == "high")
+        medium_count = sum(1 for i in compliance_data if i["severity"] == "medium")
+        risk_score = 8 if use_sample_compliance else 42  # Entertainment video is much safer
+
         col1, col2, col3, col4, col5 = st.columns(5)
-        col1.metric("Risk Score", f"{risk_score}/100", "ELEVATED", delta_color="inverse")
-        col2.metric("Critical Issues", "2", "Immediate action")
-        col3.metric("High Issues", "1", "Review needed")
-        col4.metric("Medium Issues", "1", "Monitor")
-        col5.metric("Potential Fines", "$85K - $1.1M", "If not addressed")
+        col1.metric("Risk Score", f"{risk_score}/100", "CLEAR" if risk_score < 20 else "ELEVATED", delta_color="inverse" if risk_score > 20 else "normal")
+        col2.metric("Critical Issues", str(critical_count), "None" if critical_count == 0 else "Immediate action")
+        col3.metric("High Issues", str(high_count), "None" if high_count == 0 else "Review needed")
+        col4.metric("Medium Issues", str(medium_count), "Monitor" if medium_count > 0 else "None")
+        col5.metric("Potential Fines", "$0" if use_sample_compliance else "$85K - $1.1M", "Compliant" if use_sample_compliance else "If not addressed")
 
         st.divider()
 
@@ -1954,10 +1995,13 @@ elif page == "Compliance Agent":
         risk_color = "#ef4444" if risk_score > 60 else "#f59e0b" if risk_score > 30 else "#22c55e"
         st.progress(risk_score / 100, f"Risk: {risk_score}%")
 
+        if use_sample_compliance:
+            st.success("✅ **Entertainment content scan complete** — Demo video (Entertainment Showcase) passes compliance checks")
+
         st.divider()
         st.subheader("Issues Detected")
 
-        for issue in DEMO_COMPLIANCE_ISSUES:
+        for issue in compliance_data:
             severity_icon = "🔴" if issue["severity"] == "critical" else "🟠" if issue["severity"] == "high" else "🟡"
             severity_color = "#ef4444" if issue["severity"] == "critical" else "#f97316" if issue["severity"] == "high" else "#f59e0b"
 
@@ -1992,6 +2036,7 @@ elif page == "Compliance Agent":
 elif page == "Social Publishing":
     st.title("Social Publishing Agent")
     st.caption("AI-Generated Platform-Optimized Content | Multi-Platform Scheduling | Analytics")
+    show_demo_video_player()
 
     # Capabilities showcase
     with st.expander("**Agent Capabilities** - Click to expand", expanded=False):
@@ -2034,7 +2079,10 @@ elif page == "Social Publishing":
     col1, col2 = st.columns([2, 1])
 
     with col1:
-        content_type = st.selectbox("Select content type", ["Breaking News - Fire Coverage", "Feel-Good Story - Dog Reunion"])
+        social_options = ["Breaking News - Fire Coverage", "Feel-Good Story - Dog Reunion"]
+        if DEMO_SAMPLE_AVAILABLE:
+            social_options.insert(0, f"🎬 Entertainment Showcase — {DEMO_SAMPLE_VIDEO['title']}")
+        content_type = st.selectbox("Select content type", social_options, index=0)
 
         target_platforms = st.multiselect(
             "Target platforms",
@@ -2061,10 +2109,18 @@ elif page == "Social Publishing":
             ]
             simulate_realtime_processing(steps, processing_container)
         st.session_state.social_done = True
-        st.session_state.social_type = "breaking_news" if "Breaking" in content_type else "feel_good"
+        if "Entertainment" in content_type:
+            st.session_state.social_type = "entertainment"
+        elif "Breaking" in content_type:
+            st.session_state.social_type = "breaking_news"
+        else:
+            st.session_state.social_type = "feel_good"
 
     if st.session_state.get("social_done"):
-        posts = DEMO_SOCIAL_POSTS[st.session_state.social_type]
+        if st.session_state.social_type == "entertainment":
+            posts = SAMPLE_SOCIAL_POSTS.get("product_launch", [])
+        else:
+            posts = DEMO_SOCIAL_POSTS[st.session_state.social_type]
         filtered_posts = [p for p in posts if p['platform'] in target_platforms]
 
         st.divider()
@@ -2117,6 +2173,7 @@ elif page == "Social Publishing":
 elif page == "Localization":
     st.title("Localization Agent")
     st.caption("AI Translation | Voice Dubbing | Cultural Adaptation | Global Distribution")
+    show_demo_video_player()
 
     # Capabilities showcase
     with st.expander("**Agent Capabilities** - Click to expand", expanded=False):
@@ -2160,13 +2217,17 @@ elif page == "Localization":
 
     with col1:
         st.subheader("Source Content")
-        st.info("**Demo:** Morning News Broadcast (1:22) - English (US)")
+        if DEMO_SAMPLE_AVAILABLE:
+            st.info(f"**Demo:** {DEMO_SAMPLE_VIDEO['title']} ({DEMO_SAMPLE_VIDEO['duration']}) - English (US)")
+        else:
+            st.info("**Demo:** Morning News Broadcast (1:22) - English (US)")
 
+        local_translations = SAMPLE_TRANSLATIONS if DEMO_SAMPLE_AVAILABLE else DEMO_TRANSLATIONS
         languages = st.multiselect(
             "Select target languages",
-            list(DEMO_TRANSLATIONS.keys()),
+            list(local_translations.keys()),
             default=["es", "fr", "de", "zh"],
-            format_func=lambda x: f"{DEMO_TRANSLATIONS[x]['flag']} {DEMO_TRANSLATIONS[x]['name']}"
+            format_func=lambda x: f"{local_translations[x]['flag']} {local_translations[x]['name']}"
         )
 
     with col2:
@@ -2200,14 +2261,17 @@ elif page == "Localization":
         # Summary metrics
         col1, col2, col3, col4 = st.columns(4)
         col1.metric("Languages", len(st.session_state.local_langs))
-        col2.metric("Avg Quality", f"{sum([DEMO_TRANSLATIONS[l]['quality_score'] for l in st.session_state.local_langs]) / len(st.session_state.local_langs):.0f}%")
+        _loc_trans = SAMPLE_TRANSLATIONS if DEMO_SAMPLE_AVAILABLE else DEMO_TRANSLATIONS
+        col2.metric("Avg Quality", f"{sum([_loc_trans[l]['quality_score'] for l in st.session_state.local_langs if l in _loc_trans]) / max(1, len([l for l in st.session_state.local_langs if l in _loc_trans])):.0f}%")
         col3.metric("Files Generated", len(st.session_state.local_langs) * 2)
         col4.metric("Processing Time", "2.4s")
 
         st.subheader("Localization Results")
 
         for lang in st.session_state.local_langs:
-            trans = DEMO_TRANSLATIONS[lang]
+            trans = _loc_trans.get(lang, {})
+            if not trans:
+                continue
             quality_color = "#22c55e" if trans['quality_score'] >= 95 else "#f59e0b" if trans['quality_score'] >= 90 else "#ef4444"
 
             with st.expander(f"{trans['flag']} **{trans['name']}** — Quality: {trans['quality_score']}%", expanded=True):
@@ -2245,6 +2309,7 @@ elif page == "Localization":
 elif page == "Rights Agent":
     st.title("Rights Agent")
     st.caption("License Tracking | Violation Detection | DMCA Automation | Legal Protection")
+    show_demo_video_player()
 
     # Capabilities showcase
     with st.expander("**Agent Capabilities** - Click to expand", expanded=False):
@@ -2301,13 +2366,18 @@ elif page == "Rights Agent":
     if st.session_state.get("rights_done"):
         st.divider()
 
+        # Use demo video data when available
+        rights_licenses = SAMPLE_LICENSES if DEMO_SAMPLE_AVAILABLE else DEMO_LICENSES
+        rights_violations = SAMPLE_VIOLATIONS if DEMO_SAMPLE_AVAILABLE else DEMO_VIOLATIONS
+        expiring_count = sum(1 for l in rights_licenses if l["status"] == "expiring_soon")
+
         # Dashboard metrics
         col1, col2, col3, col4, col5 = st.columns(5)
-        col1.metric("Active Licenses", len(DEMO_LICENSES))
-        col2.metric("Expiring Soon", "2", "Within 30 days", delta_color="inverse")
-        col3.metric("Violations Found", len(DEMO_VIOLATIONS))
-        col4.metric("Annual Spend", "$2.66M")
-        col5.metric("Compliance Score", "97%")
+        col1.metric("Active Licenses", len(rights_licenses))
+        col2.metric("Expiring Soon", str(expiring_count), f"Within 30 days" if expiring_count > 0 else "All clear", delta_color="inverse" if expiring_count > 0 else "normal")
+        col3.metric("Violations Found", len(rights_violations))
+        col4.metric("Annual Spend", "$499" if DEMO_SAMPLE_AVAILABLE else "$2.66M")
+        col5.metric("Compliance Score", "100%" if DEMO_SAMPLE_AVAILABLE else "97%")
 
         st.divider()
 
@@ -2318,20 +2388,25 @@ elif page == "Rights Agent":
             st.subheader("Urgent Alerts")
 
             # Expiring soon alerts
-            for lic in [l for l in DEMO_LICENSES if l["status"] == "expiring_soon"]:
-                st.warning(f"""
-                **License Expiring: {lic['title']}**
+            expiring_list = [l for l in rights_licenses if l["status"] == "expiring_soon"]
+            if expiring_list:
+                for lic in expiring_list:
+                    st.warning(f"""
+                    **License Expiring: {lic['title']}**
 
-                Expires in **{lic['days_remaining']} days** ({lic['end_date']})
+                    Expires in **{lic['days_remaining']} days** ({lic['end_date']})
 
-                Licensor: {lic['licensor']} | Cost: {lic['cost']}
+                    Licensor: {lic['licensor']} | Cost: {lic['cost']}
 
-                **Action Required:** Initiate renewal negotiations immediately
-                """)
+                    **Action Required:** Initiate renewal negotiations immediately
+                    """)
+            else:
+                st.success("✅ No licenses expiring in the next 30 days")
 
             # Violation alerts
-            for v in DEMO_VIOLATIONS:
-                if v['status'] in ['Under Review', 'DMCA Filed']:
+            active_violations = [v for v in rights_violations if v['status'] in ['Under Review', 'DMCA Filed']]
+            if active_violations:
+                for v in active_violations:
                     st.error(f"""
                     **Violation Detected: {v['content']}**
 
@@ -2339,11 +2414,13 @@ elif page == "Rights Agent":
 
                     Estimated Damages: {v['estimated_damages']}
                     """)
+            else:
+                st.success("✅ No active violations detected")
 
         with tab2:
             st.subheader("License Portfolio")
 
-            for lic in DEMO_LICENSES:
+            for lic in rights_licenses:
                 status_color = "🟢" if lic["status"] == "active" and lic["days_remaining"] > 30 else "🟡" if lic["status"] == "expiring_soon" else "🔴"
 
                 with st.expander(f"{status_color} **{lic['title']}** — {lic['days_remaining']} days remaining"):
@@ -2374,27 +2451,30 @@ elif page == "Rights Agent":
         with tab3:
             st.subheader("Detected Violations")
 
-            for v in DEMO_VIOLATIONS:
-                status_color = {"DMCA Filed": "#f59e0b", "Under Review": "#3b82f6", "Takedown Requested": "#ef4444"}.get(v['status'], "#94a3b8")
+            if not rights_violations:
+                st.success("✅ No violations detected for this content")
+            else:
+                for v in rights_violations:
+                    status_color = {"DMCA Filed": "#f59e0b", "Under Review": "#3b82f6", "Takedown Requested": "#ef4444"}.get(v['status'], "#94a3b8")
 
-                with st.container():
-                    col1, col2, col3 = st.columns([2, 1, 1])
+                    with st.container():
+                        col1, col2, col3 = st.columns([2, 1, 1])
 
-                    with col1:
-                        st.markdown(f"**{v['content']}**")
-                        st.markdown(f"Platform: **{v['platform']}** | Channel: {v['channel']}")
-                        st.caption(f"Detected: {v['detected']} | URL: {v['url']}")
+                        with col1:
+                            st.markdown(f"**{v['content']}**")
+                            st.markdown(f"Platform: **{v['platform']}** | Channel: {v['channel']}")
+                            st.caption(f"Detected: {v['detected']} | URL: {v['url']}")
 
-                    with col2:
-                        st.metric("Views", v['views'])
-                        st.metric("Match Confidence", f"{v['match_confidence']:.0%}")
+                        with col2:
+                            st.metric("Views", v['views'])
+                            st.metric("Match Confidence", f"{v['match_confidence']:.0%}")
 
-                    with col3:
-                        st.markdown(f"**Status:** {v['status']}")
-                        st.markdown(f"**Est. Damages:** {v['estimated_damages']}")
-                        st.button("📝 File DMCA", key=f"dmca_{v['content']}", use_container_width=True)
+                        with col3:
+                            st.markdown(f"**Status:** {v['status']}")
+                            st.markdown(f"**Est. Damages:** {v['estimated_damages']}")
+                            st.button("📝 File DMCA", key=f"dmca_{v['content']}", use_container_width=True)
 
-                    st.divider()
+                        st.divider()
 
         with tab4:
             st.subheader("Rights Analytics")
@@ -2403,19 +2483,24 @@ elif page == "Rights Agent":
 
             with col1:
                 st.markdown("**License Cost by Type**")
-                costs = {"Sports": 2400000, "News Feeds": 180000, "Stock Media": 45000, "Music": 35000}
+                if DEMO_SAMPLE_AVAILABLE:
+                    costs = {"Original Content": 0, "Music License": 499}
+                else:
+                    costs = {"Sports": 2400000, "News Feeds": 180000, "Stock Media": 45000, "Music": 35000}
+                max_cost = max(costs.values()) if max(costs.values()) > 0 else 1
                 for license_type, cost in costs.items():
-                    st.progress(cost / 2500000, f"{license_type}: ${cost:,}")
+                    st.progress(cost / max_cost if max_cost > 0 else 0, f"{license_type}: ${cost:,}")
 
             with col2:
                 st.markdown("**Compliance by License**")
-                for lic in DEMO_LICENSES:
+                for lic in rights_licenses:
                     st.progress(lic['compliance_score'] / 100, f"{lic['title'][:25]}...: {lic['compliance_score']}%")
 
 
 elif page == "Trending Agent":
     st.title("Trending Agent")
     st.caption("Real-time Trend Monitoring | Breaking News Alerts | Story Suggestions")
+    show_demo_video_player()
 
     # Capabilities showcase
     with st.expander("**Agent Capabilities** - Click to expand", expanded=False):
@@ -2464,8 +2549,10 @@ elif page == "Trending Agent":
             st.rerun()
 
     # Breaking News Section
+    trending_breaking = SAMPLE_BREAKING_NEWS if DEMO_SAMPLE_AVAILABLE else DEMO_BREAKING
+    trending_topics = SAMPLE_TRENDS if DEMO_SAMPLE_AVAILABLE else DEMO_TRENDS
     st.subheader("Breaking News Alerts")
-    for news in DEMO_BREAKING:
+    for news in trending_breaking:
         urgency_color = "#dc2626" if news["urgency"] == "high" else "#f59e0b"
         st.markdown(f"""
         <div style="background: linear-gradient(90deg, {urgency_color}22, {urgency_color}11); border-left: 4px solid {urgency_color}; padding: 16px; border-radius: 8px; margin: 8px 0;">
@@ -2496,7 +2583,7 @@ elif page == "Trending Agent":
     with col3:
         coverage_filter = st.selectbox("Coverage Status", ["All", "Covering", "Not Covering"])
 
-    for trend in DEMO_TRENDS:
+    for trend in trending_topics:
         # Apply filters
         if category_filter != "All" and trend['category'] != category_filter:
             continue
@@ -2550,6 +2637,7 @@ elif page == "Trending Agent":
 elif page == "🔍 Deepfake Detection":
     st.title("🔍 Deepfake & Synthetic Media Detection")
     st.caption("MARKET GAP: No broadcast-integrated deepfake detection exists | 900% deepfake growth in 2025 | Real-time forensic analysis")
+    show_demo_video_player()
 
     st.markdown("""
     <div style="background: linear-gradient(135deg, #1e1b4b, #0f172a); padding: 16px; border-radius: 12px; border: 1px solid #7c3aed; margin-bottom: 16px;">
@@ -2576,8 +2664,9 @@ elif page == "🔍 Deepfake Detection":
 
     with col1:
         st.subheader("Submit Content for Forensic Scan")
+        default_input = DEMO_SAMPLE_VIDEO['filename'] if DEMO_SAMPLE_AVAILABLE else "breaking_news_interview_clip.mp4"
         content_input = st.text_area("Content path / URL / description",
-                                      value="breaking_news_interview_clip.mp4",
+                                      value=default_input,
                                       height=80)
         scan_type = st.multiselect("Detection layers",
                                    ["Audio Layer (Voice Clone)", "Video Layer (Face Swap)", "Metadata Layer (Provenance)"],
@@ -2616,26 +2705,39 @@ elif page == "🔍 Deepfake Detection":
     if st.session_state.get("deepfake_scanned"):
         st.divider()
 
-        risk_score = round(random.uniform(0.15, 0.72), 3)
-        if risk_score < 0.25:
-            verdict, color, icon = "AUTHENTIC", "green", "✅"
-            broadcast_safe = True
-        elif risk_score < 0.60:
-            verdict, color, icon = "SUSPICIOUS - REVIEW", "orange", "⚠️"
-            broadcast_safe = False
+        # Use SAMPLE_ data when demo video available, random otherwise
+        if DEMO_SAMPLE_AVAILABLE:
+            df_result = SAMPLE_DEEPFAKE_RESULT
         else:
-            verdict, color, icon = "LIKELY SYNTHETIC", "red", "🚫"
-            broadcast_safe = False
+            _rs = round(random.uniform(0.15, 0.72), 3)
+            df_result = {
+                "risk_score": _rs,
+                "verdict": "AUTHENTIC" if _rs < 0.25 else "SUSPICIOUS - REVIEW" if _rs < 0.60 else "LIKELY SYNTHETIC",
+                "broadcast_safe": _rs < 0.25,
+                "audio_authenticity": round(random.uniform(0.72, 0.96), 3),
+                "video_authenticity": round(random.uniform(0.68, 0.94), 3),
+                "metadata_trust": round(random.uniform(0.75, 0.99), 3),
+                "audio_findings": [],
+                "video_findings": {},
+                "metadata_findings": {},
+                "provenance": ["📱 Source reported: UGC Upload", "🔗 C2PA chain: Not present"],
+                "recommendations": [("🚨 Urgent", "Submit to secondary verification before broadcast")]
+            }
+
+        risk_score = df_result["risk_score"]
+        broadcast_safe = df_result["broadcast_safe"]
+        verdict = df_result["verdict"]
+        icon = "✅" if broadcast_safe else "⚠️" if risk_score < 0.60 else "🚫"
 
         col1, col2, col3, col4 = st.columns(4)
         with col1:
-            st.metric("Overall Risk Score", f"{risk_score:.3f}", f"{'Safe' if broadcast_safe else 'Not Safe'}")
+            st.metric("Overall Risk Score", f"{risk_score:.3f}", "Safe ✅" if broadcast_safe else "Not Safe ⚠️")
         with col2:
-            st.metric("Audio Authenticity", f"{round(random.uniform(0.72, 0.96), 2)}", "Spectral analysis")
+            st.metric("Audio Authenticity", f"{df_result['audio_authenticity']:.3f}", "Spectral analysis")
         with col3:
-            st.metric("Video Authenticity", f"{round(random.uniform(0.68, 0.94), 2)}", "Frame analysis")
+            st.metric("Video Authenticity", f"{df_result['video_authenticity']:.3f}", "Frame analysis")
         with col4:
-            st.metric("Metadata Trust", f"{round(random.uniform(0.75, 0.99), 2)}", "Chain of custody")
+            st.metric("Metadata Trust", f"{df_result['metadata_trust']:.3f}", "Chain of custody")
 
         st.markdown(f"""
         <div style="background: {'rgba(34,197,94,0.1)' if broadcast_safe else 'rgba(239,68,68,0.1)'};
@@ -2643,7 +2745,7 @@ elif page == "🔍 Deepfake Detection":
                     padding: 16px; border-radius: 8px; margin: 16px 0;">
             <h3 style="margin: 0; color: {'#22c55e' if broadcast_safe else '#ef4444'};">{icon} Verdict: {verdict}</h3>
             <p style="margin: 8px 0 0 0; color: #e2e8f0;">
-            {'✅ Content cleared for broadcast' if broadcast_safe else '🚫 HOLD: Route to verification team before broadcast'}
+            {'✅ Content cleared for broadcast — Demo video authenticated as original production' if broadcast_safe else '🚫 HOLD: Route to verification team before broadcast'}
             </p>
         </div>
         """, unsafe_allow_html=True)
@@ -2653,62 +2755,46 @@ elif page == "🔍 Deepfake Detection":
 
             with tabs[0]:
                 st.markdown("**Audio Layer Findings**")
-                audio_score = round(random.uniform(0.65, 0.95), 3)
-                indicators = [
-                    {"type": "Spectral smoothness", "detail": "Unnaturally smooth freq transitions at 2.1-4.8kHz", "severity": "high" if audio_score < 0.80 else "low"},
-                    {"type": "Prosody pattern", "detail": "Pitch variation consistent with natural speech" if audio_score > 0.82 else "Unnatural pitch variation", "severity": "low" if audio_score > 0.82 else "medium"},
-                    {"type": "Breath sounds", "detail": "Natural breath sounds detected" if audio_score > 0.78 else "Missing breath sounds - potential TTS", "severity": "none" if audio_score > 0.78 else "high"},
-                ]
-                for ind in indicators:
-                    sev_color = {"high": "#ef4444", "medium": "#f59e0b", "low": "#22c55e", "none": "#22c55e"}.get(ind["severity"], "#94a3b8")
-                    st.markdown(f"**{ind['type']}** — <span style='color:{sev_color}'>{ind['detail']}</span>", unsafe_allow_html=True)
+                audio_findings = df_result.get("audio_findings", [])
+                if audio_findings:
+                    for ind in audio_findings:
+                        sev_color = {"high": "#ef4444", "medium": "#f59e0b", "low": "#22c55e", "none": "#22c55e"}.get(ind.get("severity", "none"), "#94a3b8")
+                        st.markdown(f"**{ind['type']}** — <span style='color:{sev_color}'>{ind['detail']}</span>", unsafe_allow_html=True)
+                else:
+                    st.info("No audio layer findings available for this scan type.")
 
             with tabs[1]:
                 st.markdown("**Video Layer Findings**")
-                vid_score = round(random.uniform(0.70, 0.96), 3)
-                st.markdown(f"- Temporal consistency score: **{round(random.uniform(0.75, 0.98), 3)}**")
-                st.markdown(f"- Facial boundary artifacts: **{'None detected' if vid_score > 0.85 else 'Detected at frames 147-189'}**")
-                st.markdown(f"- Eye blink frequency: **{round(random.uniform(14, 22), 1)} blinks/min** (Normal: 15-20/min)")
-                st.markdown(f"- Gaze naturalness: **{round(random.uniform(0.68, 0.97), 3)}**")
+                vf = df_result.get("video_findings", {})
+                if vf:
+                    for k, v in vf.items():
+                        st.markdown(f"- **{k.replace('_', ' ').title()}**: {v}")
+                else:
+                    st.info("No video layer findings available.")
 
             with tabs[2]:
                 st.markdown("**Metadata Analysis**")
-                st.json({
-                    "camera_model": "iPhone 15 Pro" if random.random() > 0.4 else "Unknown (stripped)",
-                    "creation_timestamp": "Consistent" if random.random() > 0.35 else "⚠️ Inconsistency detected",
-                    "gps_data": "Present" if random.random() > 0.3 else "Removed",
-                    "editing_traces": "None" if random.random() > 0.4 else "Adobe Premiere markers detected",
-                    "codec_signature": "Valid H.264",
-                    "c2pa_manifest": "Not present"
-                })
+                mf = df_result.get("metadata_findings", {})
+                if mf:
+                    st.json(mf)
+                else:
+                    st.json({"camera_model": "Unknown", "c2pa_manifest": "Not present"})
 
             with tabs[3]:
                 st.markdown("**Chain of Custody**")
-                provenance_steps = [
-                    "📱 Source reported: UGC Upload",
-                    "📡 First seen: 47 min ago (Twitter @user12847)",
-                    f"🔍 Reverse image search: {random.randint(0, 8)} hits found",
-                    "🔗 C2PA chain: Not present",
-                    "📋 Edit history: 1 FFmpeg conversion detected"
-                ]
-                for step in provenance_steps:
+                for step in df_result.get("provenance", []):
                     st.markdown(f"- {step}")
 
             with tabs[4]:
                 st.markdown("**Recommendations**")
-                recs = [
-                    ("🚨 Urgent", "Submit to secondary verification (Sensity AI / Truepic) before any broadcast decision"),
-                    ("📋 Immediate", "Request original camera file with unbroken metadata chain from source"),
-                    ("⚙️ Process", "Enable C2PA (Content Authenticity Initiative) verification on all UGC ingest"),
-                    ("🔔 Policy", "Implement mandatory deepfake scan for all UGC and wire content before air"),
-                ]
-                for priority, action in recs:
+                for priority, action in df_result.get("recommendations", []):
                     st.markdown(f"**{priority}:** {action}")
 
 
 elif page == "✅ Live Fact-Check":
     st.title("✅ Live Fact-Check Agent")
     st.caption("MARKET GAP: No broadcast-integrated real-time fact-checking | Automated claim verification during live broadcasts")
+    show_demo_video_player()
 
     st.markdown("""
     <div style="background: linear-gradient(135deg, #1e1b4b, #0f172a); padding: 16px; border-radius: 12px; border: 1px solid #0891b2; margin-bottom: 16px;">
@@ -2725,12 +2811,22 @@ elif page == "✅ Live Fact-Check":
 
     with col1:
         st.subheader("Live Broadcast Transcript Input")
+        default_transcript = (
+            f"Auto-extracted captions from: {DEMO_SAMPLE_VIDEO['title']}\n\n"
+            "Music content identified as original composition — live performance recording.\n"
+            "Crowd attendance confirmed as live event — venue capacity 5,000+.\n"
+            "Content rated suitable for all audiences — no mature content detected.\n"
+            "Video quality: 1080p broadcast grade — confirmed by technical metadata.\n"
+            "Clip duration: 15 seconds — optimal format for viral social distribution."
+        ) if DEMO_SAMPLE_AVAILABLE else (
+            "The unemployment rate is currently at 3.7%, the lowest in 50 years.\n"
+            "This bill received bipartisan support with 67 votes in the Senate.\n"
+            "Climate scientists confirm global temperatures have risen 1.2 degrees since pre-industrial times.\n"
+            "The new vaccine shows 94% efficacy in Phase 3 clinical trials according to the manufacturer.\n"
+            "The city's population has grown by 18% over the last decade, making it one of the fastest growing cities."
+        )
         transcript = st.text_area("Paste live broadcast transcript or captions",
-                                   value="""The unemployment rate is currently at 3.7%, the lowest in 50 years.
-This bill received bipartisan support with 67 votes in the Senate.
-Climate scientists confirm global temperatures have risen 1.2 degrees since pre-industrial times.
-The new vaccine shows 94% efficacy in Phase 3 clinical trials according to the manufacturer.
-The city's population has grown by 18% over the last decade, making it one of the fastest growing cities.""",
+                                   value=default_transcript,
                                    height=150)
         if st.button("✅ Run Live Fact-Check", use_container_width=True, type="primary"):
             with st.spinner("Extracting claims and verifying..."):
@@ -2749,7 +2845,7 @@ The city's population has grown by 18% over the last decade, making it one of th
         st.divider()
         st.subheader("Fact-Check Results")
 
-        claims_data = [
+        claims_data = SAMPLE_FACT_CHECK_CLAIMS if DEMO_SAMPLE_AVAILABLE else [
             {"claim": "Unemployment rate at 3.7%, lowest in 50 years", "verdict": "MOSTLY TRUE", "color": "#22c55e", "icon": "✔️",
              "confidence": 0.87, "source": "Bureau of Labor Statistics", "note": "3.7% confirmed but 'lowest in 50 years' was 2019 level (3.5%)"},
             {"claim": "Bill received 67 votes in the Senate", "verdict": "UNVERIFIED", "color": "#94a3b8", "icon": "❓",
@@ -2794,6 +2890,7 @@ The city's population has grown by 18% over the last decade, making it one of th
 elif page == "📊 Audience Intelligence":
     st.title("📊 Audience Intelligence & Retention Prediction")
     st.caption("MARKET GAP: No real-time viewer drop-off prediction for live broadcast | Predict & prevent audience loss BEFORE it happens")
+    show_demo_video_player()
 
     st.markdown("""
     <div style="background: linear-gradient(135deg, #1e1b4b, #0f172a); padding: 16px; border-radius: 12px; border: 1px solid #0d9488; margin-bottom: 16px;">
@@ -2808,13 +2905,14 @@ elif page == "📊 Audience Intelligence":
 
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        content_type = st.selectbox("Content Type", ["hard_news", "breaking_news", "weather", "sports", "human_interest", "interview"])
+        content_type = st.selectbox("Content Type", ["entertainment", "hard_news", "breaking_news", "weather", "sports", "human_interest", "interview"], index=0 if DEMO_SAMPLE_AVAILABLE else 1)
     with col2:
-        st.metric("Current Viewers", f"{random.randint(250, 850):,}K", f"+{random.randint(2, 15)}K/min")
+        _aud = SAMPLE_AUDIENCE_DATA if DEMO_SAMPLE_AVAILABLE else {}
+        st.metric("Current Viewers", f"{_aud.get('current_viewers', random.randint(250000, 850000)):,}", _aud.get('viewer_trend', f"+{random.randint(2, 15)}K/min"))
     with col3:
-        st.metric("Retention Risk", f"{random.randint(18, 45)}%", "next 10 min")
+        st.metric("Retention Risk", f"{_aud.get('retention_risk', random.randint(18, 45))}%", "next 10 min")
     with col4:
-        st.metric("Predicted Peak", f"{random.randint(480, 1200):,}K", f"in {random.randint(8, 22)} min")
+        st.metric("Predicted Peak", f"{_aud.get('predicted_peak', random.randint(480000, 1200000)):,}", f"in {_aud.get('peak_in_min', random.randint(8, 22))} min")
 
     if st.button("📊 Generate Audience Prediction", use_container_width=True, type="primary"):
         with st.spinner("Generating retention curve & intervention plan..."):
@@ -2825,33 +2923,44 @@ elif page == "📊 Audience Intelligence":
     if st.session_state.get("audience_done"):
         st.divider()
 
-        # Retention curve mock data
-        minutes = list(range(0, 60, 5))
-        base_retention = {"hard_news": 72, "breaking_news": 88, "weather": 65, "sports": 78, "human_interest": 71, "interview": 69}.get(content_type, 72)
-        import math
-        retention_values = [min(100, base_retention + random.randint(-3, 8) - i * 0.8 + (5 if i == 10 else 0)) for i in range(len(minutes))]
+        aud = SAMPLE_AUDIENCE_DATA if DEMO_SAMPLE_AVAILABLE else {}
+
+        # Retention curve data
+        if DEMO_SAMPLE_AVAILABLE:
+            curve = aud["retention_curve"]
+            time_axis = curve["seconds"]
+            ret_values = curve["values"]
+            time_label = "Seconds"
+        else:
+            time_axis = list(range(0, 60, 5))
+            base_ret = {"hard_news": 72, "breaking_news": 88, "weather": 65, "sports": 78, "entertainment": 95, "human_interest": 71, "interview": 69}.get(content_type, 72)
+            ret_values = [min(100, base_ret + random.randint(-3, 8) - i * 0.8) for i in range(len(time_axis))]
+            time_label = "Minutes"
 
         col1, col2 = st.columns([2, 1])
 
         with col1:
             st.subheader("Predicted Retention Curve")
             import pandas as pd
-            chart_data = pd.DataFrame({"Minutes": minutes, "Retention %": [round(r, 1) for r in retention_values]})
-            st.line_chart(chart_data.set_index("Minutes"), color="#0d9488")
+            chart_data = pd.DataFrame({time_label: time_axis, "Retention %": [round(r, 1) for r in ret_values]})
+            st.line_chart(chart_data.set_index(time_label), color="#0d9488")
+            if DEMO_SAMPLE_AVAILABLE and aud["retention_curve"].get("note"):
+                st.caption(f"💡 {aud['retention_curve']['note']}")
 
             # Drop-off warnings
             st.subheader("⚠️ Drop-off Risk Points")
-            drop_risks = [
-                {"minute": 15, "risk": "high", "drop_pct": 8.2, "cause": "Single-topic coverage fatigue", "intervention": "Cut to field reporter for new angle"},
-                {"minute": 25, "risk": "medium", "drop_pct": 5.1, "cause": "Pre-commercial break natural exit", "intervention": "Tease exclusive story to hold viewers"},
-                {"minute": 40, "risk": "medium", "drop_pct": 4.7, "cause": "Competing story on rival channel", "intervention": "Introduce interactive viewer poll"},
-            ]
+            drop_risks = aud.get("drop_risks", [
+                {"second": 15, "risk": "high", "drop_pct": 8.2, "cause": "Single-topic coverage fatigue", "intervention": "Cut to field reporter for new angle"},
+                {"second": 25, "risk": "medium", "drop_pct": 5.1, "cause": "Pre-commercial break natural exit", "intervention": "Tease exclusive story to hold viewers"},
+            ])
+            time_key = "second" if DEMO_SAMPLE_AVAILABLE else "minute"
             for risk in drop_risks:
                 risk_color = "#ef4444" if risk["risk"] == "high" else "#f59e0b"
+                t_val = risk.get(time_key, risk.get("second", risk.get("minute", "?")))
                 st.markdown(f"""
                 <div style="background: rgba(30,41,59,0.8); padding: 12px; border-radius: 8px;
                             border-left: 4px solid {risk_color}; margin: 8px 0;">
-                    <strong>{risk['minute']}:00 - {risk['risk'].upper()} RISK: -{risk['drop_pct']}% drop predicted</strong><br>
+                    <strong>{t_val}s - {risk['risk'].upper()} RISK: -{risk['drop_pct']}% drop predicted</strong><br>
                     <span style="color: #94a3b8;">Cause: {risk['cause']}</span><br>
                     <span style="color: #5eead4;">💡 Intervention: {risk['intervention']}</span>
                 </div>
@@ -2859,24 +2968,26 @@ elif page == "📊 Audience Intelligence":
 
         with col2:
             st.subheader("Demographic Breakdown")
-            demos = {"18-34": random.randint(55, 75), "35-54": random.randint(70, 88), "55-64": random.randint(65, 82), "65+": random.randint(58, 78)}
+            demos = aud.get("demographics", {"18-34": random.randint(55, 75), "35-54": random.randint(70, 88), "55-64": random.randint(65, 82), "65+": random.randint(58, 78)})
             for demo, pct in demos.items():
-                st.progress(pct / 100, text=f"{demo}: {pct}% retention")
+                st.progress(pct / 100, text=f"Age {demo}: {pct}% of audience")
 
             st.subheader("Competitive Analysis")
-            competitors = {"CNN": random.randint(8, 25), "Fox News": random.randint(10, 30), "MSNBC": random.randint(6, 20), "Streaming": random.randint(15, 40)}
+            competitors = aud.get("competitors", {"CNN": random.randint(8, 25), "Fox News": random.randint(10, 30), "Streaming": random.randint(15, 40)})
             for ch, pct in competitors.items():
                 st.markdown(f"→ {pct}% of dropoffs go to **{ch}**")
 
             st.subheader("Live Metrics")
-            st.metric("Social Chatter", f"{random.randint(1200, 8500):,}/min")
-            st.metric("Second Screen", f"{random.randint(18, 42)}%")
-            st.metric("Sentiment", f"{round(random.uniform(0.45, 0.82), 2)}")
+            lm = aud.get("live_metrics", {})
+            st.metric("Social Chatter", f"{lm.get('social_chatter', random.randint(1200, 8500)):,}/min")
+            st.metric("Second Screen", f"{lm.get('second_screen_pct', random.randint(18, 42))}%")
+            st.metric("Sentiment", f"{lm.get('sentiment_score', round(random.uniform(0.45, 0.82), 2))}")
 
 
 elif page == "🎬 AI Production Director":
     st.title("🎬 AI Production Director")
     st.caption("MARKET GAP: No autonomous AI production director exists for live broadcast | Camera cuts, graphics, rundown optimization")
+    show_demo_video_player()
 
     st.markdown("""
     <div style="background: linear-gradient(135deg, #1e1b4b, #0f172a); padding: 16px; border-radius: 12px; border: 1px solid #d97706; margin-bottom: 16px;">
@@ -2897,31 +3008,28 @@ elif page == "🎬 AI Production Director":
             st.session_state["prod_done"] = True
 
     if st.session_state.get("prod_done"):
+        pd_data = SAMPLE_PRODUCTION_DATA if DEMO_SAMPLE_AVAILABLE else {}
         tabs = st.tabs(["📷 Camera Plan", "📝 Lower Thirds", "📋 Rundown", "⏰ Break Strategy", "🔊 Audio", "⚙️ Technical"])
 
         with tabs[0]:
-            st.subheader("Recommended Camera Shot Plan (Next 15 min)")
-            shots = [
+            st.subheader("Recommended Camera Shot Plan — Entertainment Showcase (15s)" if DEMO_SAMPLE_AVAILABLE else "Recommended Camera Shot Plan (Next 15 min)")
+            shots = pd_data.get("shots", [
                 {"shot": 1, "camera": "Camera 2", "type": "Medium", "use": "Anchor open", "duration": "8s", "confidence": 0.94},
                 {"shot": 2, "camera": "Camera 4", "type": "Wide", "use": "Studio establishing", "duration": "5s", "confidence": 0.88},
                 {"shot": 3, "camera": "Camera 1", "type": "Close-up", "use": "Anchor emphasis", "duration": "6s", "confidence": 0.91},
                 {"shot": 4, "camera": "Remote Feed", "type": "Remote Guest", "use": "Washington DC guest", "duration": "45s", "confidence": 0.96},
-                {"shot": 5, "camera": "Camera 3", "type": "OTS", "use": "Two-shot transition", "duration": "4s", "confidence": 0.85},
-                {"shot": 6, "camera": "B-Roll", "type": "B-Roll", "use": "Illustrative footage", "duration": "20s", "confidence": 0.99},
-            ]
+            ])
             import pandas as pd
             df = pd.DataFrame(shots)
             st.dataframe(df, use_container_width=True, hide_index=True)
-            st.caption(f"AI acceptance rate today: {random.randint(75, 92)}% | Human overrides: {random.randint(3, 12)}")
+            st.caption(f"AI acceptance rate today: 89% | Human overrides: 2")
 
         with tabs[1]:
             st.subheader("Auto-Generated Lower Thirds")
-            lowers = [
+            lowers = pd_data.get("lower_thirds", [
                 {"line1": "SARAH JOHNSON", "line2": "Chief Political Correspondent", "style": "Standard", "trigger": "On cut to reporter"},
                 {"line1": "BREAKING NEWS", "line2": "Economic Announcement Expected", "style": "⚡ Breaking (Red)", "trigger": "Manual"},
-                {"line1": "LIVE", "line2": "Washington D.C.", "style": "Live (Green)", "trigger": "On live remote"},
-                {"line1": f"DOW {random.randint(36000,42000):,} ▲ {round(random.uniform(0.1,2.1),2)}%", "line2": "NASDAQ S&P500", "style": "Ticker", "trigger": "Business segment"},
-            ]
+            ])
             for lt in lowers:
                 st.markdown(f"""
                 <div style="background: #1e293b; padding: 10px; border-radius: 6px; margin: 6px 0; border-left: 3px solid #d97706;">
@@ -2932,24 +3040,22 @@ elif page == "🎬 AI Production Director":
 
         with tabs[2]:
             st.subheader("Rundown Analysis & Optimization")
-            rundown = [
+            rundown = pd_data.get("rundown", [
                 {"pos": 1, "slug": "ELECTION-UPDATE", "type": "Hard News", "planned": "3:00", "score": 9.2, "suggestion": "✅ Keep as lead"},
                 {"pos": 2, "slug": "WEATHER-LEAD", "type": "Weather", "planned": "2:00", "score": 7.1, "suggestion": "⬇️ Move to pos 3"},
-                {"pos": 3, "slug": "MARKET-CLOSE", "type": "Business", "planned": "2:30", "score": 8.0, "suggestion": "⬆️ Move to pos 2 (markets closing NOW)"},
-                {"pos": 4, "slug": "SPORTS-HIGHLIGHTS", "type": "Sports", "planned": "4:00", "score": 6.8, "suggestion": "✂️ Trim to 3:00 (drop-off at 3min)"},
-                {"pos": 5, "slug": "HUMAN-INTEREST-DOG", "type": "Human Interest", "planned": "2:00", "score": 4.5, "suggestion": "✅ Keep as kicker"},
-            ]
+                {"pos": 3, "slug": "MARKET-CLOSE", "type": "Business", "planned": "2:30", "score": 8.0, "suggestion": "⬆️ Move to pos 2"},
+                {"pos": 4, "slug": "SPORTS-HIGHLIGHTS", "type": "Sports", "planned": "4:00", "score": 6.8, "suggestion": "✂️ Trim to 3:00"},
+            ])
             import pandas as pd
             df = pd.DataFrame(rundown)
             st.dataframe(df, use_container_width=True, hide_index=True)
 
         with tabs[3]:
             st.subheader("Commercial Break Optimization")
-            breaks = [
+            breaks = pd_data.get("break_strategy", [
                 {"break": 1, "planned": "10:00", "ai_suggest": "11:30", "reason": "Post story-arc completion at 11:30 creates natural exit", "return_rate": "76%"},
                 {"break": 2, "planned": "24:00", "ai_suggest": "22:45", "reason": "Competitor breaking story emerging — break early, tease exclusive", "return_rate": "71%"},
-                {"break": 3, "planned": "38:00", "ai_suggest": "38:00", "reason": "Optimal timing confirmed — no adjustment needed", "return_rate": "68%"},
-            ]
+            ])
             for b in breaks:
                 st.markdown(f"""
                 <div style="background: #1e293b; padding: 12px; border-radius: 8px; margin: 8px 0;">
@@ -2962,31 +3068,33 @@ elif page == "🎬 AI Production Director":
 
         with tabs[4]:
             st.subheader("Audio Mix Recommendations")
-            audio_sources = [
+            audio_recs = pd_data.get("audio_recommendations", [
                 {"source": "Studio anchor mic", "level": "-16.0 dBFS", "status": "✅ Good"},
-                {"source": "Remote guest (Washington)", "level": "-21.5 dBFS", "status": "⚠️ Boost +5dB"},
+                {"source": "Remote guest", "level": "-21.5 dBFS", "status": "⚠️ Boost +5dB"},
                 {"source": "Studio ambient", "level": "-38.0 dBFS", "status": "✅ Good"},
-            ]
-            for a in audio_sources:
+            ])
+            for a in audio_recs:
                 st.markdown(f"**{a['source']}** — {a['level']} — {a['status']}")
 
         with tabs[5]:
             st.subheader("Technical Health")
+            tech = pd_data.get("technical", {})
             col1, col2, col3 = st.columns(3)
             with col1:
-                st.metric("Main Feed", f"{round(random.uniform(12, 22), 1)} Mbps", "Healthy")
-                st.metric("Remote Feed", f"{round(random.uniform(6, 12), 1)} Mbps", f"{random.randint(80, 320)}ms latency")
+                st.metric("Main Feed", f"{tech.get('main_feed_mbps', round(random.uniform(12, 22), 1))} Mbps", "Healthy")
+                st.metric("Stream Latency", f"{tech.get('stream_latency_ms', random.randint(80, 320))}ms", "Remote feed")
             with col2:
-                st.metric("Vizrt Graphics", f"{random.randint(12, 35)}ms", "Online")
+                st.metric("Graphics Latency", f"{tech.get('graphics_latency_ms', random.randint(12, 35))}ms", "Online")
                 st.metric("Chyron", f"{random.randint(10, 25)}ms", "Online")
             with col3:
-                st.metric("Loudness", f"{round(random.uniform(-22, -18), 1)} LUFS", "ITU-R BS.1770")
-                st.metric("Stream Health", "Excellent", "All CDNs stable")
+                st.metric("Loudness", f"{tech.get('loudness_lufs', round(random.uniform(-22, -18), 1))} LUFS", "ITU-R BS.1770")
+                st.metric("Stream Health", tech.get("stream_health", "Excellent"), "All CDNs stable")
 
 
 elif page == "🛡️ Brand Safety":
     st.title("🛡️ Brand Safety & Contextual Ad Intelligence")
     st.caption("MARKET GAP: No real-time brand safety scoring for live broadcast | Protect advertiser relationships & maximize ad revenue")
+    show_demo_video_player()
 
     st.markdown("""
     <div style="background: linear-gradient(135deg, #1e1b4b, #0f172a); padding: 16px; border-radius: 12px; border: 1px solid #dc2626; margin-bottom: 16px;">
@@ -3000,18 +3108,30 @@ elif page == "🛡️ Brand Safety":
     </div>
     """, unsafe_allow_html=True)
 
+    _bs = SAMPLE_BRAND_SAFETY_DATA if DEMO_SAMPLE_AVAILABLE else {}
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        st.metric("Current Safety Score", f"{random.randint(68, 94)}/100", "GARM compliant")
+        st.metric("Current Safety Score", f"{_bs.get('overall_score', random.randint(68, 94))}/100", "GARM compliant")
     with col2:
-        st.metric("Active Advertisers", f"{random.randint(18, 45)}", f"{random.randint(2, 6)} blocked")
+        st.metric("Active Advertisers", f"{_bs.get('active_advertisers', random.randint(18, 45))}", f"{_bs.get('blocked_advertisers', random.randint(2, 6))} blocked")
     with col3:
-        st.metric("Premium Windows", f"{random.randint(3, 8)} today", f"+{round(random.uniform(12, 28), 1)}% CPM")
+        st.metric("Premium Windows", f"{_bs.get('premium_windows_today', random.randint(3, 8))} today", f"+{_bs.get('cpm_uplift_pct', round(random.uniform(12, 28), 1))}% CPM")
     with col4:
-        st.metric("Revenue Protected", f"${random.randint(8, 65)}K", "This broadcast")
+        st.metric("Revenue Protected", f"${_bs.get('premium_opportunity', random.randint(8000, 65000)):,}", "This broadcast")
 
+    default_content = (
+        f"Entertainment content from: {DEMO_SAMPLE_VIDEO['title']}\n\n"
+        "High-energy 15-second performance clip. Original music. Live crowd. "
+        "Family-safe entertainment content suitable for all advertisers. "
+        "No violence, hate speech, adult content or controversial topics detected."
+    ) if DEMO_SAMPLE_AVAILABLE else (
+        "Tonight on WKRN: We continue to follow the developing story on the federal economic announcement. "
+        "Markets have responded sharply to today's Fed decision. Our financial correspondent breaks down "
+        "what this means for your portfolio. Later: the city council votes on the downtown development project, "
+        "and a heartwarming story of community resilience."
+    )
     content_input = st.text_area("Paste current broadcast segment transcript for analysis",
-                                  value="Tonight on WKRN: We continue to follow the developing story on the federal economic announcement. Markets have responded sharply to today's Fed decision. Our financial correspondent breaks down what this means for your portfolio. Later: the city council votes on the downtown development project, and a heartwarming story of community resilience.",
+                                  value=default_content,
                                   height=100)
 
     if st.button("🛡️ Run Brand Safety Analysis", use_container_width=True, type="primary"):
@@ -3023,9 +3143,10 @@ elif page == "🛡️ Brand Safety":
     if st.session_state.get("brand_safety_done"):
         st.divider()
 
-        overall_score = random.randint(72, 92)
-        level = "Premium Safe" if overall_score >= 85 else "Standard Safe" if overall_score >= 70 else "Caution"
-        level_color = "#22c55e" if overall_score >= 85 else "#f59e0b" if overall_score >= 70 else "#ef4444"
+        bs = SAMPLE_BRAND_SAFETY_DATA if DEMO_SAMPLE_AVAILABLE else {}
+        overall_score = bs.get("overall_score", random.randint(72, 92))
+        level = bs.get("level", "Premium Safe" if overall_score >= 85 else "Standard Safe" if overall_score >= 70 else "Caution")
+        level_color = bs.get("level_color", "#22c55e" if overall_score >= 85 else "#f59e0b" if overall_score >= 70 else "#ef4444")
 
         col1, col2 = st.columns([1, 2])
 
@@ -3039,21 +3160,23 @@ elif page == "🛡️ Brand Safety":
             """, unsafe_allow_html=True)
 
             st.markdown("**GARM Risk Flags**")
-            garm_items = [("Controversial News", "medium", "⚠️"), ("Violence/Gore", "none", "✅"), ("Hate Speech", "none", "✅"), ("Adult Content", "none", "✅"), ("Profanity", "none", "✅")]
+            garm_items = bs.get("garm_flags", [
+                ("Controversial News", "medium", "⚠️"), ("Violence/Gore", "none", "✅"),
+                ("Hate Speech", "none", "✅"), ("Adult Content", "none", "✅"), ("Profanity", "none", "✅")
+            ])
             for item, sev, icon in garm_items:
                 color = "#f59e0b" if sev == "medium" else "#22c55e"
                 st.markdown(f"<span style='color:{color}'>{icon} {item}</span>", unsafe_allow_html=True)
 
         with col2:
             st.subheader("Advertiser Impact Assessment")
-            advertisers = [
+            advertisers = bs.get("advertisers", [
                 {"name": "Luxury Auto", "min_score": 80, "status": "Safe" if overall_score >= 80 else "Blocked", "cpm": f"${round(random.uniform(45, 85), 2)}"},
                 {"name": "Pharmaceutical", "min_score": 75, "status": "Safe" if overall_score >= 75 else "Blocked", "cpm": f"${round(random.uniform(38, 72), 2)}"},
                 {"name": "Financial Services", "min_score": 70, "status": "Safe" if overall_score >= 70 else "Blocked", "cpm": f"${round(random.uniform(30, 65), 2)}"},
                 {"name": "Family Products", "min_score": 85, "status": "Safe" if overall_score >= 85 else "⚠️ Review", "cpm": f"${round(random.uniform(25, 55), 2)}"},
                 {"name": "Fast Food", "min_score": 60, "status": "Safe", "cpm": f"${round(random.uniform(18, 40), 2)}"},
-                {"name": "Consumer Tech", "min_score": 65, "status": "Safe", "cpm": f"${round(random.uniform(22, 50), 2)}"},
-            ]
+            ])
             import pandas as pd
             df = pd.DataFrame(advertisers)
             st.dataframe(df, use_container_width=True, hide_index=True)
@@ -3061,16 +3184,17 @@ elif page == "🛡️ Brand Safety":
             st.subheader("Revenue Optimization")
             col3, col4 = st.columns(2)
             with col3:
-                st.metric("Current CPM", f"${round(random.uniform(22, 45), 2)}")
-                st.metric("Optimized CPM", f"${round(random.uniform(35, 68), 2)}", f"+{round(random.uniform(15, 38), 1)}%")
+                st.metric("Current CPM", f"${bs.get('current_cpm', round(random.uniform(22, 45), 2))}")
+                st.metric("Optimized CPM", f"${bs.get('optimized_cpm', round(random.uniform(35, 68), 2))}", f"+{bs.get('cpm_uplift_pct', round(random.uniform(15, 38), 1))}%")
             with col4:
-                st.metric("Revenue at Risk", f"${random.randint(2000, 15000):,}")
-                st.metric("Premium Opportunity", f"+${random.randint(3000, 18000):,}")
+                st.metric("Revenue at Risk", f"${bs.get('revenue_at_risk', random.randint(2000, 15000)):,}")
+                st.metric("Premium Opportunity", f"+${bs.get('premium_opportunity', random.randint(3000, 18000)):,}")
 
 
 elif page == "🌿 Carbon Intelligence":
     st.title("🌿 Carbon Intelligence & ESG Broadcast Agent")
     st.caption("MARKET GAP: No integrated carbon tracking for broadcast operations | ESG compliance for advertisers & regulators")
+    show_demo_video_player()
 
     st.markdown("""
     <div style="background: linear-gradient(135deg, #1e1b4b, #0f172a); padding: 16px; border-radius: 12px; border: 1px solid #16a34a; margin-bottom: 16px;">
@@ -3084,7 +3208,9 @@ elif page == "🌿 Carbon Intelligence":
     </div>
     """, unsafe_allow_html=True)
 
-    broadcast_type = st.selectbox("Broadcast Type", ["standard_news", "breaking_news", "live_event", "sports_broadcast", "remote_production"])
+    _carbon_types = (["entertainment_clip", "standard_news", "breaking_news", "live_event", "sports_broadcast", "remote_production"] if DEMO_SAMPLE_AVAILABLE
+                     else ["standard_news", "breaking_news", "live_event", "sports_broadcast", "remote_production"])
+    broadcast_type = st.selectbox("Broadcast Type", _carbon_types)
 
     if st.button("🌿 Generate Carbon Intelligence Report", use_container_width=True, type="primary"):
         with st.spinner("Calculating broadcast carbon footprint..."):
@@ -3094,47 +3220,70 @@ elif page == "🌿 Carbon Intelligence":
 
     if st.session_state.get("carbon_done"):
         st.divider()
+        c = SAMPLE_CARBON_DATA if DEMO_SAMPLE_AVAILABLE else {}
 
         # Key metrics
-        co2_today = round(random.uniform(320, 780), 1)
-        renewable_pct = round(random.uniform(22, 58), 1)
-        esg_score = round(random.uniform(58, 82), 1)
+        co2_today = c.get("total_co2e_kg", round(random.uniform(320, 780), 1))
+        renewable_pct = c.get("renewable_pct", round(random.uniform(22, 58), 1))
+        esg_score = c.get("esg_score", round(random.uniform(58, 82), 1))
+        scope1 = c.get("scope1_kg", round(co2_today * 0.15, 1))
+        scope2 = c.get("scope2_kg", round(co2_today * 0.70, 1))
+        scope3 = c.get("scope3_kg", round(co2_today * 0.15, 1))
 
         col1, col2, col3, col4 = st.columns(4)
         with col1:
-            st.metric("CO₂e Today", f"{co2_today} kg", f"vs {round(co2_today*random.uniform(0.9, 1.15), 1)} kg yesterday")
+            _co2_delta = (f"{c.get('vs_industry_avg_pct', -28)}% vs industry avg"
+                          if DEMO_SAMPLE_AVAILABLE else
+                          f"vs {round(co2_today*random.uniform(0.9, 1.15), 1)} kg yesterday")
+            st.metric("CO₂e — This Clip" if DEMO_SAMPLE_AVAILABLE else "CO₂e Today",
+                      f"{co2_today} kg", _co2_delta)
         with col2:
-            st.metric("Annual CO₂e", f"{round(co2_today * 365 / 1000, 1)} tonnes", "Scope 1+2+3")
+            _annual = (round(co2_today * 4 * 52 / 1000, 1) if DEMO_SAMPLE_AVAILABLE
+                       else round(co2_today * 365 / 1000, 1))
+            _annual_lbl = "Annual (4 clips/wk)" if DEMO_SAMPLE_AVAILABLE else "Annual CO₂e"
+            st.metric(_annual_lbl, f"{_annual} tonnes", "Scope 1+2+3")
         with col3:
             st.metric("Renewable Mix", f"{renewable_pct}%", f"Grid: {100-renewable_pct:.0f}% fossil")
         with col4:
-            st.metric("ESG Score", f"{esg_score}/100", f"Rating: {'A' if esg_score >= 80 else 'B+' if esg_score >= 70 else 'B'}")
+            st.metric("ESG Score", f"{esg_score}/100",
+                      f"Rating: {'A' if esg_score >= 80 else 'B+' if esg_score >= 70 else 'B'}")
 
         tabs = st.tabs(["⚡ Energy Breakdown", "🌍 Carbon Footprint", "📊 Optimizations", "♻️ Offsets", "📋 ESG Report"])
 
         with tabs[0]:
             st.subheader("Equipment Energy Consumption")
             import pandas as pd
-            equipment = [
-                {"Equipment": "Main Transmitter (12kW)", "Category": "Broadcast", "kWh Today": round(12*18, 1), "Status": "Active"},
-                {"Equipment": "Server Farm (18kW)", "Category": "IT", "kWh Today": round(18*24, 1), "Status": "Active"},
-                {"Equipment": "Studio HVAC (22kW)", "Category": "Facility", "kWh Today": round(22*18, 1), "Status": "Active"},
-                {"Equipment": "Studio A Lighting (4.5kW)", "Category": "Studio", "kWh Today": round(4.5*10, 1), "Status": "Active"},
-                {"Equipment": "CDN Streaming (5kW)", "Category": "Digital", "kWh Today": round(5*24, 1), "Status": "Active"},
-                {"Equipment": "OB Truck (35kW)" if broadcast_type == "live_event" else "OB Truck (standby)", "Category": "Remote", "kWh Today": round(35*8, 1) if broadcast_type == "live_event" else 0, "Status": "Active" if broadcast_type == "live_event" else "Standby"},
-            ]
-            df = pd.DataFrame(equipment)
-            st.dataframe(df, use_container_width=True, hide_index=True)
-            st.metric("Total Energy Today", f"{sum(e['kWh Today'] for e in equipment):,.0f} kWh")
+            if DEMO_SAMPLE_AVAILABLE:
+                equip_breakdown = c.get("equipment_breakdown", {})
+                equipment_rows = [
+                    {"Equipment": eq, "kWh (15s clip)": round(kwh, 2),
+                     "CO₂e (kg)": round(kwh * 0.386, 3), "Status": "Active"}
+                    for eq, kwh in equip_breakdown.items()
+                ]
+                df = pd.DataFrame(equipment_rows)
+                st.dataframe(df, use_container_width=True, hide_index=True)
+                _col_e1, _col_e2 = st.columns(2)
+                _col_e1.metric("Total Energy (This Clip)", f"{c.get('energy_kwh', 28.4)} kWh")
+                _col_e2.metric("Social Distribution CO₂e",
+                               f"{c.get('social_distribution_co2e', 4.8)} kg / 1M views")
+            else:
+                equipment = [
+                    {"Equipment": "Main Transmitter (12kW)", "Category": "Broadcast", "kWh Today": round(12*18, 1), "Status": "Active"},
+                    {"Equipment": "Server Farm (18kW)", "Category": "IT", "kWh Today": round(18*24, 1), "Status": "Active"},
+                    {"Equipment": "Studio HVAC (22kW)", "Category": "Facility", "kWh Today": round(22*18, 1), "Status": "Active"},
+                    {"Equipment": "Studio A Lighting (4.5kW)", "Category": "Studio", "kWh Today": round(4.5*10, 1), "Status": "Active"},
+                    {"Equipment": "CDN Streaming (5kW)", "Category": "Digital", "kWh Today": round(5*24, 1), "Status": "Active"},
+                    {"Equipment": "OB Truck (35kW)" if broadcast_type == "live_event" else "OB Truck (standby)", "Category": "Remote", "kWh Today": round(35*8, 1) if broadcast_type == "live_event" else 0, "Status": "Active" if broadcast_type == "live_event" else "Standby"},
+                ]
+                df = pd.DataFrame(equipment)
+                st.dataframe(df, use_container_width=True, hide_index=True)
+                st.metric("Total Energy Today", f"{sum(e['kWh Today'] for e in equipment):,.0f} kWh")
 
         with tabs[1]:
             st.subheader("Carbon Footprint Breakdown")
             col1, col2 = st.columns(2)
             with col1:
                 st.markdown("**Scope Breakdown**")
-                scope1 = round(co2_today * 0.15, 1)
-                scope2 = round(co2_today * 0.70, 1)
-                scope3 = round(co2_today * 0.15, 1)
                 st.progress(scope1/co2_today, text=f"Scope 1 (Direct): {scope1} kg")
                 st.progress(scope2/co2_today, text=f"Scope 2 (Grid electricity): {scope2} kg")
                 st.progress(scope3/co2_today, text=f"Scope 3 (Supply chain, travel): {scope3} kg")
@@ -3147,46 +3296,90 @@ elif page == "🌿 Carbon Intelligence":
 
         with tabs[2]:
             st.subheader("Carbon Reduction Opportunities")
-            optimizations = [
-                {"priority": "🔴 High", "action": "Shift batch video encoding to 2AM-6AM (40% lower grid carbon intensity)", "CO₂ Savings/month": f"{round(random.uniform(180, 450), 0):.0f} kg", "Cost Savings": f"${random.randint(800, 3200):,}"},
-                {"priority": "🔴 High", "action": "Procure 100% renewable energy PPA (current mix 28%)", "CO₂ Savings/month": f"{round(co2_today*0.85*30, 0):.0f} kg", "Cost Savings": f"${random.randint(-500, 2000):,}"},
-                {"priority": "🟡 Medium", "action": "Replace studio HMI/tungsten lighting with LED", "CO₂ Savings/month": f"{round(random.uniform(120, 380), 0):.0f} kg", "Cost Savings": f"${random.randint(600, 2400):,}"},
-                {"priority": "🟡 Medium", "action": "Replace OB truck with cloud REMI production model", "CO₂ Savings/event": f"{round(random.uniform(200, 800), 0):.0f} kg", "Cost Savings": f"${random.randint(5000, 25000):,}"},
-                {"priority": "🟢 Low", "action": "Migrate CDN to AWS eu-west (lower carbon region)", "CO₂ Savings/month": f"{round(random.uniform(40, 180), 0):.0f} kg", "Cost Savings": f"${random.randint(200, 800):,}"},
-            ]
             import pandas as pd
-            df = pd.DataFrame(optimizations)
-            st.dataframe(df, use_container_width=True, hide_index=True)
+            if DEMO_SAMPLE_AVAILABLE:
+                _renew_opts = c.get("renewable_options", [])
+                _priorities = ["🔴 High", "🟡 Medium", "🟢 Low"]
+                optimizations = [
+                    {
+                        "Priority": _priorities[min(i, 2)],
+                        "Action": opt.get("option", ""),
+                        "CO₂ Saving": f"{opt.get('saving_pct', 0)}%",
+                        "Est. Cost": opt.get("cost", "TBD"),
+                    }
+                    for i, opt in enumerate(_renew_opts)
+                ]
+                df = pd.DataFrame(optimizations)
+                st.dataframe(df, use_container_width=True, hide_index=True)
+                st.info(f"💡 Total optimization potential: **{c.get('optimization_potential_pct', 18)}%** CO₂e reduction with current technology")
+                st.metric("Green Schedule Saving", f"{c.get('green_schedule_saving_pct', 12)}%",
+                          "by shifting encoding to off-peak grid hours")
+            else:
+                optimizations = [
+                    {"priority": "🔴 High", "action": "Shift batch video encoding to 2AM-6AM (40% lower grid carbon intensity)", "CO₂ Savings/month": f"{round(random.uniform(180, 450), 0):.0f} kg", "Cost Savings": f"${random.randint(800, 3200):,}"},
+                    {"priority": "🔴 High", "action": "Procure 100% renewable energy PPA (current mix 28%)", "CO₂ Savings/month": f"{round(co2_today*0.85*30, 0):.0f} kg", "Cost Savings": f"${random.randint(-500, 2000):,}"},
+                    {"priority": "🟡 Medium", "action": "Replace studio HMI/tungsten lighting with LED", "CO₂ Savings/month": f"{round(random.uniform(120, 380), 0):.0f} kg", "Cost Savings": f"${random.randint(600, 2400):,}"},
+                    {"priority": "🟡 Medium", "action": "Replace OB truck with cloud REMI production model", "CO₂ Savings/event": f"{round(random.uniform(200, 800), 0):.0f} kg", "Cost Savings": f"${random.randint(5000, 25000):,}"},
+                    {"priority": "🟢 Low", "action": "Migrate CDN to AWS eu-west (lower carbon region)", "CO₂ Savings/month": f"{round(random.uniform(40, 180), 0):.0f} kg", "Cost Savings": f"${random.randint(200, 800):,}"},
+                ]
+                df = pd.DataFrame(optimizations)
+                st.dataframe(df, use_container_width=True, hide_index=True)
 
         with tabs[3]:
             st.subheader("Carbon Offset Recommendations")
-            annual_tonnes = round(co2_today * 365 / 1000, 1)
-            offsets = [
-                {"Project": "US Forestry (Gold Standard)", "Type": "Nature-based", "$/tonne": "$18", "Annual Cost": f"${round(annual_tonnes * 18):,}", "Rating": "⭐⭐⭐⭐⭐"},
-                {"Project": "Wind Farm Dev - South Asia", "Type": "Renewable Energy", "$/tonne": "$9", "Annual Cost": f"${round(annual_tonnes * 9):,}", "Rating": "⭐⭐⭐⭐"},
-                {"Project": "Direct Air Capture (Climeworks)", "Type": "Technological", "$/tonne": "$550", "Annual Cost": f"${round(annual_tonnes * 550):,}", "Rating": "⭐⭐⭐⭐⭐ (permanent)"},
-            ]
             import pandas as pd
-            df = pd.DataFrame(offsets)
-            st.dataframe(df, use_container_width=True, hide_index=True)
-            st.info(f"💡 Recommended: US Forestry offset at $18/tonne. Annual cost to offset all Scope 2: **${round(co2_today * 0.7 * 365 / 1000 * 18):,}**")
+            if DEMO_SAMPLE_AVAILABLE:
+                _offset_kg = c.get("offset_recommended_kg", 5.0)
+                _offset_cost = c.get("offset_cost_usd", 2.50)
+                offsets = [
+                    {"Project": "US Forestry (Gold Standard)", "Type": "Nature-based", "$/tonne": "$18", "Clip Cost": f"${_offset_kg * 18 / 1000:.4f}", "Rating": "⭐⭐⭐⭐⭐"},
+                    {"Project": "Wind Farm Dev - South Asia", "Type": "Renewable Energy", "$/tonne": "$9", "Clip Cost": f"${_offset_kg * 9 / 1000:.4f}", "Rating": "⭐⭐⭐⭐"},
+                    {"Project": "Direct Air Capture (Climeworks)", "Type": "Technological", "$/tonne": "$550", "Clip Cost": f"${_offset_kg * 550 / 1000:.3f}", "Rating": "⭐⭐⭐⭐⭐ (permanent)"},
+                ]
+                df = pd.DataFrame(offsets)
+                st.dataframe(df, use_container_width=True, hide_index=True)
+                st.info(f"💡 Recommended offset for this 15s clip: **{_offset_kg} kg CO₂e** — Full offset cost: **${_offset_cost:.2f}** via verified nature-based project")
+            else:
+                annual_tonnes = round(co2_today * 365 / 1000, 1)
+                offsets = [
+                    {"Project": "US Forestry (Gold Standard)", "Type": "Nature-based", "$/tonne": "$18", "Annual Cost": f"${round(annual_tonnes * 18):,}", "Rating": "⭐⭐⭐⭐⭐"},
+                    {"Project": "Wind Farm Dev - South Asia", "Type": "Renewable Energy", "$/tonne": "$9", "Annual Cost": f"${round(annual_tonnes * 9):,}", "Rating": "⭐⭐⭐⭐"},
+                    {"Project": "Direct Air Capture (Climeworks)", "Type": "Technological", "$/tonne": "$550", "Annual Cost": f"${round(annual_tonnes * 550):,}", "Rating": "⭐⭐⭐⭐⭐ (permanent)"},
+                ]
+                df = pd.DataFrame(offsets)
+                st.dataframe(df, use_container_width=True, hide_index=True)
+                st.info(f"💡 Recommended: US Forestry offset at $18/tonne. Annual cost to offset all Scope 2: **${round(co2_today * 0.7 * 365 / 1000 * 18):,}**")
 
         with tabs[4]:
             st.subheader("ESG Report Summary")
             rating = "A" if esg_score >= 80 else "B+" if esg_score >= 70 else "B"
+            _standards = (", ".join(c.get("esg_report_standards", ["GRI 305", "TCFD", "GHG Protocol"]))
+                          if DEMO_SAMPLE_AVAILABLE else "GRI 305, TCFD, GHG Protocol")
+            _carbon_int = (c.get("carbon_intensity_per_min", 49.6) if DEMO_SAMPLE_AVAILABLE
+                           else round(random.uniform(85, 245), 1))
+            _int_label = "Carbon Intensity" if DEMO_SAMPLE_AVAILABLE else "Energy Intensity"
+            _int_unit = "kg CO₂e/min" if DEMO_SAMPLE_AVAILABLE else "kWh/broadcast-hour"
+            _scope_ctx = ("Entertainment Showcase clip (15s)" if DEMO_SAMPLE_AVAILABLE
+                          else "broadcast facility")
+            _co2_summary = (f"**{co2_today} kg CO₂e** (this clip)"
+                            if DEMO_SAMPLE_AVAILABLE else
+                            f"**{round(co2_today * 365 / 1000, 1)} tCO₂e annually**")
+            _co2_metric = (f"{co2_today} kg" if DEMO_SAMPLE_AVAILABLE
+                           else f"{round(co2_today * 365 / 1000, 1)} tonnes")
+            _co2_metric_label = "Clip CO₂e" if DEMO_SAMPLE_AVAILABLE else "Annual CO₂e"
             st.markdown(f"""
             **Report Period:** {datetime.now().strftime('%B %Y')}
 
             **Executive Summary:**
-            This broadcast facility achieved an ESG score of **{esg_score}/100** (Rating: **{rating}**) this period.
-            Total carbon footprint: **{round(co2_today * 365 / 1000, 1)} tCO₂e annually**.
+            This {_scope_ctx} achieved an ESG score of **{esg_score}/100** (Rating: **{rating}**) this period.
+            Total carbon footprint: {_co2_summary}.
             Renewable energy mix: **{renewable_pct}%**. Net Zero target: **2035**.
 
             **Key Metrics:**
-            - 📊 Annual CO₂e: {round(co2_today * 365 / 1000, 1)} tonnes
+            - 📊 {_co2_metric_label}: {_co2_metric}
             - ⚡ Renewable Energy: {renewable_pct}%
-            - 🏭 Energy Intensity: {round(random.uniform(85, 245), 1)} kWh/broadcast-hour
-            - 📋 Frameworks Aligned: GRI 305, TCFD, GHG Protocol
+            - 🏭 {_int_label}: {_carbon_int} {_int_unit}
+            - 📋 Frameworks Aligned: {_standards}
             - ✅ Advertiser ESG Compliant: {'Yes' if esg_score >= 60 else 'No'}
             - 📅 Next Audit: {(datetime.now() + timedelta(days=90)).strftime('%Y-%m-%d')}
             """)
