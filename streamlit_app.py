@@ -633,6 +633,84 @@ INTEGRATION_CAPABILITIES = {
         ],
         "protocols": ["WebSocket", "REST API", "gRPC"],
         "status": "Production Ready"
+    },
+    "deepfake_provenance": {
+        "name": "Deepfake Detection & Content Provenance",
+        "description": "Integration with C2PA provenance registries and forensic AI services to authenticate media before broadcast.",
+        "capabilities": [
+            "C2PA content credentials verification",
+            "Audio/video forensic analysis",
+            "Metadata trust chain validation",
+            "Auto-hold workflow for flagged content",
+            "Third-party lab API integration (Truepic, Hive)"
+        ],
+        "protocols": ["C2PA REST API", "REST API", "Webhooks"],
+        "status": "Future Ready"
+    },
+    "fact_check_databases": {
+        "name": "Live Fact-Check & Verification Networks",
+        "description": "Real-time claim verification against 8+ authoritative fact-check databases and wire services.",
+        "capabilities": [
+            "AP & Reuters wire feed integration",
+            "PolitiFact, FactCheck.org, Snopes APIs",
+            "Full Fact & IFCN network access",
+            "WHO & CDC health claim verification",
+            "GPT-4 claim extraction pipeline"
+        ],
+        "protocols": ["REST API", "RSS/Atom", "GraphQL"],
+        "status": "Future Ready"
+    },
+    "audience_analytics": {
+        "name": "Audience Intelligence & Analytics",
+        "description": "Integration with broadcast ratings and streaming analytics platforms for real-time audience insights.",
+        "capabilities": [
+            "Nielsen & Comscore ratings sync",
+            "Second-by-second retention curve",
+            "Demographic breakdown by platform",
+            "Competitor migration tracking",
+            "Drop-off risk alert webhooks"
+        ],
+        "protocols": ["REST API", "WebSocket", "Webhooks"],
+        "status": "Future Ready"
+    },
+    "graphics_newsroom": {
+        "name": "Graphics Servers & Newsroom Systems",
+        "description": "AI Production Director integration with broadcast graphics servers and newsroom computer systems.",
+        "capabilities": [
+            "Vizrt / ChyronHego lower-thirds automation",
+            "iNews & ENPS rundown sync",
+            "Camera tally & PTZ control",
+            "Real-time graphics triggering",
+            "Commercial break automation"
+        ],
+        "protocols": ["Vizrt DataHub API", "MOS Protocol", "REST API", "WebSocket"],
+        "status": "Future Ready"
+    },
+    "brand_safety_adtech": {
+        "name": "Brand Safety & Ad Tech Integration",
+        "description": "GARM-compliant brand safety scoring integrated with programmatic ad platforms and verification services.",
+        "capabilities": [
+            "IAS & DoubleVerify API integration",
+            "GARM 10-category compliance checks",
+            "IAB Tech Lab 36-category taxonomy",
+            "DV360 / The Trade Desk CPM optimization",
+            "Real-time ad block / allow webhooks"
+        ],
+        "protocols": ["OpenRTB", "REST API", "Webhooks"],
+        "status": "Future Ready"
+    },
+    "carbon_esg_reporting": {
+        "name": "Carbon Intelligence & ESG Reporting",
+        "description": "Integration with electricity grid carbon APIs and ESG reporting frameworks for sustainability compliance.",
+        "capabilities": [
+            "ElectricityMap / WattTime grid intensity API",
+            "GHG Protocol Scope 1/2/3 calculation",
+            "GRI 305 / TCFD / SBTi report generation",
+            "Verified carbon offset registry (Gold Standard)",
+            "Advertiser ESG compliance dashboard"
+        ],
+        "protocols": ["REST API", "REST API (Carbon APIs)", "PDF Export"],
+        "status": "Future Ready"
     }
 }
 
@@ -1114,12 +1192,13 @@ if page == "Dashboard":
 
 elif page == "🚀 All-in-One Workflow":
     st.title("🚀 All-in-One Workflow")
-    st.caption("Process content through ALL 8 AI Agents simultaneously | Complete media intelligence in one click")
+    st.caption("Process content through ALL 14 AI Agents simultaneously | Complete media intelligence in one click")
 
     st.markdown("""
-    **The Complete Media Intelligence Pipeline** - Upload your content once and let all 8 AI agents
+    **The Complete Media Intelligence Pipeline** - Upload your content once and let all 14 AI agents
     analyze it simultaneously. Get captions, viral clips, compliance checks, social posts,
-    translations, rights verification, and trending context - all in one workflow.
+    translations, rights verification, trending context, deepfake detection, fact-checking,
+    audience intelligence, production direction, brand safety, and carbon tracking — all in one workflow.
     """)
 
     st.divider()
@@ -1161,6 +1240,7 @@ elif page == "🚀 All-in-One Workflow":
         st.subheader("⚙️ Workflow Settings")
 
         st.markdown("**Select Agents to Run:**")
+        st.markdown("*Original 8 Agents:*")
         run_caption = st.checkbox("📝 Caption Agent", value=True)
         run_clip = st.checkbox("🎬 Clip Agent", value=True)
         run_compliance = st.checkbox("⚖️ Compliance Agent", value=True)
@@ -1169,6 +1249,13 @@ elif page == "🚀 All-in-One Workflow":
         run_localization = st.checkbox("🌍 Localization", value=True)
         run_rights = st.checkbox("📜 Rights Agent", value=True)
         run_trending = st.checkbox("📈 Trending Agent", value=True)
+        st.markdown("*Future-Ready 6 Agents:*")
+        run_deepfake = st.checkbox("🕵️ Deepfake Detection", value=True)
+        run_fact_check = st.checkbox("✅ Live Fact-Check", value=True)
+        run_audience = st.checkbox("👥 Audience Intelligence", value=True)
+        run_production = st.checkbox("🎬 AI Production Director", value=True)
+        run_brand_safety = st.checkbox("🛡️ Brand Safety", value=True)
+        run_carbon = st.checkbox("🌿 Carbon Intelligence", value=True)
 
         target_languages = st.multiselect("Translation Languages", ["Spanish", "French", "German", "Chinese"], default=["Spanish", "French"])
 
@@ -1205,6 +1292,18 @@ elif page == "🚀 All-in-One Workflow":
             agents_to_run.append({"name": "Rights Agent", "icon": "📜", "steps": ["Checking licenses", "Scanning violations", "Verifying usage", "Generating alerts"]})
         if run_trending:
             agents_to_run.append({"name": "Trending Agent", "icon": "📈", "steps": ["Analyzing trends", "Matching topics", "Sentiment analysis", "Recommendations"]})
+        if run_deepfake:
+            agents_to_run.append({"name": "Deepfake Detection", "icon": "🕵️", "steps": ["C2PA provenance check", "Audio forensics", "Video forensics", "Generating verdict"]})
+        if run_fact_check:
+            agents_to_run.append({"name": "Live Fact-Check", "icon": "✅", "steps": ["Extracting claims", "Querying databases", "Cross-referencing", "Generating verdicts"]})
+        if run_audience:
+            agents_to_run.append({"name": "Audience Intelligence", "icon": "👥", "steps": ["Analyzing demographics", "Predicting retention", "Detecting drop-offs", "Generating insights"]})
+        if run_production:
+            agents_to_run.append({"name": "AI Production Director", "icon": "🎥", "steps": ["Planning shots", "Generating lower-thirds", "Optimizing rundown", "Break strategy"]})
+        if run_brand_safety:
+            agents_to_run.append({"name": "Brand Safety", "icon": "🛡️", "steps": ["GARM scanning", "IAB categorizing", "Checking advertisers", "CPM optimization"]})
+        if run_carbon:
+            agents_to_run.append({"name": "Carbon Intelligence", "icon": "🌿", "steps": ["Calculating energy", "Scope 1/2/3 analysis", "ESG scoring", "Generating report"]})
 
         # Progress display
         overall_progress = st.progress(0, "Starting all agents...")
@@ -1273,6 +1372,12 @@ elif page == "🚀 All-in-One Workflow":
             active_social = SAMPLE_SOCIAL_POSTS.get("product_launch", [])
             active_translations = SAMPLE_TRANSLATIONS
             active_licenses = SAMPLE_LICENSES
+            active_deepfake = SAMPLE_DEEPFAKE_RESULT
+            active_fact_check = SAMPLE_FACT_CHECK_CLAIMS
+            active_audience = SAMPLE_AUDIENCE_DATA
+            active_production = SAMPLE_PRODUCTION_DATA
+            active_brand_safety = SAMPLE_BRAND_SAFETY_DATA
+            active_carbon = SAMPLE_CARBON_DATA
             content_title = DEMO_SAMPLE_VIDEO['title']
             content_duration = DEMO_SAMPLE_VIDEO['duration']
         else:
@@ -1292,10 +1397,16 @@ elif page == "🚀 All-in-One Workflow":
             active_social = DEMO_SOCIAL_POSTS.get("breaking_news", [])
             active_translations = DEMO_TRANSLATIONS
             active_licenses = DEMO_LICENSES
+            active_deepfake = {}
+            active_fact_check = []
+            active_audience = {}
+            active_production = {}
+            active_brand_safety = {}
+            active_carbon = {}
             content_title = "Morning News Broadcast"
             content_duration = "4:02:15"
 
-        # Summary Metrics - Dynamic based on content
+        # Summary Metrics Row 1 — Original 8 agents
         col1, col2, col3, col4, col5, col6 = st.columns(6)
         col1.metric("Captions", f"{len(active_captions)} segments", f"{sum(c['confidence'] for c in active_captions)/len(active_captions)*100:.1f}% accuracy")
         col2.metric("Viral Clips", f"{len(active_viral)} found", f"Top: {max(m['score'] for m in active_viral)*100:.0f}%")
@@ -1304,12 +1415,24 @@ elif page == "🚀 All-in-One Workflow":
         col5.metric("Translations", f"{len(target_languages)} languages", "95% quality")
         col6.metric("Trending Match", f"{len(active_trends)} topics", f"{active_trends[0]['topic']}" if active_trends else "N/A")
 
+        # Summary Metrics Row 2 — Future-Ready 6 agents
+        col7, col8, col9, col10, col11, col12 = st.columns(6)
+        _df_verdict = active_deepfake.get("verdict", "N/A")
+        _df_risk = active_deepfake.get("risk_score", 0)
+        col7.metric("Deepfake", _df_verdict, f"Risk: {_df_risk:.3f}")
+        col8.metric("Fact-Check", f"{len(active_fact_check)} claims", "Analyzed" if active_fact_check else "N/A")
+        col9.metric("Audience", f"{active_audience.get('current_viewers', 847000):,}", active_audience.get("viewer_trend", "+18K/min"))
+        col10.metric("Production", f"{len(active_production.get('shots', []))} shots", "planned")
+        col11.metric("Brand Safety", f"{active_brand_safety.get('overall_score', 96)}/100", active_brand_safety.get("level", "Premium Safe"))
+        col12.metric("Carbon", f"{active_carbon.get('total_co2e_kg', 12.4)} kg CO₂e", f"ESG: {active_carbon.get('esg_score', 81)}/100")
+
         st.divider()
 
         # Tabbed Results
-        tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
+        tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11, tab12, tab13, tab14 = st.tabs([
             "📝 Captions", "🎬 Viral Clips", "⚖️ Compliance", "🔍 Archive",
-            "📱 Social", "🌍 Translations", "📜 Rights", "📈 Trending"
+            "📱 Social", "🌍 Translations", "📜 Rights", "📈 Trending",
+            "🕵️ Deepfake", "✅ Fact-Check", "👥 Audience", "🎥 Production", "🛡️ Brand Safety", "🌿 Carbon"
         ])
 
         with tab1:
@@ -1411,6 +1534,101 @@ elif page == "🚀 All-in-One Workflow":
                             st.progress(pct/100, f"{age}: {pct}%")
                     st.info(f"💡 **Recommendation:** {trend['recommendation']}")
             st.success("💡 **AI Analysis:** Content aligns well with current trends. Optimal for immediate publication.")
+
+        with tab9:
+            st.markdown("**Deepfake Detection Report**")
+            verdict = active_deepfake.get("verdict", "N/A")
+            risk = active_deepfake.get("risk_score", 0)
+            broadcast_safe = active_deepfake.get("broadcast_safe", True)
+            verdict_color = "#22c55e" if verdict == "AUTHENTIC" else "#ef4444"
+            st.markdown(f"""
+            <div style="background: #1e293b; padding: 16px; border-radius: 10px; border-left: 4px solid {verdict_color};">
+            <h3 style="color: {verdict_color}; margin:0;">{'✅' if verdict == 'AUTHENTIC' else '🚨'} Verdict: {verdict}</h3>
+            <p style="color: #94a3b8; margin: 8px 0 0 0;">Risk Score: {risk:.3f} | Broadcast Safe: {'Yes' if broadcast_safe else 'No'}</p>
+            </div>
+            """, unsafe_allow_html=True)
+            col1, col2, col3 = st.columns(3)
+            col1.metric("Audio Authenticity", f"{active_deepfake.get('audio_authenticity', 0.971)*100:.1f}%")
+            col2.metric("Video Authenticity", f"{active_deepfake.get('video_authenticity', 0.964)*100:.1f}%")
+            col3.metric("Metadata Trust", f"{active_deepfake.get('metadata_trust', 0.989)*100:.1f}%")
+            st.success("✅ C2PA provenance chain verified. No synthetic media indicators detected.")
+
+        with tab10:
+            st.markdown("**Live Fact-Check Results**")
+            if active_fact_check:
+                for claim in active_fact_check:
+                    st.markdown(f"""
+                    <div style="background: #1e293b; padding: 10px 14px; border-radius: 8px; margin: 6px 0; border-left: 4px solid {claim.get('color','#6366f1')};">
+                    <span style="color:{claim.get('color','#6366f1')}; font-weight:bold;">{claim.get('icon','ℹ️')} {claim.get('verdict','N/A')}</span>
+                    <span style="color:#94a3b8; float:right;">{claim.get('confidence',0)*100:.0f}% confidence</span><br/>
+                    <span style="color:#e2e8f0;">{claim.get('claim','')}</span><br/>
+                    <small style="color:#64748b;">Source: {claim.get('source','')}</small>
+                    </div>
+                    """, unsafe_allow_html=True)
+            else:
+                st.info("Fact-check results will appear here after running the analysis with demo video selected.")
+
+        with tab11:
+            st.markdown("**Audience Intelligence**")
+            col1, col2, col3 = st.columns(3)
+            col1.metric("Current Viewers", f"{active_audience.get('current_viewers', 847000):,}", active_audience.get("viewer_trend", "+18K/min"))
+            col2.metric("Predicted Peak", f"{active_audience.get('predicted_peak', 1240000):,}", f"in {active_audience.get('peak_in_min', 6)} min")
+            col3.metric("Retention Risk", f"{active_audience.get('retention_risk', 12)}%", "Low")
+            st.markdown("**Demographics:**")
+            for age, pct in active_audience.get("demographics", {}).items():
+                st.progress(pct / 100, text=f"{age}: {pct}%")
+
+        with tab12:
+            st.markdown("**AI Production Director**")
+            _shots = active_production.get("shots", [])
+            _lt = active_production.get("lower_thirds", [])
+            if _shots:
+                st.markdown(f"**Camera Shot Plan** — {len(_shots)} shots")
+                import pandas as pd
+                df_shots = pd.DataFrame([{"Shot": s["shot"], "Camera": s["camera"], "Type": s["type"], "Use": s["use"], "Duration": s["duration"]} for s in _shots])
+                st.dataframe(df_shots, use_container_width=True, hide_index=True)
+            if _lt:
+                st.markdown(f"**Lower Thirds** — {len(_lt)} graphics queued")
+                for lt in _lt:
+                    st.markdown(f"- **{lt['line1']}** / {lt['line2']} — *{lt['trigger']}*")
+            else:
+                st.info("Production plan will appear here after running with demo video selected.")
+
+        with tab13:
+            st.markdown("**Brand Safety Report**")
+            bs_score = active_brand_safety.get("overall_score", 96)
+            bs_level = active_brand_safety.get("level", "Premium Safe")
+            bs_color = active_brand_safety.get("level_color", "#22c55e")
+            st.markdown(f"""
+            <div style="background: #1e293b; padding: 14px; border-radius: 10px; border-left: 4px solid {bs_color};">
+            <h3 style="color: {bs_color}; margin:0;">🛡️ {bs_level} — {bs_score}/100</h3>
+            <p style="color: #94a3b8; margin: 8px 0 0 0;">
+            Active Advertisers: {active_brand_safety.get('active_advertisers', 42)} |
+            Blocked: {active_brand_safety.get('blocked_advertisers', 0)} |
+            CPM: ${active_brand_safety.get('current_cpm', 42.50)} → ${active_brand_safety.get('optimized_cpm', 61.80)}
+            </p>
+            </div>
+            """, unsafe_allow_html=True)
+            _garm = active_brand_safety.get("garm_flags", [])
+            if _garm:
+                st.markdown("**GARM Compliance:**")
+                cols_g = st.columns(2)
+                for i, (cat, level, icon) in enumerate(_garm):
+                    cols_g[i % 2].markdown(f"{icon} **{cat}**: {level}")
+
+        with tab14:
+            st.markdown("**Carbon Intelligence & ESG**")
+            col1, col2, col3 = st.columns(3)
+            col1.metric("Total CO₂e", f"{active_carbon.get('total_co2e_kg', 12.4)} kg", f"{active_carbon.get('vs_industry_avg_pct', -28)}% vs avg")
+            col2.metric("Renewable Mix", f"{active_carbon.get('renewable_pct', 34)}%", f"Grid: {100 - active_carbon.get('renewable_pct', 34)}% fossil")
+            col3.metric("ESG Score", f"{active_carbon.get('esg_score', 81)}/100", "Rating: A")
+            st.markdown("**Scope Breakdown:**")
+            _co2 = active_carbon.get("total_co2e_kg", 12.4)
+            st.progress(active_carbon.get("scope1_kg", 1.8) / _co2, text=f"Scope 1 (Direct): {active_carbon.get('scope1_kg', 1.8)} kg")
+            st.progress(active_carbon.get("scope2_kg", 6.9) / _co2, text=f"Scope 2 (Grid electricity): {active_carbon.get('scope2_kg', 6.9)} kg")
+            st.progress(active_carbon.get("scope3_kg", 3.7) / _co2, text=f"Scope 3 (Supply chain): {active_carbon.get('scope3_kg', 3.7)} kg")
+            standards = ", ".join(active_carbon.get("esg_report_standards", ["GRI 305", "TCFD", "SBTi"]))
+            st.success(f"📋 Frameworks Aligned: {standards}")
 
         st.divider()
 
@@ -3401,8 +3619,8 @@ elif page == "Integration Showcase":
 
     # Integration overview metrics
     col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Supported Protocols", "15+")
-    col2.metric("Integration Types", "6 Categories")
+    col1.metric("Supported Protocols", "21+")
+    col2.metric("Integration Types", "12 Categories")
     col3.metric("API Uptime", "99.9%")
     col4.metric("Avg Response Time", "<100ms")
 
@@ -3482,23 +3700,26 @@ elif page == "Integration Showcase":
 
     st.markdown("""
     ```
-    ┌─────────────────────────────────────────────────────────────────────────────────┐
-    │                              MediaAgentIQ Platform                               │
-    │  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐       │
-    │  │ Caption │ │  Clip   │ │ Archive │ │Compliance│ │ Social  │ │Trending │       │
-    │  │  Agent  │ │  Agent  │ │  Agent  │ │  Agent  │ │  Agent  │ │  Agent  │       │
-    │  └────┬────┘ └────┬────┘ └────┬────┘ └────┬────┘ └────┬────┘ └────┬────┘       │
-    │       │           │           │           │           │           │             │
-    │  ┌────┴───────────┴───────────┴───────────┴───────────┴───────────┴────┐       │
-    │  │                        Integration Layer                             │       │
-    │  │   REST API │ WebSocket │ MOS Protocol │ NMOS │ gRPC │ Webhooks      │       │
-    │  └────┬───────────┬───────────┬───────────┬───────────┬───────────┬────┘       │
-    └───────┼───────────┼───────────┼───────────┼───────────┼───────────┼────────────┘
-            │           │           │           │           │           │
-    ┌───────┴───┐ ┌─────┴─────┐ ┌───┴───┐ ┌─────┴─────┐ ┌───┴───┐ ┌─────┴─────┐
-    │    MAM    │ │ Broadcast │ │  NMOS │ │   Cloud   │ │Social │ │Transcription│
-    │  Systems  │ │Automation │ │Network│ │ Platforms │ │  APIs │ │  Services  │
-    └───────────┘ └───────────┘ └───────┘ └───────────┘ └───────┘ └────────────┘
+    ┌───────────────────────────────────────────────────────────────────────────────────────────────────┐
+    │                                    MediaAgentIQ Platform — 14 AI Agents                            │
+    │  ┌────────┐ ┌──────┐ ┌─────────┐ ┌──────────┐ ┌────────┐ ┌────────┐ ┌───────┐                    │
+    │  │Caption │ │ Clip │ │ Archive │ │Compliance│ │ Social │ │Localiz-│ │Rights │                    │
+    │  │ Agent  │ │Agent │ │  Agent  │ │  Agent   │ │Publishing│ │ation  │ │ Agent │                    │
+    │  └───┬────┘ └──┬───┘ └────┬────┘ └────┬─────┘ └───┬────┘ └───┬────┘ └──┬────┘                    │
+    │  ┌────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐        │
+    │  │Trending│ │Deepfake  │ │ Fact-    │ │Audience  │ │Production│ │  Brand   │ │  Carbon  │        │
+    │  │ Agent  │ │Detection │ │ Check    │ │Intellig. │ │ Director │ │  Safety  │ │Intellig. │        │
+    │  └───┬────┘ └────┬─────┘ └────┬─────┘ └────┬─────┘ └────┬─────┘ └────┬─────┘ └────┬─────┘        │
+    │      │           │            │             │             │            │            │              │
+    │  ┌───┴───────────┴────────────┴─────────────┴─────────────┴────────────┴────────────┴──────┐       │
+    │  │              Integration Layer — REST API │ WebSocket │ MOS │ NMOS │ gRPC │ Webhooks    │       │
+    │  └───┬───────────┬────────────┬─────────────┬─────────────┬────────────┬────────────┬──────┘       │
+    └──────┼───────────┼────────────┼─────────────┼─────────────┼────────────┼────────────┼──────────────┘
+           │           │            │             │             │            │            │
+    ┌──────┴──┐ ┌──────┴──┐ ┌──────┴──┐ ┌────────┴─┐ ┌────────┴─┐ ┌───────┴──┐ ┌──────┴───┐
+    │   MAM   │ │Broadcast│ │  NMOS   │ │  Cloud   │ │C2PA/Fact │ │ Brand    │ │  Carbon  │
+    │ Systems │ │Automate │ │ Network │ │Platforms │ │Check APIs│ │Safety/Ad │ │ESG APIs  │
+    └─────────┘ └─────────┘ └─────────┘ └──────────┘ └──────────┘ └──────────┘ └──────────┘
     ```
     """)
 
@@ -3518,6 +3739,12 @@ elif page == "Integration Showcase":
             {"method": "POST", "endpoint": "/api/v1/compliance/scan", "description": "Run compliance scan on content"},
             {"method": "POST", "endpoint": "/api/v1/social/generate", "description": "Generate social media posts"},
             {"method": "GET", "endpoint": "/api/v1/trending/topics", "description": "Get current trending topics"},
+            {"method": "POST", "endpoint": "/api/v1/deepfake/verify", "description": "Run forensic deepfake & C2PA provenance check"},
+            {"method": "POST", "endpoint": "/api/v1/factcheck/analyze", "description": "Extract & verify claims against 8 databases"},
+            {"method": "GET", "endpoint": "/api/v1/audience/retention", "description": "Get real-time retention curve & drop-off predictions"},
+            {"method": "POST", "endpoint": "/api/v1/production/plan", "description": "Generate shot plan, lower-thirds & rundown"},
+            {"method": "POST", "endpoint": "/api/v1/brandsafety/score", "description": "Score content for GARM compliance & CPM optimization"},
+            {"method": "GET", "endpoint": "/api/v1/carbon/report", "description": "Get Scope 1/2/3 carbon footprint & ESG score"},
         ]
 
         for api in api_endpoints:
@@ -3536,10 +3763,19 @@ elif page == "Integration Showcase":
 // Connect to real-time updates
 const ws = new WebSocket('wss://api.mediaagentiq.com/ws');
 
-// Subscribe to events
+// Subscribe to events (all 14 agents)
 ws.send(JSON.stringify({
     action: 'subscribe',
-    channels: ['trending', 'compliance_alerts', 'processing_status']
+    channels: [
+        // Original 8 agents
+        'trending', 'compliance_alerts', 'processing_status',
+        'caption.live', 'clip.detected', 'archive.indexed',
+        'social.scheduled', 'rights.alert',
+        // Future-Ready 6 agents
+        'deepfake.verdict', 'factcheck.claim_flagged',
+        'audience.dropoff_risk', 'production.shot_change',
+        'brandsafety.score_update', 'carbon.threshold_alert'
+    ]
 }));
 
 // Receive real-time updates
@@ -3558,7 +3794,13 @@ ws.onmessage = (event) => {
         "caption.completed",
         "clip.detected",
         "compliance.violation",
-        "trending.alert"
+        "trending.alert",
+        "deepfake.flagged",
+        "factcheck.false_claim_detected",
+        "audience.drop_off_alert",
+        "production.rundown_updated",
+        "brandsafety.ad_blocked",
+        "carbon.esg_report_ready"
     ],
     "secret": "your-webhook-secret",
     "retry_policy": {

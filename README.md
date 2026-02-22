@@ -163,12 +163,18 @@ NMOS_REGISTRY_URL=http://nmos-registry:8080
 
 | System | Protocol | Status |
 |--------|----------|--------|
-| Media Asset Management | REST API, MOS | ✅ Ready |
-| Broadcast Automation | MOS, VDCP | ✅ Ready |
-| NMOS IP Infrastructure | IS-04, IS-05 | ✅ Ready |
+| Media Asset Management | REST API, MOS, BXF | ✅ Ready |
+| Broadcast Automation | MOS, VDCP, RS-422 | ✅ Ready |
+| NMOS IP Infrastructure | IS-04, IS-05, IS-07 | ✅ Ready |
 | Cloud Platforms | AWS, Azure, GCP | ✅ Ready |
-| Social Media | Platform APIs | ✅ Ready |
-| AI Transcription | Whisper, etc. | ✅ Ready |
+| Social Media | Platform APIs, OAuth 2.0 | ✅ Ready |
+| AI Transcription | Whisper, gRPC | ✅ Ready |
+| Deepfake / C2PA Provenance | C2PA REST API | 🔮 Future Ready |
+| Fact-Check Databases | REST API, RSS/Atom | 🔮 Future Ready |
+| Audience Analytics | REST API, WebSocket | 🔮 Future Ready |
+| Graphics & Newsroom (Vizrt, iNews) | Vizrt DataHub, MOS | 🔮 Future Ready |
+| Brand Safety / Ad Tech | OpenRTB, IAS API | 🔮 Future Ready |
+| Carbon ESG APIs (ElectricityMap) | REST API | 🔮 Future Ready |
 
 ---
 
@@ -207,10 +213,10 @@ python orchestrator.py
 ## 📸 Features
 
 ### All-in-One Workflow
-Process content through ALL 8 agents with one click:
+Process content through ALL 14 agents with one click:
 - Upload once, analyze everywhere
-- Real-time parallel processing
-- Combined results dashboard
+- Real-time parallel processing across all 14 agents
+- Combined results dashboard with 14-tab results view
 - Batch export options
 
 ### Integration Showcase
