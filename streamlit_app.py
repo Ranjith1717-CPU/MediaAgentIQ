@@ -21,6 +21,9 @@ try:
         SAMPLE_DEEPFAKE_RESULT, SAMPLE_FACT_CHECK_CLAIMS,
         SAMPLE_AUDIENCE_DATA, SAMPLE_PRODUCTION_DATA,
         SAMPLE_BRAND_SAFETY_DATA, SAMPLE_CARBON_DATA,
+        DEMO_DEEPFAKE_RESULT, DEMO_FACT_CHECK_CLAIMS,
+        DEMO_AUDIENCE_DATA, DEMO_PRODUCTION_DATA,
+        DEMO_BRAND_SAFETY_DATA, DEMO_CARBON_DATA,
         get_demo_video_path, is_demo_video_available
     )
     DEMO_SAMPLE_AVAILABLE = is_demo_video_available()
@@ -974,10 +977,14 @@ if page == "Dashboard":
     # Key Metrics
     st.subheader("Today's Performance")
     col1, col2, col3, col4, col5 = st.columns(5)
-    col1.metric("Jobs Processed", "147", "+23 vs yesterday")
-    col2.metric("Content Captioned", "48 hrs", "of video")
-    col3.metric("Compliance Score", "96.2%", "+2.1%")
-    col4.metric("Viral Clips Found", "12", "this week")
+    _jobs = random.randint(138, 162)
+    _hrs = round(random.uniform(44.5, 52.3), 1)
+    _comp = round(random.uniform(94.8, 97.6), 1)
+    _clips = random.randint(9, 16)
+    col1.metric("Jobs Processed", str(_jobs), f"+{random.randint(18, 31)} vs yesterday")
+    col2.metric("Content Captioned", f"{_hrs} hrs", "of video")
+    col3.metric("Compliance Score", f"{_comp}%", f"+{round(random.uniform(1.2, 3.1), 1)}%")
+    col4.metric("Viral Clips Found", str(_clips), "this week")
     col5.metric("Languages Served", "8", "active")
 
     st.divider()
@@ -1177,10 +1184,10 @@ if page == "Dashboard":
 
         # Processing stats
         st.markdown("**Processing Today**")
-        st.metric("Video Processed", "48.2 hrs")
-        st.metric("Captions Generated", "12,450 segments")
-        st.metric("Clips Extracted", "47")
-        st.metric("Posts Published", "28")
+        st.metric("Video Processed", f"{round(random.uniform(44.5, 52.3), 1)} hrs")
+        st.metric("Captions Generated", f"{random.randint(11800, 13200):,} segments")
+        st.metric("Clips Extracted", str(random.randint(42, 56)))
+        st.metric("Posts Published", str(random.randint(24, 34)))
 
         st.divider()
 
@@ -1321,38 +1328,42 @@ elif page == "🚀 All-in-One Workflow":
                 </div>
                 """, unsafe_allow_html=True)
 
-        # Simulate parallel processing
-        import time
+        # Sequential agent pipeline — each agent completes before the next starts
+        import time as _time
+        import random as _rand
         total_steps = sum(len(a['steps']) for a in agents_to_run)
         completed_steps = 0
 
-        for step_num in range(4):  # Max 4 steps per agent
-            for i, agent in enumerate(agents_to_run):
-                if step_num < len(agent['steps']):
-                    current_step = agent['steps'][step_num]
-                    with cols[i % 4]:
-                        if step_num == len(agent['steps']) - 1:
-                            # Last step - mark complete
-                            agent_containers[agent['name']].markdown(f"""
-                            <div style="background: #1e293b; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 3px solid #22c55e;">
-                                <strong>{agent['icon']} {agent['name']}</strong><br/>
-                                <span style="color: #22c55e;">✅ Complete</span>
-                            </div>
-                            """, unsafe_allow_html=True)
-                        else:
-                            agent_containers[agent['name']].markdown(f"""
-                            <div style="background: #1e293b; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 3px solid #f59e0b;">
-                                <strong>{agent['icon']} {agent['name']}</strong><br/>
-                                <span style="color: #f59e0b;">🔄 {current_step}...</span>
-                            </div>
-                            """, unsafe_allow_html=True)
-                    completed_steps += 1
+        for i, agent in enumerate(agents_to_run):
+            # Mark agent as active (orange)
+            agent_containers[agent['name']].markdown(f"""
+            <div style="background: #1e293b; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 3px solid #f59e0b;">
+                <strong>{agent['icon']} {agent['name']}</strong><br/>
+                <span style="color: #f59e0b;">⚡ Starting...</span>
+            </div>
+            """, unsafe_allow_html=True)
 
-            overall_progress.progress(completed_steps / total_steps, f"Processing... {completed_steps}/{total_steps} steps complete")
-            time.sleep(0.4)
+            for step_num, step_text in enumerate(agent['steps']):
+                agent_containers[agent['name']].markdown(f"""
+                <div style="background: #1e293b; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 3px solid #f59e0b;">
+                    <strong>{agent['icon']} {agent['name']}</strong><br/>
+                    <span style="color: #f59e0b;">🔄 {step_text}...</span>
+                </div>
+                """, unsafe_allow_html=True)
+                completed_steps += 1
+                overall_progress.progress(completed_steps / total_steps, f"🔄 {agent['name']}: {step_text}...")
+                _time.sleep(_rand.uniform(0.15, 0.55))
 
-        overall_progress.progress(1.0, "✅ All agents complete!")
-        time.sleep(0.5)
+            # Mark agent complete (green)
+            agent_containers[agent['name']].markdown(f"""
+            <div style="background: #1e293b; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 3px solid #22c55e;">
+                <strong>{agent['icon']} {agent['name']}</strong><br/>
+                <span style="color: #22c55e;">✅ Complete</span>
+            </div>
+            """, unsafe_allow_html=True)
+
+        overall_progress.progress(1.0, "✅ All 14 agents complete!")
+        _time.sleep(0.4)
 
         st.session_state.all_in_one_done = True
         st.session_state.all_in_one_running = False
@@ -1397,12 +1408,12 @@ elif page == "🚀 All-in-One Workflow":
             active_social = DEMO_SOCIAL_POSTS.get("breaking_news", [])
             active_translations = DEMO_TRANSLATIONS
             active_licenses = DEMO_LICENSES
-            active_deepfake = {}
-            active_fact_check = []
-            active_audience = {}
-            active_production = {}
-            active_brand_safety = {}
-            active_carbon = {}
+            active_deepfake = DEMO_DEEPFAKE_RESULT
+            active_fact_check = DEMO_FACT_CHECK_CLAIMS
+            active_audience = DEMO_AUDIENCE_DATA
+            active_production = DEMO_PRODUCTION_DATA
+            active_brand_safety = DEMO_BRAND_SAFETY_DATA
+            active_carbon = DEMO_CARBON_DATA
             content_title = "Morning News Broadcast"
             content_duration = "4:02:15"
 
@@ -1476,11 +1487,17 @@ elif page == "🚀 All-in-One Workflow":
                     st.warning(f"{severity_icon} **{issue['type'].upper()}** @ {issue['timestamp']}\n\n{issue['description']}\n\n**Recommendation:** {issue['recommendation']}")
                 else:
                     st.info(f"{severity_icon} **{issue['type'].upper()}** @ {issue['timestamp']}\n\n{issue['description']}\n\n**Recommendation:** {issue['recommendation']}")
-            st.button("📝 Generate Compliance Report", use_container_width=True, key="compliance_report_allinone")
+            import json as _json
+            compliance_report = _json.dumps(active_compliance, indent=2)
+            st.download_button("📥 Download Compliance Report (JSON)", compliance_report,
+                "compliance_report.json", "application/json", use_container_width=True, key="dl_compliance_allinone")
 
         with tab4:
             st.markdown("**Archive Metadata Generated**")
             st.json(active_archive)
+            import json as _json
+            st.download_button("📥 Download Archive Metadata (JSON)", _json.dumps(active_archive, indent=2),
+                "archive_metadata.json", "application/json", use_container_width=True, key="dl_archive_allinone")
             st.button("📤 Send to MAM System", use_container_width=True, key="mam_sync_allinone")
 
         with tab5:
@@ -1489,9 +1506,16 @@ elif page == "🚀 All-in-One Workflow":
                 with st.expander(f"**{post['platform']}** - {post['char_count']} chars | Best time: {post['best_time']}"):
                     st.text_area("Post Content", post['content'], height=120, key=f"social_{post['platform']}")
                     st.caption(f"📊 Predicted engagement: {post['predicted_engagement']}")
-            col1, col2 = st.columns(2)
+            import csv, io as _io
+            _buf = _io.StringIO()
+            _writer = csv.DictWriter(_buf, fieldnames=["platform", "content", "char_count", "best_time", "predicted_engagement"])
+            _writer.writeheader()
+            _writer.writerows(active_social)
+            col1, col2, col3 = st.columns(3)
             col1.button("📤 Post All Now", type="primary", use_container_width=True, key="post_all_allinone")
             col2.button("🕐 Schedule All", use_container_width=True, key="schedule_all_allinone")
+            col3.download_button("📥 Export Social Posts (CSV)", _buf.getvalue(),
+                "social_posts.csv", "text/csv", use_container_width=True, key="dl_social_allinone")
 
         with tab6:
             st.markdown(f"**Translations Complete** - {len(target_languages)} languages")
@@ -1551,7 +1575,21 @@ elif page == "🚀 All-in-One Workflow":
             col1.metric("Audio Authenticity", f"{active_deepfake.get('audio_authenticity', 0.971)*100:.1f}%")
             col2.metric("Video Authenticity", f"{active_deepfake.get('video_authenticity', 0.964)*100:.1f}%")
             col3.metric("Metadata Trust", f"{active_deepfake.get('metadata_trust', 0.989)*100:.1f}%")
-            st.success("✅ C2PA provenance chain verified. No synthetic media indicators detected.")
+            if broadcast_safe:
+                st.success("✅ C2PA provenance chain verified. No synthetic media indicators detected.")
+            else:
+                st.error("🚫 HOLD FOR BROADCAST — Suspicious synthetic media indicators detected. Verify before airing.")
+            _df_report = (
+                f"DEEPFAKE FORENSIC REPORT\n{'='*50}\n"
+                f"Verdict: {verdict}\nRisk Score: {risk:.3f}\nBroadcast Safe: {'Yes' if broadcast_safe else 'No'}\n\n"
+                f"Audio Authenticity: {active_deepfake.get('audio_authenticity', 0)*100:.1f}%\n"
+                f"Video Authenticity: {active_deepfake.get('video_authenticity', 0)*100:.1f}%\n"
+                f"Metadata Trust: {active_deepfake.get('metadata_trust', 0)*100:.1f}%\n\n"
+                f"Recommendations:\n" +
+                "\n".join(f"  {p}: {a}" for p, a in active_deepfake.get("recommendations", []))
+            )
+            st.download_button("📥 Download Forensic Report", _df_report,
+                "deepfake_report.txt", "text/plain", use_container_width=True, key="dl_deepfake_allinone")
 
         with tab10:
             st.markdown("**Live Fact-Check Results**")
@@ -1567,6 +1605,10 @@ elif page == "🚀 All-in-One Workflow":
                     """, unsafe_allow_html=True)
             else:
                 st.info("Fact-check results will appear here after running the analysis with demo video selected.")
+            if active_fact_check:
+                import json as _json
+                st.download_button("📥 Download Fact-Check Report (JSON)", _json.dumps(active_fact_check, indent=2),
+                    "fact_check_report.json", "application/json", use_container_width=True, key="dl_factcheck_allinone")
 
         with tab11:
             st.markdown("**Audience Intelligence**")
@@ -1577,6 +1619,9 @@ elif page == "🚀 All-in-One Workflow":
             st.markdown("**Demographics:**")
             for age, pct in active_audience.get("demographics", {}).items():
                 st.progress(pct / 100, text=f"{age}: {pct}%")
+            import json as _json
+            st.download_button("📥 Download Audience Report (JSON)", _json.dumps(active_audience, indent=2),
+                "audience_intelligence.json", "application/json", use_container_width=True, key="dl_audience_allinone")
 
         with tab12:
             st.markdown("**AI Production Director**")
@@ -1593,6 +1638,10 @@ elif page == "🚀 All-in-One Workflow":
                     st.markdown(f"- **{lt['line1']}** / {lt['line2']} — *{lt['trigger']}*")
             else:
                 st.info("Production plan will appear here after running with demo video selected.")
+            if _shots:
+                import json as _json
+                st.download_button("📥 Download Production Plan (JSON)", _json.dumps(active_production, indent=2),
+                    "production_plan.json", "application/json", use_container_width=True, key="dl_production_allinone")
 
         with tab13:
             st.markdown("**Brand Safety Report**")
@@ -1615,6 +1664,9 @@ elif page == "🚀 All-in-One Workflow":
                 cols_g = st.columns(2)
                 for i, (cat, level, icon) in enumerate(_garm):
                     cols_g[i % 2].markdown(f"{icon} **{cat}**: {level}")
+            import json as _json
+            st.download_button("📥 Download Brand Safety Report (JSON)", _json.dumps(active_brand_safety, indent=2),
+                "brand_safety_report.json", "application/json", use_container_width=True, key="dl_brandsafety_allinone")
 
         with tab14:
             st.markdown("**Carbon Intelligence & ESG**")
@@ -1629,6 +1681,23 @@ elif page == "🚀 All-in-One Workflow":
             st.progress(active_carbon.get("scope3_kg", 3.7) / _co2, text=f"Scope 3 (Supply chain): {active_carbon.get('scope3_kg', 3.7)} kg")
             standards = ", ".join(active_carbon.get("esg_report_standards", ["GRI 305", "TCFD", "SBTi"]))
             st.success(f"📋 Frameworks Aligned: {standards}")
+            _co2_val = active_carbon.get("total_co2e_kg", 12.4)
+            _esg_val = active_carbon.get("esg_score", 81)
+            _ren_val = active_carbon.get("renewable_pct", 34)
+            _esg_text = (
+                f"ESG CARBON INTELLIGENCE REPORT\n{'='*50}\n"
+                f"Report Period: {datetime.now().strftime('%B %Y')}\n\n"
+                f"Total CO2e: {_co2_val} kg\n"
+                f"ESG Score: {_esg_val}/100\n"
+                f"Renewable Mix: {_ren_val}%\n"
+                f"Scope 1 (Direct): {active_carbon.get('scope1_kg', 0)} kg\n"
+                f"Scope 2 (Grid): {active_carbon.get('scope2_kg', 0)} kg\n"
+                f"Scope 3 (Supply chain): {active_carbon.get('scope3_kg', 0)} kg\n\n"
+                f"Frameworks Aligned: {standards}\n"
+            )
+            import json as _json
+            st.download_button("📥 Download ESG Report (JSON)", _json.dumps(active_carbon, indent=2),
+                "esg_carbon_report.json", "application/json", use_container_width=True, key="dl_carbon_allinone")
 
         st.divider()
 
@@ -2923,24 +2992,11 @@ elif page == "🔍 Deepfake Detection":
     if st.session_state.get("deepfake_scanned"):
         st.divider()
 
-        # Use SAMPLE_ data when demo video available, random otherwise
+        # Use SAMPLE_ data when demo video available, DEMO_ data on cloud (no video)
         if DEMO_SAMPLE_AVAILABLE:
             df_result = SAMPLE_DEEPFAKE_RESULT
         else:
-            _rs = round(random.uniform(0.15, 0.72), 3)
-            df_result = {
-                "risk_score": _rs,
-                "verdict": "AUTHENTIC" if _rs < 0.25 else "SUSPICIOUS - REVIEW" if _rs < 0.60 else "LIKELY SYNTHETIC",
-                "broadcast_safe": _rs < 0.25,
-                "audio_authenticity": round(random.uniform(0.72, 0.96), 3),
-                "video_authenticity": round(random.uniform(0.68, 0.94), 3),
-                "metadata_trust": round(random.uniform(0.75, 0.99), 3),
-                "audio_findings": [],
-                "video_findings": {},
-                "metadata_findings": {},
-                "provenance": ["📱 Source reported: UGC Upload", "🔗 C2PA chain: Not present"],
-                "recommendations": [("🚨 Urgent", "Submit to secondary verification before broadcast")]
-            }
+            df_result = DEMO_DEEPFAKE_RESULT
 
         risk_score = df_result["risk_score"]
         broadcast_safe = df_result["broadcast_safe"]
@@ -3008,6 +3064,18 @@ elif page == "🔍 Deepfake Detection":
                 for priority, action in df_result.get("recommendations", []):
                     st.markdown(f"**{priority}:** {action}")
 
+        _df_forensic = (
+            f"DEEPFAKE FORENSIC REPORT\n{'='*50}\n"
+            f"Verdict: {verdict}\nRisk Score: {risk_score:.3f}\nBroadcast Safe: {'Yes' if broadcast_safe else 'No'}\n\n"
+            f"Audio Authenticity: {df_result['audio_authenticity']:.3f}\n"
+            f"Video Authenticity: {df_result['video_authenticity']:.3f}\n"
+            f"Metadata Trust: {df_result['metadata_trust']:.3f}\n\n"
+            f"Provenance:\n" + "\n".join(f"  {s}" for s in df_result.get("provenance", [])) +
+            f"\n\nRecommendations:\n" + "\n".join(f"  {p}: {a}" for p, a in df_result.get("recommendations", []))
+        )
+        st.download_button("📥 Download Forensic Report", _df_forensic,
+            "deepfake_forensic_report.txt", "text/plain", use_container_width=True, key="dl_deepfake_page")
+
 
 elif page == "✅ Live Fact-Check":
     st.title("✅ Live Fact-Check Agent")
@@ -3063,18 +3131,7 @@ elif page == "✅ Live Fact-Check":
         st.divider()
         st.subheader("Fact-Check Results")
 
-        claims_data = SAMPLE_FACT_CHECK_CLAIMS if DEMO_SAMPLE_AVAILABLE else [
-            {"claim": "Unemployment rate at 3.7%, lowest in 50 years", "verdict": "MOSTLY TRUE", "color": "#22c55e", "icon": "✔️",
-             "confidence": 0.87, "source": "Bureau of Labor Statistics", "note": "3.7% confirmed but 'lowest in 50 years' was 2019 level (3.5%)"},
-            {"claim": "Bill received 67 votes in the Senate", "verdict": "UNVERIFIED", "color": "#94a3b8", "icon": "❓",
-             "confidence": 0.62, "source": "Congressional Record", "note": "Unable to verify current bill vote count in real-time"},
-            {"claim": "Global temps risen 1.2°C since pre-industrial", "verdict": "TRUE", "color": "#22c55e", "icon": "✅",
-             "confidence": 0.97, "source": "IPCC AR6 Report", "note": "Confirmed by IPCC 2023 report: 1.1-1.2°C increase"},
-            {"claim": "Vaccine shows 94% efficacy in Phase 3 trials", "verdict": "MISLEADING", "color": "#f59e0b", "icon": "⚠️",
-             "confidence": 0.79, "source": "FDA Clinical Trial Database", "note": "94% was initial trial data; updated analysis shows 89.7%"},
-            {"claim": "City population grew 18% over last decade", "verdict": "FALSE", "color": "#ef4444", "icon": "❌",
-             "confidence": 0.83, "source": "US Census Bureau", "note": "Census data shows 12.3% growth, not 18%"},
-        ]
+        claims_data = SAMPLE_FACT_CHECK_CLAIMS if DEMO_SAMPLE_AVAILABLE else DEMO_FACT_CHECK_CLAIMS
 
         for i, claim in enumerate(claims_data):
             with st.container():
@@ -3103,6 +3160,9 @@ elif page == "✅ Live Fact-Check":
             st.metric("Problematic Claims", false_count, delta=f"{'🚨 Alert Producers' if false_count > 0 else 'Clear'}")
         with col3:
             st.metric("Avg Confidence", f"{sum(c['confidence'] for c in claims_data)/len(claims_data):.0%}")
+        import json as _json
+        st.download_button("📥 Download Fact-Check Report (JSON)", _json.dumps(claims_data, indent=2),
+            "fact_check_report.json", "application/json", use_container_width=True, key="dl_factcheck_page")
 
 
 elif page == "📊 Audience Intelligence":
@@ -3125,7 +3185,7 @@ elif page == "📊 Audience Intelligence":
     with col1:
         content_type = st.selectbox("Content Type", ["entertainment", "hard_news", "breaking_news", "weather", "sports", "human_interest", "interview"], index=0 if DEMO_SAMPLE_AVAILABLE else 1)
     with col2:
-        _aud = SAMPLE_AUDIENCE_DATA if DEMO_SAMPLE_AVAILABLE else {}
+        _aud = SAMPLE_AUDIENCE_DATA if DEMO_SAMPLE_AVAILABLE else DEMO_AUDIENCE_DATA
         st.metric("Current Viewers", f"{_aud.get('current_viewers', random.randint(250000, 850000)):,}", _aud.get('viewer_trend', f"+{random.randint(2, 15)}K/min"))
     with col3:
         st.metric("Retention Risk", f"{_aud.get('retention_risk', random.randint(18, 45))}%", "next 10 min")
@@ -3141,7 +3201,7 @@ elif page == "📊 Audience Intelligence":
     if st.session_state.get("audience_done"):
         st.divider()
 
-        aud = SAMPLE_AUDIENCE_DATA if DEMO_SAMPLE_AVAILABLE else {}
+        aud = SAMPLE_AUDIENCE_DATA if DEMO_SAMPLE_AVAILABLE else DEMO_AUDIENCE_DATA
 
         # Retention curve data
         if DEMO_SAMPLE_AVAILABLE:
@@ -3201,6 +3261,10 @@ elif page == "📊 Audience Intelligence":
             st.metric("Second Screen", f"{lm.get('second_screen_pct', random.randint(18, 42))}%")
             st.metric("Sentiment", f"{lm.get('sentiment_score', round(random.uniform(0.45, 0.82), 2))}")
 
+        import json as _json
+        st.download_button("📥 Download Audience Report (JSON)", _json.dumps(aud, indent=2),
+            "audience_intelligence.json", "application/json", use_container_width=True, key="dl_audience_page")
+
 
 elif page == "🎬 AI Production Director":
     st.title("🎬 AI Production Director")
@@ -3226,7 +3290,7 @@ elif page == "🎬 AI Production Director":
             st.session_state["prod_done"] = True
 
     if st.session_state.get("prod_done"):
-        pd_data = SAMPLE_PRODUCTION_DATA if DEMO_SAMPLE_AVAILABLE else {}
+        pd_data = SAMPLE_PRODUCTION_DATA if DEMO_SAMPLE_AVAILABLE else DEMO_PRODUCTION_DATA
         tabs = st.tabs(["📷 Camera Plan", "📝 Lower Thirds", "📋 Rundown", "⏰ Break Strategy", "🔊 Audio", "⚙️ Technical"])
 
         with tabs[0]:
@@ -3308,6 +3372,10 @@ elif page == "🎬 AI Production Director":
                 st.metric("Loudness", f"{tech.get('loudness_lufs', round(random.uniform(-22, -18), 1))} LUFS", "ITU-R BS.1770")
                 st.metric("Stream Health", tech.get("stream_health", "Excellent"), "All CDNs stable")
 
+        import json as _json
+        st.download_button("📥 Download Production Plan (JSON)", _json.dumps(pd_data, indent=2),
+            "production_plan.json", "application/json", use_container_width=True, key="dl_production_page")
+
 
 elif page == "🛡️ Brand Safety":
     st.title("🛡️ Brand Safety & Contextual Ad Intelligence")
@@ -3326,7 +3394,7 @@ elif page == "🛡️ Brand Safety":
     </div>
     """, unsafe_allow_html=True)
 
-    _bs = SAMPLE_BRAND_SAFETY_DATA if DEMO_SAMPLE_AVAILABLE else {}
+    _bs = SAMPLE_BRAND_SAFETY_DATA if DEMO_SAMPLE_AVAILABLE else DEMO_BRAND_SAFETY_DATA
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric("Current Safety Score", f"{_bs.get('overall_score', random.randint(68, 94))}/100", "GARM compliant")
@@ -3361,7 +3429,7 @@ elif page == "🛡️ Brand Safety":
     if st.session_state.get("brand_safety_done"):
         st.divider()
 
-        bs = SAMPLE_BRAND_SAFETY_DATA if DEMO_SAMPLE_AVAILABLE else {}
+        bs = SAMPLE_BRAND_SAFETY_DATA if DEMO_SAMPLE_AVAILABLE else DEMO_BRAND_SAFETY_DATA
         overall_score = bs.get("overall_score", random.randint(72, 92))
         level = bs.get("level", "Premium Safe" if overall_score >= 85 else "Standard Safe" if overall_score >= 70 else "Caution")
         level_color = bs.get("level_color", "#22c55e" if overall_score >= 85 else "#f59e0b" if overall_score >= 70 else "#ef4444")
@@ -3408,6 +3476,10 @@ elif page == "🛡️ Brand Safety":
                 st.metric("Revenue at Risk", f"${bs.get('revenue_at_risk', random.randint(2000, 15000)):,}")
                 st.metric("Premium Opportunity", f"+${bs.get('premium_opportunity', random.randint(3000, 18000)):,}")
 
+        import json as _json
+        st.download_button("📥 Download Brand Safety Report (JSON)", _json.dumps(bs, indent=2),
+            "brand_safety_report.json", "application/json", use_container_width=True, key="dl_brandsafety_page")
+
 
 elif page == "🌿 Carbon Intelligence":
     st.title("🌿 Carbon Intelligence & ESG Broadcast Agent")
@@ -3438,7 +3510,7 @@ elif page == "🌿 Carbon Intelligence":
 
     if st.session_state.get("carbon_done"):
         st.divider()
-        c = SAMPLE_CARBON_DATA if DEMO_SAMPLE_AVAILABLE else {}
+        c = SAMPLE_CARBON_DATA if DEMO_SAMPLE_AVAILABLE else DEMO_CARBON_DATA
 
         # Key metrics
         co2_today = c.get("total_co2e_kg", round(random.uniform(320, 780), 1))
@@ -3601,8 +3673,27 @@ elif page == "🌿 Carbon Intelligence":
             - ✅ Advertiser ESG Compliant: {'Yes' if esg_score >= 60 else 'No'}
             - 📅 Next Audit: {(datetime.now() + timedelta(days=90)).strftime('%Y-%m-%d')}
             """)
-            if st.button("📄 Export ESG Report (PDF)", use_container_width=True):
-                st.info("Production mode: Generates full GRI 305-compliant PDF report for stakeholder disclosure")
+            _esg_dl_text = (
+                f"ESG CARBON INTELLIGENCE REPORT\n{'='*50}\n"
+                f"Report Period: {datetime.now().strftime('%B %Y')}\n\n"
+                f"ESG Score: {esg_score}/100 (Rating: {rating})\n"
+                f"Total CO2e: {co2_today} kg\n"
+                f"Renewable Mix: {renewable_pct}%\n"
+                f"Scope 1 (Direct): {scope1} kg\n"
+                f"Scope 2 (Grid electricity): {scope2} kg\n"
+                f"Scope 3 (Supply chain): {scope3} kg\n\n"
+                f"Carbon Intensity: {_carbon_int} {_int_unit}\n"
+                f"Frameworks Aligned: {_standards}\n"
+                f"Advertiser ESG Compliant: {'Yes' if esg_score >= 60 else 'No'}\n"
+                f"Next Audit: {(datetime.now() + timedelta(days=90)).strftime('%Y-%m-%d')}\n"
+                f"\nNet Zero Target: 2035\n"
+            )
+            import json as _json
+            col_e1, col_e2 = st.columns(2)
+            col_e1.download_button("📥 Download ESG Report (TXT)", _esg_dl_text,
+                "esg_carbon_report.txt", "text/plain", use_container_width=True, key="dl_carbon_page_txt")
+            col_e2.download_button("📥 Download Carbon Data (JSON)", _json.dumps(c, indent=2),
+                "carbon_data.json", "application/json", use_container_width=True, key="dl_carbon_page_json")
 
 
 elif page == "Integration Showcase":

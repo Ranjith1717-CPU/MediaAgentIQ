@@ -635,6 +635,263 @@ SAMPLE_CARBON_DATA = {
 }
 
 
+# ============== DEMO DATA: NEWS BROADCAST SCENARIO ==============
+# "Senator James Hartford Infrastructure Bill Press Conference"
+# Used when DEMO_SAMPLE_AVAILABLE = False (cloud deployment without video file)
+
+DEMO_DEEPFAKE_RESULT = {
+    "risk_score": 0.68,
+    "verdict": "SUSPICIOUS — REVIEW REQUIRED",
+    "broadcast_safe": False,
+    "audio_authenticity": 0.321,
+    "video_authenticity": 0.412,
+    "metadata_trust": 0.285,
+    "audio_findings": [
+        {"type": "GAN fingerprint scan", "detail": "Neural synthesis artifacts detected in 2.1–3.8kHz frequency band — consistent with GAN-generated speech", "severity": "high"},
+        {"type": "Breath sound analysis", "detail": "Missing natural breath sounds between sentences — characteristic of TTS/voice synthesis", "severity": "high"},
+        {"type": "Prosody pattern", "detail": "Unnatural prosody and pitch transitions at phrase boundaries — may indicate voice cloning", "severity": "medium"},
+        {"type": "Room tone continuity", "detail": "Background noise floor inconsistency between utterances — suggests edit splicing", "severity": "medium"},
+    ],
+    "video_findings": {
+        "temporal_consistency": 0.412,
+        "facial_boundary_artifacts": "Jaw/hairline blending artifacts detected frames 892–1205",
+        "eye_blink_frequency": "6.1 blinks/min (Normal: 15–20/min) — suppressed blink rate, deepfake indicator",
+        "gaze_naturalness": 0.387,
+        "motion_flow": "Unnatural head motion vectors around frame 1100 — possible face-swap seam",
+    },
+    "metadata_findings": {
+        "camera_model": "Unknown — EXIF stripped",
+        "creation_timestamp": "DISCREPANCY: File timestamp 3 days before scheduled press conference",
+        "gps_data": "Absent — GPS metadata stripped",
+        "editing_traces": "CapCut re-encode detected — non-professional edit chain",
+        "codec_signature": "H.264 re-encode (2nd generation) — quality degradation consistent with social media re-post",
+        "c2pa_manifest": "ABSENT — No C2PA provenance chain present",
+    },
+    "provenance": [
+        "📱 Source: Social media upload (TikTok @political_watchdog_99)",
+        "🔗 C2PA chain: Not present — no origin credentials",
+        "🔍 Reverse image search: 3 prior uses found — earliest 6 days ago on Telegram",
+        "📋 Edit history: CapCut + 2 re-encodes detected",
+        "⚠️ Timestamp mismatch: File created 72 hours before the press conference occurred",
+    ],
+    "recommendations": [
+        ("🚫 HOLD", "Do NOT air — content flagged as suspicious pending verification"),
+        ("🚨 Escalate", "Route to editorial team and legal for immediate review"),
+        ("📞 Verify", "Contact Senator Hartford press office to confirm clip authenticity"),
+        ("🔍 Secondary check", "Submit to independent forensics lab for expert analysis"),
+    ],
+}
+
+DEMO_FACT_CHECK_CLAIMS = [
+    {
+        "claim": "The Senate passed the Infrastructure Investment Act 69–30",
+        "verdict": "TRUE",
+        "color": "#22c55e",
+        "icon": "✅",
+        "confidence": 0.99,
+        "source": "Senate.gov / Congressional Record",
+        "note": "Vote confirmed: 69–30 on final passage. Senate.gov roll call #247 verified.",
+    },
+    {
+        "claim": "$1.2 trillion allocated for infrastructure in the bill",
+        "verdict": "MOSTLY TRUE",
+        "color": "#22c55e",
+        "icon": "✔️",
+        "confidence": 0.91,
+        "source": "Congressional Budget Office (CBO)",
+        "note": "Total authorized: $1.2T. However, only $550B is new spending — remainder reauthorizes existing programs.",
+    },
+    {
+        "claim": "US infrastructure has been rated D+ for over a decade",
+        "verdict": "MISLEADING",
+        "color": "#f59e0b",
+        "icon": "⚠️",
+        "confidence": 0.82,
+        "source": "ASCE Infrastructure Report Card 2021",
+        "note": "ASCE gave US infrastructure C- in 2021 (improved from D+ in 2017). Senator used outdated grade.",
+    },
+    {
+        "claim": "Largest infrastructure investment since the Interstate Highway System",
+        "verdict": "UNVERIFIED",
+        "color": "#94a3b8",
+        "icon": "❓",
+        "confidence": 0.54,
+        "source": "Multiple economists — disputed",
+        "note": "Claim disputed by economists. 2009 Recovery Act (~$800B inflation-adjusted) may be comparable. No authoritative source confirms superlative.",
+    },
+    {
+        "claim": "The bill requires zero new taxes to fund the investment",
+        "verdict": "FALSE",
+        "color": "#ef4444",
+        "icon": "❌",
+        "confidence": 0.94,
+        "source": "CBO Score / Reuters / PolitiFact",
+        "note": "CBO projects bill adds $256B to the deficit over 10 years. Reuters and PolitiFact both rate this claim false.",
+    },
+]
+
+DEMO_AUDIENCE_DATA = {
+    "content_type": "breaking_news",
+    "current_viewers": 1247000,
+    "viewer_trend": "+34K/min",
+    "retention_risk": 22,
+    "predicted_peak": 2100000,
+    "peak_in_min": 12,
+    "retention_curve": {
+        "seconds": [0, 60, 120, 180, 240, 300, 360, 420, 480, 540, 600, 660, 720],
+        "values":  [100, 97, 94, 89, 87, 85, 91, 94, 88, 82, 78, 74, 70],
+        "note": "Spike at 360–420s = controversial budget claim moment — high engagement / simultaneous social sharing detected",
+    },
+    "drop_risks": [
+        {
+            "second": 180,
+            "risk": "medium",
+            "drop_pct": 5.2,
+            "cause": "Repetitive policy detail recitation — audience attention fatigue",
+            "intervention": "Cut to on-screen infographic or field reporter for visual variety",
+        },
+        {
+            "second": 420,
+            "risk": "high",
+            "drop_pct": 8.7,
+            "cause": "Technical budget breakdown segment — low engagement, complex data",
+            "intervention": "Anchor ad-lib: tease upcoming Q&A with senator — creates anticipation hook",
+        },
+        {
+            "second": 600,
+            "risk": "medium",
+            "drop_pct": 6.1,
+            "cause": "Pre-commercial break natural exit point",
+            "intervention": "Tease exclusive analyst reaction — hold viewers through break",
+        },
+    ],
+    "demographics": {
+        "18-24": 28,
+        "25-34": 41,
+        "35-44": 58,
+        "45-54": 72,
+        "55-64": 79,
+        "65+": 83,
+    },
+    "competitors": {
+        "CNN": 34,
+        "Fox News": 28,
+        "MSNBC": 22,
+        "BBC": 11,
+    },
+    "live_metrics": {
+        "social_chatter": 42300,
+        "second_screen_pct": 62,
+        "sentiment_score": 0.61,
+    },
+}
+
+DEMO_PRODUCTION_DATA = {
+    "shots": [
+        {"shot": 1, "camera": "Camera A", "type": "Wide", "use": "Podium establishing shot — full press conference context", "duration": "8s", "confidence": 0.96},
+        {"shot": 2, "camera": "Camera B", "type": "Medium Close-Up", "use": "Senator Hartford — audience connection, statement delivery", "duration": "45s", "confidence": 0.94},
+        {"shot": 3, "camera": "Camera C", "type": "Wide", "use": "Press corps reaction — audience credibility signal", "duration": "12s", "confidence": 0.88},
+        {"shot": 4, "camera": "Remote DC", "type": "Remote Guest", "use": "DC analyst — expert context and commentary", "duration": "60s", "confidence": 0.92},
+        {"shot": 5, "camera": "Graphics", "type": "Full Screen", "use": "Bill details graphic overlay — complex data visual aid", "duration": "20s", "confidence": 0.97},
+        {"shot": 6, "camera": "Camera B", "type": "Close-Up", "use": "Q&A session — close-up for reaction shots", "duration": "90s", "confidence": 0.91},
+    ],
+    "lower_thirds": [
+        {"line1": "SEN. JAMES HARTFORD (D-OH)", "line2": "Infrastructure Bill Author", "style": "Standard", "trigger": "On cut to senator — 0s"},
+        {"line1": "BREAKING NEWS", "line2": "Senate Passes $1.2T Infrastructure Act", "style": "Breaking (Red)", "trigger": "Opening — auto-trigger"},
+        {"line1": "DAVID CHEN", "line2": "DC Political Correspondent", "style": "Standard", "trigger": "On remote feed cut"},
+        {"line1": "LIVE", "line2": "Hartford Press Conference", "style": "Live (Red)", "trigger": "Continuous — top-right"},
+    ],
+    "rundown": [
+        {"pos": 1, "slug": "HARTFORD-OPEN", "type": "Live Address", "planned": "0:00–3:00", "score": 9.6, "suggestion": "✅ Strong open — lead with senator statement"},
+        {"pos": 2, "slug": "ANALYST-REACT", "type": "Live Remote", "planned": "3:00–5:30", "score": 9.1, "suggestion": "⬆️ Move from pos 3 to pos 2 — capture peak audience interest window"},
+        {"pos": 3, "slug": "BILL-GRAPHIC", "type": "Explainer", "planned": "5:30–7:00", "score": 7.8, "suggestion": "✅ Keep — visual break holds attention"},
+        {"pos": 4, "slug": "PRESS-QA", "type": "Live Q&A", "planned": "7:00–12:00", "score": 8.9, "suggestion": "✅ High engagement — senator under press questioning"},
+        {"pos": 5, "slug": "STUDIO-WRAP", "type": "Anchor Close", "planned": "12:00–13:00", "score": 7.2, "suggestion": "✅ Standard close — tease evening analysis"},
+    ],
+    "break_strategy": [
+        {"break": 1, "planned": "8:00", "ai_suggest": "9:45", "reason": "Post Q&A climax at 9:45 — natural story completion point, higher return rate", "return_rate": "74%"},
+        {"break": 2, "planned": "20:00", "ai_suggest": "18:30", "reason": "Competing coverage emerging on Fox — break early, return with exclusive analyst angle", "return_rate": "68%"},
+    ],
+    "audio_recommendations": [
+        {"source": "Senator Hartford (podium mic)", "level": "-16.2 LUFS", "status": "✅ Broadcast compliant"},
+        {"source": "Remote DC feed (David Chen)", "level": "-24.8 LUFS", "status": "⚠️ Too quiet — boost +8dB recommended"},
+        {"source": "Crowd/press background", "level": "-38.0 dBFS", "status": "✅ Acceptable ambience level"},
+    ],
+    "technical": {
+        "main_feed_mbps": 19.8,
+        "stream_latency_ms": 142,
+        "graphics_latency_ms": 21,
+        "loudness_lufs": -15.5,
+        "stream_health": "Good — 1 remote feed latency warning",
+    },
+}
+
+DEMO_BRAND_SAFETY_DATA = {
+    "overall_score": 71,
+    "level": "News Safe",
+    "level_color": "#f59e0b",
+    "garm_flags": [
+        ("Adult Content", "none", "✅"),
+        ("Violence/Gore", "none", "✅"),
+        ("Hate Speech", "none", "✅"),
+        ("Profanity", "none", "✅"),
+        ("Controversial News", "medium", "⚠️"),
+        ("Political Content", "high", "🔴"),
+        ("Illegal Content", "none", "✅"),
+        ("Misinformation Risk", "low", "⚠️"),
+    ],
+    "advertisers": [
+        {"name": "Luxury Auto", "min_score": 80, "status": "🔴 Blocked", "cpm": "N/A"},
+        {"name": "Family Products", "min_score": 85, "status": "🔴 Blocked", "cpm": "N/A"},
+        {"name": "Financial Services", "min_score": 65, "status": "✅ Safe", "cpm": "$52.40"},
+        {"name": "Consumer Tech", "min_score": 60, "status": "✅ Safe", "cpm": "$44.80"},
+        {"name": "Fast Food", "min_score": 55, "status": "✅ Safe", "cpm": "$31.20"},
+    ],
+    "current_cpm": 24.80,
+    "optimized_cpm": 38.50,
+    "cpm_uplift_pct": 55.2,
+    "revenue_at_risk": 12400,
+    "premium_opportunity": 18600,
+    "active_advertisers": 28,
+    "blocked_advertisers": 2,
+    "premium_windows_today": 3,
+}
+
+DEMO_CARBON_DATA = {
+    "broadcast_type": "breaking_news",
+    "duration_seconds": 1800,
+    "total_co2e_kg": 287.4,
+    "scope1_kg": 42.1,
+    "scope2_kg": 198.6,
+    "scope3_kg": 46.7,
+    "renewable_pct": 28,
+    "grid_region": "US_Mid_Atlantic",
+    "esg_score": 68,
+    "carbon_intensity_per_min": 9.58,
+    "vs_industry_avg_pct": -8,
+    "optimization_potential_pct": 31,
+    "energy_kwh": 742.8,
+    "equipment_breakdown": {
+        "Main transmitter (12kW x 30min)": 6.0,
+        "Studio lighting rig (18kW x 30min)": 9.0,
+        "Server farm & encoding (8kW x 24h share)": 6.4,
+        "Remote uplink - DC bureau (4kW x 30min)": 2.0,
+        "CDN streaming (6kW x 30min)": 3.0,
+        "Satellite uplink (2.5kW x 30min)": 1.25,
+    },
+    "social_distribution_co2e": 38.2,
+    "offset_recommended_kg": 145.0,
+    "offset_cost_usd": 72.50,
+    "green_schedule_saving_pct": 18,
+    "esg_report_standards": ["GRI 305", "TCFD", "GHG Protocol"],
+    "renewable_options": [
+        {"option": "Switch CDN to EU-West renewable-powered region", "saving_pct": 11, "cost": "$0"},
+        {"option": "Purchase verified carbon offset (Gold Standard)", "saving_pct": 50, "cost": "$72.50"},
+        {"option": "Replace OB truck with REMI cloud production", "saving_pct": 28, "cost": "Eliminate OB truck cost (~$8K/event)"},
+    ],
+}
+
+
 def get_demo_video_path():
     """Get the full path to the demo sample video."""
     base_dir = Path(__file__).parent
