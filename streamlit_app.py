@@ -808,8 +808,13 @@ with st.sidebar:
             "🔍 Deepfake Detection", "✅ Live Fact-Check",
             "📊 Audience Intelligence", "🎬 AI Production Director",
             "🛡️ Brand Safety", "🌿 Carbon Intelligence",
+            # ── Phase 1 Pipeline Agents ──
+            "📥 Ingest + Transcode", "📡 Signal Quality",
+            "📋 Playout Scheduling", "🌐 OTT Distribution",
+            "📰 Newsroom Integration",
             # System
             "Integration Showcase",
+            "💬 Channel Simulator",
         ],
         label_visibility="collapsed"
     )
@@ -823,8 +828,8 @@ with st.sidebar:
     with col2:
         st.caption(f"{datetime.now().strftime('%H:%M:%S')}")
 
-    st.success("All 14 Agents Online")
-    st.info("🔮 6 Future-Ready Agents Active")
+    st.success("All 19 Agents Online")
+    st.info("💬 Slack + Teams Gateway Active")
 
     # Mode selector
     st.markdown("**Processing Mode**")
@@ -903,10 +908,14 @@ if page == "Dashboard":
         # Scheduled Jobs
         with st.expander("📅 **Scheduled Background Jobs** (Click to expand)", expanded=True):
             scheduled_jobs = [
-                {"agent": "📈 Trending Agent", "interval": "Every 5 min", "last_run": "2 min ago", "status": "✅ Active"},
-                {"agent": "⚖️ Compliance Agent", "interval": "Every 10 min", "last_run": "7 min ago", "status": "✅ Active"},
-                {"agent": "📜 Rights Agent", "interval": "Every 1 hour", "last_run": "34 min ago", "status": "✅ Active"},
-                {"agent": "🔍 Archive Agent", "interval": "Every 6 hours", "last_run": "2h ago", "status": "✅ Active"},
+                {"agent": "📈 Trending Agent",        "interval": "Every 5 min",  "last_run": "2 min ago",  "status": "✅ Active"},
+                {"agent": "⚖️ Compliance Agent",      "interval": "Every 10 min", "last_run": "7 min ago",  "status": "✅ Active"},
+                {"agent": "📜 Rights Agent",           "interval": "Every 1 hour", "last_run": "34 min ago", "status": "✅ Active"},
+                {"agent": "🔍 Archive Agent",          "interval": "Every 6 hours","last_run": "2h ago",     "status": "✅ Active"},
+                {"agent": "📡 Signal Quality",         "interval": "Every 2 min",  "last_run": "1 min ago",  "status": "✅ Active"},
+                {"agent": "📰 Newsroom Integration",   "interval": "Every 3 min",  "last_run": "2 min ago",  "status": "✅ Active"},
+                {"agent": "📋 Playout Scheduling",     "interval": "Every 5 min",  "last_run": "3 min ago",  "status": "✅ Active"},
+                {"agent": "🌐 OTT Distribution",       "interval": "Every 10 min", "last_run": "6 min ago",  "status": "✅ Active"},
             ]
 
             for job in scheduled_jobs:
@@ -1437,13 +1446,23 @@ elif page == "🚀 All-in-One Workflow":
         col11.metric("Brand Safety", f"{active_brand_safety.get('overall_score', 96)}/100", active_brand_safety.get("level", "Premium Safe"))
         col12.metric("Carbon", f"{active_carbon.get('total_co2e_kg', 12.4)} kg CO₂e", f"ESG: {active_carbon.get('esg_score', 81)}/100")
 
+        # Summary Metrics Row 3 — Phase 1 Pipeline agents
+        col13, col14, col15, col16, col17 = st.columns(5)
+        col13.metric("Ingest Jobs", "3 complete", "0 errors")
+        col14.metric("Signal Quality", "✅ All Clear", "EBU R128 −22.8 LUFS")
+        col15.metric("Playout", "12 slots", "Next: 18:00 News")
+        col16.metric("OTT Streams", "5 profiles live", "147K viewers")
+        col17.metric("Newsroom", "8 stories", "2 wires pending")
+
         st.divider()
 
         # Tabbed Results
-        tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11, tab12, tab13, tab14 = st.tabs([
+        (tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10,
+         tab11, tab12, tab13, tab14, tab15, tab16, tab17, tab18, tab19) = st.tabs([
             "📝 Captions", "🎬 Viral Clips", "⚖️ Compliance", "🔍 Archive",
             "📱 Social", "🌍 Translations", "📜 Rights", "📈 Trending",
-            "🕵️ Deepfake", "✅ Fact-Check", "👥 Audience", "🎥 Production", "🛡️ Brand Safety", "🌿 Carbon"
+            "🕵️ Deepfake", "✅ Fact-Check", "👥 Audience", "🎥 Production", "🛡️ Brand Safety", "🌿 Carbon",
+            "📥 Ingest", "📡 Signal", "📋 Playout", "🌐 OTT", "📰 Newsroom",
         ])
 
         with tab1:
@@ -1698,6 +1717,115 @@ elif page == "🚀 All-in-One Workflow":
             import json as _json
             st.download_button("📥 Download ESG Report (JSON)", _json.dumps(active_carbon, indent=2),
                 "esg_carbon_report.json", "application/json", use_container_width=True, key="dl_carbon_allinone")
+
+        with tab15:
+            st.markdown("**Ingest + Transcode — Pipeline Status**")
+            col1, col2, col3 = st.columns(3)
+            col1.metric("Jobs Today", "3 complete", "0 errors")
+            col2.metric("Avg Transcode Time", "7m 24s", "4K HDR: 18m 12s")
+            col3.metric("Output Profiles", "6 configured", "Cloud: AWS MediaConvert")
+            jobs = [
+                {"id": "INJ-001", "file": "wkrn_morningnews_raw.mxf",   "status": "✅ Complete", "duration": "4:02:15", "outputs": "Broadcast HD, OTT HLS, Proxy, Thumbnail"},
+                {"id": "INJ-002", "file": "wkrn_sportshighlight_raw.mp4","status": "✅ Complete", "duration": "0:45:30", "outputs": "Broadcast HD, OTT HLS, Web MP4"},
+                {"id": "INJ-003", "file": "wkrn_weather_segment_raw.mxf","status": "⏳ In Progress","duration": "0:12:00", "outputs": "Broadcast HD, Proxy (running)"},
+            ]
+            for j in jobs:
+                st.markdown(f"""
+                <div style="background:#1e293b;padding:10px 14px;border-radius:8px;margin:6px 0;border-left:3px solid #6366f1;">
+                <strong style="color:#e2e8f0;">{j['id']}</strong> — <span style="color:#94a3b8;">{j['file']}</span>
+                &nbsp;&nbsp;<span style="color:#22c55e;">{j['status']}</span><br>
+                <small style="color:#64748b;">Duration: {j['duration']} &nbsp;|&nbsp; Outputs: {j['outputs']}</small>
+                </div>""", unsafe_allow_html=True)
+
+        with tab16:
+            st.markdown("**Signal Quality Monitor — Live Broadcast**")
+            col1, col2, col3, col4 = st.columns(4)
+            col1.metric("Loudness", "−22.8 LUFS", "✅ Target −23 ±1")
+            col2.metric("True Peak", "−1.4 dBTP", "✅ < −1.0 limit")
+            col3.metric("Black Frames", "0 detected", "✅ Clear")
+            col4.metric("Caption Sync", "±12ms", "✅ < 500ms")
+            st.success("📡 WKRN-HD: All Clear | EBU R128 + ATSC A/85 compliant")
+            alerts = [
+                ("09:23:45", "⚠️ WARNING", "Commercial segment +8 LUFS above program level", "#f59e0b"),
+                ("08:15:12", "🔴 CRITICAL", "3.2s black frame during program break — NOC alerted", "#ef4444"),
+            ]
+            st.markdown("**Alert History (Last 24h):**")
+            for ts, sev, msg, col in alerts:
+                st.markdown(f"""
+                <div style="background:rgba({','.join(['239,68,68' if col=='#ef4444' else '245,158,11,0.1' for _ in [1]])},0.1);
+                border-left:3px solid {col};padding:8px 12px;border-radius:6px;margin:4px 0;">
+                <small style="color:#94a3b8;">{ts}</small> &nbsp; <strong>{sev}</strong><br>
+                <span style="color:#e2e8f0;font-size:13px;">{msg}</span></div>""", unsafe_allow_html=True)
+
+        with tab17:
+            st.markdown("**Playout Scheduling — Today's Rundown**")
+            schedule = [
+                ("06:00", "09:00", "WKRN Morning News LIVE", "news_live", "✅ Aired"),
+                ("09:00", "10:00", "Today Show (NBC)",        "network",   "✅ Aired"),
+                ("10:00", "12:00", "The Price Is Right",      "syndicated","✅ Aired"),
+                ("12:00", "12:30", "WKRN News at Noon",       "news_live", "✅ Aired"),
+                ("18:00", "18:30", "WKRN News at 6",          "news_live", "🔵 Scheduled"),
+                ("22:00", "22:30", "WKRN News at 10",         "news_live", "🔵 Scheduled"),
+                ("22:30", "23:30", "Late Show (CBS)",          "network",   "🔵 Scheduled"),
+            ]
+            for s, e, title, t, status in schedule:
+                type_color = "#6366f1" if "news" in t else "#0891b2"
+                st.markdown(f"""
+                <div style="display:flex;gap:12px;align-items:center;padding:7px 12px;
+                background:#1e293b;border-radius:6px;margin:4px 0;border-left:3px solid {type_color};">
+                <span style="color:#94a3b8;font-family:monospace;min-width:110px;">{s} – {e}</span>
+                <span style="color:#e2e8f0;flex:1;">{title}</span>
+                <span style="color:#64748b;font-size:12px;">{status}</span></div>""", unsafe_allow_html=True)
+
+        with tab18:
+            st.markdown("**OTT Distribution — Live Stream Health**")
+            col1, col2, col3 = st.columns(3)
+            col1.metric("Active Streams", "5 profiles", "All healthy")
+            col2.metric("Total Viewers", "147,234", "+2.3K/min")
+            col3.metric("CDN", "CloudFront", "99.98% uptime")
+            abr = [
+                ("4K HDR",   "25 Mbps",  12847,  "✅"),
+                ("1080p60",  "8 Mbps",   89234,  "✅"),
+                ("720p",     "4 Mbps",   31204,  "✅"),
+                ("480p",     "2 Mbps",   10891,  "✅"),
+                ("Audio Only","128 kbps", 3058,  "✅"),
+            ]
+            for profile, br, viewers, health in abr:
+                st.markdown(f"""
+                <div style="display:flex;gap:12px;align-items:center;padding:6px 12px;
+                background:#1e293b;border-radius:6px;margin:3px 0;">
+                <span style="color:#e2e8f0;min-width:90px;font-weight:600;">{profile}</span>
+                <span style="color:#94a3b8;min-width:80px;">{br}</span>
+                <span style="color:#22c55e;flex:1;">{viewers:,} viewers</span>
+                <span>{health}</span></div>""", unsafe_allow_html=True)
+
+        with tab19:
+            st.markdown("**Newsroom Integration — iNews Rundown**")
+            col1, col2 = st.columns(2)
+            col1.metric("Stories Ready", "6 / 8", "2 editing")
+            col2.metric("Wire Stories", "14 new", "AP: 8, Reuters: 4, AFP: 2")
+            rundown = [
+                ("FIRE-DOWNTOWN", "Warehouse Fire Nashville",    "Jake Thompson",   "2:30", "✅ Ready", "LEAD"),
+                ("COUNCIL-VOTE",  "City Council Budget Vote",    "Maria Sanchez",   "1:45", "✅ Ready", "2ND"),
+                ("WEATHER-STORM", "Severe Storm Watch Tonight",  "Weather Team",    "1:15", "✅ Ready", "3RD"),
+                ("ECON-REPORT",   "Fed Rate Decision Analysis",  "David Park",      "2:00", "⏳ Editing","4TH"),
+                ("SPORTS-WIN",    "Titans Win Playoff Opener",   "Sports Desk",     "1:30", "✅ Ready", "5TH"),
+                ("TRAFFIC-ISSUE", "I-24 Closure Update",         "Traffic Desk",    "0:45", "✅ Ready", "KICKER"),
+            ]
+            for slug, title, reporter, dur, status, pos in rundown:
+                status_color = "#22c55e" if "Ready" in status else "#f59e0b"
+                pos_color = "#ef4444" if pos == "LEAD" else "#6366f1"
+                st.markdown(f"""
+                <div style="display:flex;gap:10px;align-items:center;padding:7px 12px;
+                background:#1e293b;border-radius:6px;margin:4px 0;">
+                <span style="background:{pos_color};color:#fff;padding:2px 8px;border-radius:4px;
+                font-size:11px;font-weight:700;min-width:58px;text-align:center;">{pos}</span>
+                <span style="color:#94a3b8;font-family:monospace;font-size:12px;min-width:90px;">{slug}</span>
+                <span style="color:#e2e8f0;flex:1;">{title}</span>
+                <span style="color:#94a3b8;font-size:12px;min-width:55px;">{reporter.split()[0]}</span>
+                <span style="color:#64748b;min-width:35px;">{dur}</span>
+                <span style="color:{status_color};font-size:13px;">{status}</span></div>""",
+                unsafe_allow_html=True)
 
         st.divider()
 
@@ -3696,6 +3824,503 @@ elif page == "🌿 Carbon Intelligence":
                 "carbon_data.json", "application/json", use_container_width=True, key="dl_carbon_page_json")
 
 
+# ======================================================================
+# PHASE 1 PIPELINE AGENTS (Broadcast Pipeline Gaps)
+# ======================================================================
+
+elif page == "📥 Ingest + Transcode":
+    st.title("📥 Ingest + Transcode Agent")
+    st.caption("Broadcast Pipeline — Automated Media Ingest | Multi-Profile Transcoding | MAM Integration | AWS MediaConvert")
+
+    with st.expander("**Agent Capabilities** — Click to expand", expanded=False):
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.markdown("""
+            **Format Support**
+            - MXF (XDCAM, P2, IMX)
+            - ProRes 4444 / 422 HQ
+            - H.264 / H.265 HEVC
+            - DPX, DNxHD, RAW
+            """)
+        with col2:
+            st.markdown("""
+            **Output Profiles**
+            - Broadcast HD (MXF 50 Mbps)
+            - Broadcast 4K (MXF 150 Mbps)
+            - OTT HLS (fMP4 ABR)
+            - Proxy Edit (ProRes 422)
+            - Web MP4 + Thumbnail
+            """)
+        with col3:
+            st.markdown("""
+            **Pipeline Steps**
+            - NMOS IS-04 discovery
+            - Checksum validation (MD5/SHA256)
+            - Colour space conversion
+            - LUFS / loudness normalise
+            - MXF structural validation
+            """)
+        with col4:
+            st.markdown("""
+            **Integrations**
+            - AWS MediaConvert (cloud)
+            - FFmpeg (on-prem)
+            - Harmonic Polaris MAM
+            - Avid Interplay
+            - Frame.io review link
+            """)
+
+    st.divider()
+
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        st.markdown(f'<span class="realtime-indicator"></span> **Pipeline Active** — {datetime.now().strftime("%I:%M:%S %p")}', unsafe_allow_html=True)
+    with col2:
+        ingest_run = st.button("▶️ Simulate Ingest", type="primary", use_container_width=True)
+
+    if ingest_run:
+        steps = [
+            {"icon": "📡", "text": "NMOS IS-04 discovery — locating source device"},
+            {"icon": "✅", "text": "File validation — MD5 checksum OK (42.7 GB)"},
+            {"icon": "🎨", "text": "Colour space: BT.709 → BT.2020 HDR conversion"},
+            {"icon": "🔊", "text": "Loudness normalization — −22.8 LUFS (EBU R128)"},
+            {"icon": "🎬", "text": "Transcoding: Broadcast HD (MXF H.264 50 Mbps)"},
+            {"icon": "📺", "text": "Transcoding: OTT HLS (fMP4 8 Mbps ABR)"},
+            {"icon": "🗂️", "text": "Transcoding: Proxy Edit (ProRes 422 HQ)"},
+            {"icon": "🖼️", "text": "Generating thumbnails (10 keyframes)"},
+            {"icon": "🏷️", "text": "Writing MXF metadata + archiving to MAM"},
+        ]
+        container = st.container()
+        simulate_realtime_processing(steps, container)
+
+    # Current jobs table
+    st.subheader("Ingest Queue — Today")
+    jobs_data = [
+        {"ID": "INJ-001", "File": "wkrn_morningnews_raw.mxf",    "Duration": "4:02:15", "Size": "42.7 GB", "Status": "✅ Complete", "Outputs": 4, "Time": "7m 24s"},
+        {"ID": "INJ-002", "File": "wkrn_sportshighlight_raw.mp4", "Duration": "0:45:30", "Size": "8.2 GB",  "Status": "✅ Complete", "Outputs": 3, "Time": "3m 11s"},
+        {"ID": "INJ-003", "File": "wkrn_weather_segment_raw.mxf", "Duration": "0:12:00", "Size": "2.1 GB",  "Status": "⏳ Running",  "Outputs": 2, "Time": "1m 48s..."},
+    ]
+    for j in jobs_data:
+        status_col = "#22c55e" if "Complete" in j["Status"] else "#f59e0b"
+        st.markdown(f"""
+        <div style="background:#1e293b;padding:12px 16px;border-radius:8px;margin:6px 0;
+        display:flex;gap:16px;align-items:center;border-left:3px solid #6366f1;">
+        <span style="color:#6366f1;font-family:monospace;font-weight:700;min-width:70px;">{j['ID']}</span>
+        <span style="color:#e2e8f0;flex:2;">{j['File']}</span>
+        <span style="color:#94a3b8;min-width:60px;">{j['Duration']}</span>
+        <span style="color:#94a3b8;min-width:60px;">{j['Size']}</span>
+        <span style="color:#94a3b8;min-width:55px;">{j['Outputs']} outputs</span>
+        <span style="color:#94a3b8;min-width:70px;">{j['Time']}</span>
+        <span style="color:{status_col};">{j['Status']}</span>
+        </div>""", unsafe_allow_html=True)
+
+    st.divider()
+    st.subheader("Output Profile Specifications")
+    profiles = [
+        ("Broadcast HD",   "MXF",   "H.264",  "50 Mbps",  "1920×1080i 50",  "PCM 48kHz", "NLE + Playout"),
+        ("Broadcast 4K",   "MXF",   "H.265",  "150 Mbps", "3840×2160p 50",  "PCM 48kHz", "4K Playout"),
+        ("OTT HLS",        "fMP4",  "H.264",  "8 Mbps",   "1080p + ABR",    "AAC 192k",  "Streaming CDN"),
+        ("Proxy Edit",     "MOV",   "ProRes", "45 Mbps",  "1920×1080p 25",  "PCM 48kHz", "NLE Editing"),
+        ("Web MP4",        "MP4",   "H.264",  "4 Mbps",   "1280×720p 25",   "AAC 128k",  "Web / Social"),
+        ("Thumbnail",      "JPEG",  "—",      "N/A",      "1920×1080",      "—",          "Archive / CMS"),
+    ]
+    cols_h = st.columns([2, 1, 1, 1, 2, 1, 2])
+    for h, label in zip(cols_h, ["Profile", "Container", "Codec", "Bitrate", "Resolution", "Audio", "Use Case"]):
+        h.markdown(f"**{label}**")
+    for p in profiles:
+        cols_r = st.columns([2, 1, 1, 1, 2, 1, 2])
+        for col, val in zip(cols_r, p):
+            col.caption(val)
+
+
+elif page == "📡 Signal Quality":
+    st.title("📡 Signal Quality Agent")
+    st.caption("EBU R128 / ATSC A/85 Loudness | Black & Freeze Frame Detection | CEA-608/708 Caption Monitoring | 24/7 NOC Alerts")
+
+    with st.expander("**Agent Capabilities** — Click to expand", expanded=False):
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.markdown("""
+            **Audio (EBU R128)**
+            - Integrated loudness (I)
+            - True peak (TP) limiter
+            - Loudness range (LRA)
+            - Momentary / Short-term
+            - CALM Act compliance
+            """)
+        with col2:
+            st.markdown("""
+            **Video Analysis**
+            - Black frame detection
+            - Freeze frame detection
+            - Bitrate monitoring
+            - Motion vector analysis
+            - HDR peak luminance
+            """)
+        with col3:
+            st.markdown("""
+            **Caption QC**
+            - CEA-608 / CEA-708
+            - Sync drift alerting
+            - Missing caption detect
+            - Language track count
+            - EIA-608 line 21 verify
+            """)
+        with col4:
+            st.markdown("""
+            **Alerting**
+            - NOC Slack/Teams alert
+            - Auto-hold on critical
+            - Email escalation
+            - Dashboard notification
+            - Log to compliance DB
+            """)
+
+    st.divider()
+
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        st.markdown(f'<span class="realtime-indicator"></span> **Live Monitoring** — {datetime.now().strftime("%I:%M:%S %p")}', unsafe_allow_html=True)
+    with col2:
+        if st.button("🔄 Re-check Now", use_container_width=True):
+            st.rerun()
+
+    # Live metrics
+    st.subheader("WKRN-HD — Current Signal Status")
+    st.success("✅ ALL CLEAR — Signal within broadcast spec")
+
+    col1, col2, col3, col4, col5, col6 = st.columns(6)
+    col1.metric("Integrated Loudness", "−22.8 LUFS", "✅ −23 ±1")
+    col2.metric("True Peak", "−1.4 dBTP", "✅ < −1.0")
+    col3.metric("LRA", "8.2 LU", "✅ < 18 LU")
+    col4.metric("Black Frames", "0", "✅ Clear")
+    col5.metric("Freeze Frames", "0", "✅ Clear")
+    col6.metric("Caption Sync", "±12ms", "✅ < 500ms")
+
+    # Loudness timeline
+    st.subheader("Loudness Timeline (Last 2 Hours)")
+    loudness_samples = [-22.1, -23.4, -22.8, -23.1, -22.5, -23.8, -22.9, -23.2, -22.6, -23.0,
+                        -15.2, -22.8, -23.1, -22.7, -23.3, -22.9, -23.0, -22.4, -23.1, -22.8]
+    import json as _sq_json
+    st.line_chart({"Loudness (LUFS)": loudness_samples, "Target (−23)": [-23.0] * 20, "Upper Limit (−22)": [-22.0] * 20})
+    st.caption("⚠️ Spike at sample 11 = commercial segment loudness violation (auto-logged)")
+
+    # Alert history
+    st.subheader("Alert History — Last 24 Hours")
+    alerts_sq = [
+        ("09:23:45", "⚠️ WARNING",  "WKRN-HD", "Loudness",     "Commercial +8 LUFS above program",     "Logged to compliance DB"),
+        ("08:15:12", "🔴 CRITICAL", "WKRN-SD", "Black Frame",  "3.2s black frame during program break", "NOC alerted via Slack"),
+        ("06:01:00", "ℹ️ INFO",     "WKRN-HD", "Caption",      "Caption track restarted after reboot",  "Auto-recovered"),
+    ]
+    for ts, sev, ch, typ, msg, action in alerts_sq:
+        sev_color = "#ef4444" if "CRITICAL" in sev else "#f59e0b" if "WARNING" in sev else "#3b82f6"
+        st.markdown(f"""
+        <div style="background:rgba(30,35,41,1);padding:10px 14px;border-radius:8px;margin:5px 0;
+        border-left:3px solid {sev_color};display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+        <span style="color:#94a3b8;font-family:monospace;min-width:65px;">{ts}</span>
+        <span style="font-weight:700;color:{sev_color};min-width:90px;">{sev}</span>
+        <span style="color:#6366f1;min-width:70px;">{ch}</span>
+        <span style="color:#94a3b8;min-width:75px;">[{typ}]</span>
+        <span style="color:#e2e8f0;flex:1;">{msg}</span>
+        <span style="color:#22c55e;font-size:12px;">{action}</span>
+        </div>""", unsafe_allow_html=True)
+
+
+elif page == "📋 Playout Scheduling":
+    st.title("📋 Playout Scheduling Agent")
+    st.caption("Harmonic Polaris / GV Maestro Integration | 24h Rundown | SCTE-35 Ad Cue Insertion | Auto-Fill on Gaps")
+
+    with st.expander("**Agent Capabilities** — Click to expand", expanded=False):
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.markdown("""
+            **Schedule Management**
+            - 24h rundown import/export
+            - AS-11 / MXF playlist
+            - Secondary event triggers
+            - Pre-roll / post-roll
+            - Filler detection + fill
+            """)
+        with col2:
+            st.markdown("""
+            **SCTE-35 Cuing**
+            - Ad break insertion points
+            - Splice_insert commands
+            - Segmentation descriptors
+            - Out/In timing precision
+            - DAI compatibility
+            """)
+        with col3:
+            st.markdown("""
+            **Automation Systems**
+            - Harmonic Polaris REST API
+            - GV Maestro integration
+            - Ross Overdrive support
+            - Vizrt overlay triggers
+            - Graphics event sync
+            """)
+        with col4:
+            st.markdown("""
+            **Intelligence**
+            - Gap detection + alert
+            - Conflict resolution
+            - Rating compliance check
+            - CPI / rights window verify
+            - On-air confidence monitor
+            """)
+
+    st.divider()
+
+    col1, col2, col3 = st.columns([3, 1, 1])
+    with col1:
+        st.markdown(f'<span class="realtime-indicator"></span> **Live Schedule** — {datetime.now().strftime("%I:%M:%S %p")}', unsafe_allow_html=True)
+    with col2:
+        if st.button("🔄 Sync from Polaris", use_container_width=True):
+            with st.spinner("Syncing from Harmonic Polaris..."):
+                time.sleep(1.5)
+            st.success("Schedule synced!")
+    with col3:
+        if st.button("⚡ Detect Gaps", use_container_width=True):
+            st.info("No gaps detected in next 6 hours")
+
+    # Today's schedule
+    st.subheader("Today's Broadcast Schedule")
+    schedule_full = [
+        ("06:00", "09:00", "WKRN Morning News LIVE",   "news_live",  "aired",     False),
+        ("09:00", "10:00", "Today Show (NBC Feed)",    "network",    "aired",     False),
+        ("10:00", "11:00", "The Price Is Right",       "syndicated", "aired",     False),
+        ("11:00", "12:00", "The Young & the Restless", "syndicated", "aired",     False),
+        ("12:00", "12:30", "WKRN News at Noon",        "news_live",  "aired",     False),
+        ("12:30", "13:00", "Let's Make a Deal",        "syndicated", "aired",     False),
+        ("13:00", "15:00", "Days of Our Lives",        "network",    "aired",     False),
+        ("15:00", "16:00", "The Kelly Clarkson Show",  "syndicated", "airing",    True),
+        ("16:00", "17:00", "Jeopardy!",                "syndicated", "upcoming",  True),
+        ("17:00", "17:30", "WKRN News at 5",           "news_live",  "upcoming",  True),
+        ("18:00", "18:30", "WKRN News at 6",           "news_live",  "upcoming",  True),
+        ("18:30", "19:30", "NBC Nightly News",         "network",    "upcoming",  True),
+        ("19:30", "22:00", "NBC Primetime",             "network",    "upcoming",  True),
+        ("22:00", "22:30", "WKRN News at 10",          "news_live",  "upcoming",  True),
+        ("22:30", "23:30", "The Tonight Show",         "network",    "upcoming",  True),
+        ("23:30", "00:30", "Late Night",               "network",    "upcoming",  True),
+    ]
+    type_colors = {"news_live": "#6366f1", "network": "#0891b2", "syndicated": "#059669"}
+    for s, e, title, t, status, scte in schedule_full:
+        tc = type_colors.get(t, "#475569")
+        status_icon = "🟢" if status == "airing" else "✅" if status == "aired" else "🔵"
+        scte_badge = '<span style="background:#7c3aed;color:#fff;font-size:10px;padding:1px 5px;border-radius:3px;margin-left:6px;">SCTE-35</span>' if scte and "news" in t else ""
+        st.markdown(f"""
+        <div style="display:flex;gap:12px;align-items:center;padding:7px 14px;
+        background:#1e293b;border-radius:6px;margin:3px 0;border-left:3px solid {tc};">
+        <span style="color:#94a3b8;font-family:monospace;min-width:120px;">{s} – {e}</span>
+        <span style="color:#e2e8f0;flex:1;">{title}{scte_badge}</span>
+        <span style="color:#64748b;font-size:12px;min-width:80px;">{t.replace('_',' ')}</span>
+        <span style="font-size:14px;">{status_icon}</span>
+        </div>""", unsafe_allow_html=True)
+
+    st.caption("🟣 SCTE-35 = ad break cue points injected | 🟢 On-Air | ✅ Aired | 🔵 Scheduled")
+
+
+elif page == "🌐 OTT Distribution":
+    st.title("🌐 OTT Distribution Agent")
+    st.caption("HLS / DASH Packaging | ABR Ladder | CloudFront / Akamai CDN | DRM | Live + VOD Origin")
+
+    with st.expander("**Agent Capabilities** — Click to expand", expanded=False):
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.markdown("""
+            **Stream Packaging**
+            - HLS (TS + fMP4 segments)
+            - DASH (MPEG-DASH MPD)
+            - CMAF (single-file)
+            - Low-latency HLS (LL-HLS)
+            - 7-rung ABR ladder
+            """)
+        with col2:
+            st.markdown("""
+            **CDN Management**
+            - AWS CloudFront
+            - Akamai Media Delivery
+            - Fastly Streaming
+            - Cache purge on event
+            - Geographic restriction
+            """)
+        with col3:
+            st.markdown("""
+            **DRM & Security**
+            - Widevine (Android/Web)
+            - FairPlay (Apple)
+            - PlayReady (Windows)
+            - Token-based auth
+            - Watermarking (NexGuard)
+            """)
+        with col4:
+            st.markdown("""
+            **Analytics**
+            - Real-time viewer count
+            - Bitrate distribution
+            - Buffer ratio per rung
+            - Geographic heatmap
+            - CDN cost per viewer
+            """)
+
+    st.divider()
+
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        st.markdown(f'<span class="realtime-indicator"></span> **Live OTT Status** — {datetime.now().strftime("%I:%M:%S %p")}', unsafe_allow_html=True)
+    with col2:
+        if st.button("🔄 Refresh CDN", use_container_width=True):
+            st.rerun()
+
+    # CDN health
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Total Viewers", "147,234", "+2.3K/min")
+    col2.metric("CDN Uptime", "99.98%", "CloudFront + Akamai")
+    col3.metric("Avg Bitrate Served", "4.8 Mbps", "+0.3 Mbps vs yesterday")
+    col4.metric("Buffer Ratio", "0.12%", "✅ < 0.5% target")
+
+    # ABR ladder
+    st.subheader("ABR Ladder — Live Viewer Distribution")
+    abr_ladder = [
+        ("4K HDR",    "25 Mbps",  "3840×2160", 12847,  0.9,  "✅"),
+        ("1080p60",   "8 Mbps",   "1920×1080", 89234,  0.7,  "✅"),
+        ("1080p",     "5 Mbps",   "1920×1080", 21043,  0.5,  "✅"),
+        ("720p",      "3 Mbps",   "1280×720",  13892,  0.3,  "✅"),
+        ("480p",      "1.5 Mbps", "854×480",   7218,   0.2,  "✅"),
+        ("360p",      "750 kbps", "640×360",   2941,   0.15, "✅"),
+        ("Audio Only","128 kbps", "—",          59,    0.02, "✅"),
+    ]
+    st.markdown("| Profile | Bitrate | Resolution | Viewers | Buffer Ratio | Status |")
+    st.markdown("|---------|---------|------------|---------|--------------|--------|")
+    for p, br, res, viewers, buf, status in abr_ladder:
+        buf_color = "🟢" if buf < 0.3 else "🟡"
+        st.markdown(f"| **{p}** | {br} | {res} | {viewers:,} | {buf_color} {buf:.2f}% | {status} |")
+
+    # CDN pops
+    st.subheader("CDN Edge Locations — Request Distribution")
+    geo = [("US East",  "43%"), ("US West", "28%"), ("Europe", "16%"), ("APAC", "8%"), ("Other", "5%")]
+    cols_geo = st.columns(5)
+    for col, (region, pct) in zip(cols_geo, geo):
+        col.metric(region, pct)
+
+
+elif page == "📰 Newsroom Integration":
+    st.title("📰 Newsroom Integration Agent")
+    st.caption("iNews / ENPS MOS Sync | AP / Reuters / AFP Wire | Story Status Tracking | Urgent Flag Detection | AI Rundown Assist")
+
+    with st.expander("**Agent Capabilities** — Click to expand", expanded=False):
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.markdown("""
+            **MOS Integration**
+            - iNews REST + MOS 2.8
+            - ENPS ActiveX bridge
+            - Rundown sync (3-min)
+            - Story status tracking
+            - Script version control
+            """)
+        with col2:
+            st.markdown("""
+            **Wire Ingestion**
+            - AP (Associated Press)
+            - Reuters News Agency
+            - AFP (Agence France-Presse)
+            - CNN Wire service
+            - AI priority scoring
+            """)
+        with col3:
+            st.markdown("""
+            **AI Assist**
+            - Urgent flag detection
+            - Story duplicate filter
+            - Auto-topic tagging
+            - Source credibility score
+            - Suggested coverage angle
+            """)
+        with col4:
+            st.markdown("""
+            **Alerting**
+            - Breaking wire → Slack
+            - Rundown gap alert
+            - Story conflict detect
+            - Script approval flow
+            - Live show countdown
+            """)
+
+    st.divider()
+
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        st.markdown(f'<span class="realtime-indicator"></span> **iNews Live** — Synced {datetime.now().strftime("%I:%M:%S %p")}', unsafe_allow_html=True)
+    with col2:
+        if st.button("🔄 Sync iNews", use_container_width=True):
+            with st.spinner("Connecting to iNews MOS..."):
+                time.sleep(1.2)
+            st.success("Rundown synced (8 stories)")
+
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Stories in Rundown", "8", "6 ready, 2 editing")
+    col2.metric("Wire Stories Today", "247", "+14 in last hour")
+    col3.metric("Urgent Flags", "2", "AI-detected")
+    col4.metric("MOS Connection", "✅ Live", "iNews 8.6.1")
+
+    # Rundown
+    st.subheader("Live Rundown — WKRN News at 6 (18:00)")
+    rundown_full = [
+        ("FIRE-DOWNTOWN",   "Warehouse Fire Nashville",     "Jake Thompson",   "2:30", "✅ Ready",    "LEAD",   "LIVE PKG"),
+        ("COUNCIL-VOTE",    "City Council Budget Vote",     "Maria Sanchez",   "1:45", "✅ Ready",    "2ND",    "PKG"),
+        ("WEATHER-STORM",   "Severe Storm Watch Tonight",   "Weather Team",    "1:15", "✅ Ready",    "3RD",    "LIVE VOSOT"),
+        ("AI-REGULATION",   "Senate AI Bill Vote",          "David Park",      "2:00", "⏳ Editing",  "4TH",    "PKG"),
+        ("TITANS-WIN",      "Titans Win Playoff Opener",    "Sports Desk",     "1:30", "✅ Ready",    "5TH",    "PKG"),
+        ("FED-RATE",        "Fed Rate Decision Impact",     "Business Desk",   "1:00", "✅ Ready",    "6TH",    "VOSOT"),
+        ("TRAFFIC-I24",     "I-24 Closure Update",          "Traffic Cam",     "0:45", "✅ Ready",    "KICKER", "VO"),
+        ("WEATHER-TAG",     "7-Day Forecast",               "Meteorologist",   "0:30", "✅ Ready",    "TAG",    "LIVE"),
+    ]
+    pos_colors = {"LEAD": "#ef4444", "2ND": "#f59e0b", "3RD": "#6366f1", "4TH": "#6366f1",
+                  "5TH": "#475569", "6TH": "#475569", "KICKER": "#059669", "TAG": "#059669"}
+    for slug, title, reporter, dur, status, pos, story_type in rundown_full:
+        pc = pos_colors.get(pos, "#475569")
+        sc = "#22c55e" if "Ready" in status else "#f59e0b"
+        st.markdown(f"""
+        <div style="display:flex;gap:10px;align-items:center;padding:8px 14px;
+        background:#1e293b;border-radius:6px;margin:4px 0;">
+        <span style="background:{pc};color:#fff;padding:2px 8px;border-radius:4px;
+        font-size:11px;font-weight:700;min-width:58px;text-align:center;">{pos}</span>
+        <span style="color:#94a3b8;font-family:monospace;font-size:11px;min-width:105px;">{slug}</span>
+        <span style="color:#e2e8f0;flex:2;font-weight:500;">{title}</span>
+        <span style="color:#94a3b8;min-width:85px;">{reporter.split()[0]}</span>
+        <span style="background:#334155;color:#94a3b8;padding:2px 7px;border-radius:4px;
+        font-size:11px;min-width:75px;text-align:center;">{story_type}</span>
+        <span style="color:#94a3b8;min-width:35px;">{dur}</span>
+        <span style="color:{sc};">{status}</span>
+        </div>""", unsafe_allow_html=True)
+
+    # Wire stories
+    st.divider()
+    st.subheader("Breaking Wire Stories — Last Hour")
+    wires = [
+        ("🔴 URGENT", "AP",      "Senate Passes AI Safety Regulation Bill 67-33",           "2 min ago",  "Politics"),
+        ("🔴 URGENT", "Reuters", "Gaza Ceasefire Deal Signed — Hostages to be Released",    "8 min ago",  "World"),
+        ("⚠️ HIGH",   "AFP",     "Magnitude 6.1 Earthquake Near Tokyo — No Tsunami Warning","14 min ago", "World"),
+        ("ℹ️ NORMAL", "AP",      "Fed Chair: 'Data-dependent' Rate Path for Q2 2026",       "22 min ago", "Finance"),
+        ("ℹ️ NORMAL", "Reuters", "SpaceX Starship Test Flight 9 Scheduled for Next Week",   "31 min ago", "Tech"),
+    ]
+    for priority, source, headline, timing, category in wires:
+        p_color = "#ef4444" if "URGENT" in priority else "#f59e0b" if "HIGH" in priority else "#3b82f6"
+        st.markdown(f"""
+        <div style="background:#0f172a;padding:10px 14px;border-radius:8px;margin:5px 0;
+        border-left:3px solid {p_color};">
+        <div style="display:flex;gap:10px;align-items:center;">
+        <span style="font-weight:700;color:{p_color};min-width:80px;">{priority}</span>
+        <span style="background:#1e293b;color:#6366f1;padding:2px 7px;border-radius:4px;
+        font-size:11px;font-weight:700;">{source}</span>
+        <span style="color:#e2e8f0;flex:1;font-weight:500;">{headline}</span>
+        <span style="color:#64748b;font-size:12px;">{timing}</span>
+        <span style="color:#94a3b8;font-size:12px;">{category}</span>
+        </div>
+        </div>""", unsafe_allow_html=True)
+
+
 elif page == "Integration Showcase":
     st.title("Integration Showcase")
     st.caption("Enterprise-Grade Connectivity | Industry-Standard Protocols | Production-Ready APIs")
@@ -3932,12 +4557,1012 @@ ws.onmessage = (event) => {
         st.button("🛠️ Request Custom Integration", use_container_width=True)
 
 
+# ============== Channel Simulator ==============
+
+elif page == "💬 Channel Simulator":
+
+    # ── Styles ────────────────────────────────────────────────────────────
+    st.markdown("""
+<style>
+/* ── Slack chrome ── */
+.sim-slack-workspace {
+    background: linear-gradient(160deg,#4a154b 0%,#611f69 100%);
+    padding:14px 16px; border-radius:10px 10px 0 0;
+    display:flex; align-items:center; gap:10px;
+}
+.sim-slack-ws-name { color:#fff; font-weight:700; font-size:15px; }
+.sim-slack-ws-dot  { width:9px;height:9px;background:#2bac76;border-radius:50%;border:2px solid #4a154b; }
+.sim-slack-sidebar {
+    background:#19171d; padding:8px 0;
+    min-height:500px; border-radius:0 0 0 10px;
+}
+.sim-slack-section-hdr { color:#9e8da4; font-size:11px; font-weight:700;
+    padding:10px 16px 4px; letter-spacing:.06em; text-transform:uppercase; }
+.sim-slack-ch { display:flex; align-items:center; gap:6px;
+    padding:5px 16px; border-radius:4px; margin:1px 8px;
+    color:#c9c3d0; font-size:14px; }
+.sim-slack-ch.active { background:rgba(29,155,209,.22); color:#fff; }
+.sim-slack-ch-hash { color:#9e8da4; margin-right:2px; }
+.sim-slack-badge { background:#e01e5a; color:#fff; border-radius:10px;
+    padding:1px 6px; font-size:11px; margin-left:auto; }
+/* message area */
+.sim-slack-area-hdr {
+    background:#1a1d21; border-bottom:1px solid #2d3136;
+    padding:11px 16px; display:flex; align-items:center; gap:8px;
+    border-radius:10px 10px 0 0;
+}
+.sim-slack-area-hdr-name { color:#fff; font-weight:700; font-size:15px; }
+.sim-slack-area-hdr-desc { color:#9e8da4; font-size:12px; margin-left:6px; }
+.sim-slack-msgs {
+    background:#1a1d21; padding:12px 16px;
+    border-radius:0 0 10px 10px;
+    border-top:none;
+}
+/* individual message */
+.sim-slack-msg  { display:flex; gap:12px; padding:7px 0; align-items:flex-start; }
+.sim-slack-av   { width:36px;height:36px;border-radius:6px;
+    background:linear-gradient(135deg,#9c27b0,#e91e63);
+    display:flex;align-items:center;justify-content:center;
+    font-size:19px;flex-shrink:0; }
+.sim-slack-av.user { background:linear-gradient(135deg,#1164A3,#0b4d91); }
+.sim-slack-msg-hdr { display:flex;align-items:baseline;gap:8px;margin-bottom:2px; }
+.sim-slack-msg-name  { color:#fff; font-weight:700; font-size:14px; }
+.sim-slack-app-badge { background:#1d9bd1;color:#fff;font-size:10px;
+    padding:1px 5px;border-radius:3px;font-weight:600; }
+.sim-slack-msg-ts    { color:#9e8da4; font-size:11px; }
+.sim-slack-msg-text  { color:#d1d2d3; font-size:14px; line-height:1.55; }
+.sim-slack-cmd-text  { color:#c9c3d0; font-family:monospace; background:#2d3136;
+    padding:2px 7px; border-radius:4px; font-size:13px; }
+/* Block Kit card */
+.sim-slack-card {
+    background:#1e2329; border:1px solid #383c42;
+    border-left:3px solid #9c27b0;
+    border-radius:6px; padding:12px 16px; margin-top:6px; max-width:700px;
+}
+.sim-slack-card-title { color:#fff; font-weight:700; font-size:15px; margin-bottom:8px; }
+.sim-slack-card-muted { color:#9e8da4; font-size:12px; }
+.sim-slack-card-text  { color:#d1d2d3; font-size:13px; line-height:1.6; }
+.sim-slack-card-section { padding:7px 0; border-bottom:1px solid #2d3136; }
+.sim-slack-card-section:last-of-type { border-bottom:none; }
+.sim-slack-divider { border:none; border-top:1px solid #2d3136; margin:8px 0; }
+.sim-slack-btn { background:#2d3136; color:#d1d2d3; border:1px solid #4a4f57;
+    padding:5px 13px; border-radius:4px; font-size:12px; margin-right:5px; display:inline-block; }
+.sim-slack-btn.primary { background:#1164A3; color:#fff; border-color:#1164A3; }
+.sim-slack-status-row { display:flex;align-items:center;gap:8px;padding:3px 0; }
+.sim-slack-dot-g { width:8px;height:8px;background:#2bac76;border-radius:50%;flex-shrink:0; }
+.sim-slack-dot-y { width:8px;height:8px;background:#f59e0b;border-radius:50%;flex-shrink:0; }
+.sim-slack-lbl   { color:#d1d2d3;font-size:13px;flex:1; }
+.sim-slack-val   { color:#9e8da4;font-size:12px; }
+.sbadge-crit { background:#b01121;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600; }
+.sbadge-warn { background:#d97706;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600; }
+.sbadge-ok   { background:#0f7b42;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600; }
+.sbadge-info { background:#1164A3;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600; }
+
+/* ── Teams chrome ── */
+.sim-teams-header {
+    background:#4f52b2;
+    padding:13px 16px; border-radius:10px 10px 0 0;
+    display:flex;align-items:center;gap:10px;
+}
+.sim-teams-title { color:#fff;font-weight:700;font-size:15px; }
+.sim-teams-sidebar { background:#292929; min-height:500px; border-radius:0 0 0 10px; padding:8px 0; }
+.sim-teams-ch { padding:8px 14px;color:#c0c0c0;font-size:13px;cursor:pointer;border-radius:4px;margin:2px 6px; }
+.sim-teams-ch.active { background:rgba(255,255,255,.12);color:#fff; }
+.sim-teams-area-hdr {
+    background:#fff; border-bottom:1px solid #e0e0e0;
+    padding:11px 16px; display:flex;align-items:center;gap:8px;
+    border-radius:10px 10px 0 0;
+}
+.sim-teams-area-hdr-name { color:#252424;font-weight:700;font-size:15px; }
+.sim-teams-msgs { background:#f5f5f5; padding:12px 16px; border-radius:0 0 10px 10px; }
+.sim-teams-msg  { display:flex;gap:12px;padding:8px 0;align-items:flex-start; }
+.sim-teams-av   { width:32px;height:32px;border-radius:50%;
+    background:linear-gradient(135deg,#6264A7,#9c27b0);
+    display:flex;align-items:center;justify-content:center;
+    font-size:16px;flex-shrink:0; }
+.sim-teams-av.user { background:linear-gradient(135deg,#1164A3,#0b4d91); }
+.sim-teams-msg-name { color:#252424;font-weight:600;font-size:13px; }
+.sim-teams-msg-ts   { color:#9e9e9e;font-size:11px;margin-left:8px; }
+.sim-teams-msg-text { color:#252424;font-size:14px;line-height:1.5;margin-top:2px; }
+/* Adaptive Card */
+.sim-teams-card {
+    background:#fff; border:1px solid #e0e0e0; border-radius:8px;
+    padding:14px 16px; margin-top:6px; max-width:600px;
+    box-shadow:0 1px 4px rgba(0,0,0,.08);
+}
+.sim-teams-card-title  { color:#252424;font-weight:700;font-size:14px;margin-bottom:10px; }
+.sim-teams-card-text   { color:#616161;font-size:13px;line-height:1.6; }
+.sim-teams-card-section{ padding:6px 0;border-bottom:1px solid #f0f0f0; }
+.sim-teams-card-section:last-of-type { border-bottom:none; }
+.sim-teams-btn { background:#6264A7;color:#fff;border-radius:4px;
+    padding:6px 16px;font-size:13px;margin-right:5px;display:inline-block;margin-top:8px; }
+.sim-teams-btn-sec { background:#fff;color:#6264A7;border:1px solid #6264A7;
+    border-radius:4px;padding:6px 16px;font-size:13px;margin-right:5px;display:inline-block;margin-top:8px; }
+.tbadge-crit { background:#a80000;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600; }
+.tbadge-warn { background:#ca5010;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600; }
+.tbadge-ok   { background:#107c10;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600; }
+.tbadge-info { background:#0078d4;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600; }
+</style>
+""", unsafe_allow_html=True)
+
+    # ── Card generators ────────────────────────────────────────────────────
+
+    def _sc(html):
+        """Wrap HTML in a Slack card div."""
+        return f'<div class="sim-slack-card">{html}</div>'
+
+    def _tc(html):
+        """Wrap HTML in a Teams adaptive card div."""
+        return f'<div class="sim-teams-card">{html}</div>'
+
+    def _slack_welcome():
+        return _sc("""
+<div class="sim-slack-card-title">👋 Welcome to MediaAgentIQ</div>
+<div class="sim-slack-card-section sim-slack-card-text">
+  I'm your AI broadcast operations assistant. I can run compliance scans, detect deepfakes,
+  find viral clips, monitor trends, and much more — all directly from this channel.<br><br>
+  Type <span class="sim-slack-cmd-text">/miq-help</span> to see all available commands,
+  or click a <strong>Quick Command</strong> button below to see a live demo.
+</div>
+<div class="sim-slack-card-section">
+  <span class="sbadge-ok">19 Agents Online</span>&nbsp;
+  <span class="sbadge-info">Autonomous Mode Active</span>&nbsp;
+  <span class="sbadge-ok">Connectors Ready</span>
+</div>""")
+
+    def _teams_welcome():
+        return _tc("""
+<div class="sim-teams-card-title">👋 Welcome to MediaAgentIQ</div>
+<div class="sim-teams-card-section sim-teams-card-text">
+  I'm your AI broadcast operations assistant — connected to all 19 agents.<br>
+  Type <strong>/miq-help</strong> for available commands, or click a Quick Command button to demo live.
+</div>
+<div class="sim-teams-card-section">
+  <span class="tbadge-ok">19 Agents Online</span>&nbsp;
+  <span class="tbadge-info">Autonomous Mode Active</span>
+</div>""")
+
+    def _slack_help():
+        return _sc("""
+<div class="sim-slack-card-title">MediaAgentIQ — Available Commands</div>
+<div class="sim-slack-card-section">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;">
+  <div><span class="sim-slack-cmd-text">/miq-status</span><br>
+    <span class="sim-slack-card-muted">System health &amp; all 19 agent statuses</span></div>
+  <div><span class="sim-slack-cmd-text">/miq-trending</span><br>
+    <span class="sim-slack-card-muted">Live trending topics &amp; breaking news</span></div>
+  <div><span class="sim-slack-cmd-text">/miq-compliance</span><br>
+    <span class="sim-slack-card-muted">FCC scan with violation details</span></div>
+  <div><span class="sim-slack-cmd-text">/miq-deepfake</span><br>
+    <span class="sim-slack-card-muted">C2PA provenance + 3-layer forensic</span></div>
+  <div><span class="sim-slack-cmd-text">/miq-signal</span><br>
+    <span class="sim-slack-card-muted">EBU R128 loudness + signal quality</span></div>
+  <div><span class="sim-slack-cmd-text">/miq-caption</span><br>
+    <span class="sim-slack-card-muted">Auto-generated captions preview</span></div>
+  <div><span class="sim-slack-cmd-text">/miq-clip</span><br>
+    <span class="sim-slack-card-muted">Viral moment detection + view predictions</span></div>
+  <div><span class="sim-slack-cmd-text">/miq-archive [query]</span><br>
+    <span class="sim-slack-card-muted">Natural language archive search</span></div>
+</div>
+</div>
+<div class="sim-slack-card-muted" style="margin-top:8px;">
+💡 You can also type plain messages like <em>"check compliance"</em> or <em>"show trends"</em>
+</div>""")
+
+    def _teams_help():
+        return _tc("""
+<div class="sim-teams-card-title">MediaAgentIQ — Available Commands</div>
+<div class="sim-teams-card-section">
+<table style="width:100%;border-collapse:collapse;font-size:13px;">
+<tr><td style="padding:3px 8px;font-family:monospace;color:#6264A7;">/miq-status</td><td style="color:#616161;">System health &amp; all 19 agent statuses</td></tr>
+<tr><td style="padding:3px 8px;font-family:monospace;color:#6264A7;">/miq-trending</td><td style="color:#616161;">Live trending topics &amp; breaking news</td></tr>
+<tr><td style="padding:3px 8px;font-family:monospace;color:#6264A7;">/miq-compliance</td><td style="color:#616161;">FCC scan with violation details</td></tr>
+<tr><td style="padding:3px 8px;font-family:monospace;color:#6264A7;">/miq-deepfake</td><td style="color:#616161;">C2PA provenance + 3-layer forensic</td></tr>
+<tr><td style="padding:3px 8px;font-family:monospace;color:#6264A7;">/miq-signal</td><td style="color:#616161;">EBU R128 loudness + broadcast signal</td></tr>
+<tr><td style="padding:3px 8px;font-family:monospace;color:#6264A7;">/miq-caption</td><td style="color:#616161;">Auto-generated captions preview</td></tr>
+<tr><td style="padding:3px 8px;font-family:monospace;color:#6264A7;">/miq-clip</td><td style="color:#616161;">Viral moment detection + view predictions</td></tr>
+<tr><td style="padding:3px 8px;font-family:monospace;color:#6264A7;">/miq-archive [query]</td><td style="color:#616161;">Natural language archive search</td></tr>
+</table>
+</div>
+<div style="margin-top:8px;">
+  <span class="sim-teams-btn">Get Started</span>
+</div>""")
+
+    def _slack_status():
+        agents_s = [
+            ("📝 Caption Agent",         "🟢", "2ms"),
+            ("🎬 Clip Agent",            "🟢", "3ms"),
+            ("🔍 Archive Agent",         "🟢", "4ms"),
+            ("⚖️ Compliance Agent",      "🟢", "1ms"),
+            ("📱 Social Publishing",     "🟢", "2ms"),
+            ("🌍 Localization Agent",    "🟢", "3ms"),
+            ("📜 Rights Agent",          "🟢", "2ms"),
+            ("📈 Trending Agent",        "🟢", "1ms"),
+            ("🕵️ Deepfake Detection",   "🟢", "5ms"),
+            ("✅ Live Fact-Check",       "🟢", "4ms"),
+            ("👥 Audience Intelligence","🟢", "3ms"),
+            ("🎥 AI Production Director","🟢","2ms"),
+            ("🛡️ Brand Safety",         "🟢", "2ms"),
+            ("🌿 Carbon Intelligence",  "🟢", "3ms"),
+            ("📥 Ingest + Transcode",   "🟢", "6ms"),
+            ("📡 Signal Quality",       "🟢", "1ms"),
+            ("📋 Playout Scheduling",   "🟢", "2ms"),
+            ("🌐 OTT Distribution",     "🟢", "4ms"),
+            ("📰 Newsroom Integration", "🟢", "3ms"),
+        ]
+        rows = "".join(
+            f'<div class="sim-slack-status-row">'
+            f'<div class="sim-slack-dot-g"></div>'
+            f'<div class="sim-slack-lbl">{a}</div>'
+            f'<div class="sim-slack-val">{dot} Online &nbsp; {lat}</div>'
+            f'</div>'
+            for a, dot, lat in agents_s
+        )
+        return _sc(f"""
+<div class="sim-slack-card-title">🟢 MediaAgentIQ — System Status</div>
+<div class="sim-slack-card-section">
+  <div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:6px;">
+    <div style="text-align:center;">
+      <div style="color:#2bac76;font-size:22px;font-weight:700;">19</div>
+      <div class="sim-slack-card-muted">Agents Online</div></div>
+    <div style="text-align:center;">
+      <div style="color:#d1d2d3;font-size:22px;font-weight:700;">3ms</div>
+      <div class="sim-slack-card-muted">Avg Latency</div></div>
+    <div style="text-align:center;">
+      <div style="color:#d1d2d3;font-size:22px;font-weight:700;">1,247</div>
+      <div class="sim-slack-card-muted">Tasks Today</div></div>
+    <div style="text-align:center;">
+      <div style="color:#2bac76;font-size:22px;font-weight:700;">✅</div>
+      <div class="sim-slack-card-muted">Autonomous Mode</div></div>
+  </div>
+</div>
+<div class="sim-slack-card-section">
+  <div class="sim-slack-card-muted" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Agent Status</div>
+  {rows}
+</div>
+<div class="sim-slack-card-section">
+  <div class="sim-slack-card-muted" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Connector Status</div>
+  <div class="sim-slack-status-row"><div class="sim-slack-dot-g"></div><div class="sim-slack-lbl">Slack Connector</div><div class="sim-slack-val">🟢 Connected &nbsp; 1ms</div></div>
+  <div class="sim-slack-status-row"><div class="sim-slack-dot-g"></div><div class="sim-slack-lbl">Teams Connector</div><div class="sim-slack-val">🟢 Connected &nbsp; 2ms</div></div>
+</div>
+<div style="margin-top:8px;">
+  <span class="sim-slack-btn primary">📊 Full Report</span>
+  <span class="sim-slack-btn">⚙️ Configure Alerts</span>
+  <span class="sim-slack-btn">📅 View Schedule</span>
+</div>""")
+
+    def _teams_status():
+        return _tc("""
+<div class="sim-teams-card-title">🟢 MediaAgentIQ — System Status</div>
+<div class="sim-teams-card-section">
+  <table style="width:100%;border-collapse:collapse;font-size:13px;">
+    <tr style="color:#252424;font-weight:600;border-bottom:1px solid #e0e0e0;">
+      <td style="padding:4px 8px;">Agent</td><td style="padding:4px 8px;">Status</td><td style="padding:4px 8px;">Latency</td></tr>
+    <tr><td style="padding:3px 8px;">📝 Caption Agent</td><td><span class="tbadge-ok">Online</span></td><td style="color:#616161;">2ms</td></tr>
+    <tr><td style="padding:3px 8px;">⚖️ Compliance Agent</td><td><span class="tbadge-ok">Online</span></td><td style="color:#616161;">1ms</td></tr>
+    <tr><td style="padding:3px 8px;">🕵️ Deepfake Detection</td><td><span class="tbadge-ok">Online</span></td><td style="color:#616161;">5ms</td></tr>
+    <tr><td style="padding:3px 8px;">📈 Trending Agent</td><td><span class="tbadge-ok">Online</span></td><td style="color:#616161;">1ms</td></tr>
+    <tr><td style="padding:3px 8px;">📡 Signal Quality</td><td><span class="tbadge-ok">Online</span></td><td style="color:#616161;">1ms</td></tr>
+    <tr><td style="padding:3px 8px;">📰 Newsroom Integration</td><td><span class="tbadge-ok">Online</span></td><td style="color:#616161;">3ms</td></tr>
+    <tr><td style="padding:3px 8px;color:#9e9e9e;" colspan="3">+ 13 more agents — all online</td></tr>
+  </table>
+</div>
+<div class="sim-teams-card-section">
+  <span style="color:#252424;font-size:13px;font-weight:600;">Total tasks today: </span>
+  <span style="color:#107c10;font-weight:700;">1,247</span>&nbsp;&nbsp;
+  <span style="color:#252424;font-size:13px;font-weight:600;">Autonomous Mode: </span>
+  <span class="tbadge-ok">Active</span>
+</div>
+<div>
+  <span class="sim-teams-btn">📊 Full Report</span>
+  <span class="sim-teams-btn-sec">⚙️ Configure</span>
+</div>""")
+
+    def _slack_trending():
+        topics = [
+            ("🚨", "CRITICAL", "sbadge-crit", "AI Regulation Senate Vote",     "+2,847%", "Politics",     "2.1M"),
+            ("⚠️", "WARNING",  "sbadge-warn", "Gaza Ceasefire Talks",          "+1,234%", "World",        "1.4M"),
+            ("ℹ️", "INFO",     "sbadge-info", "Super Bowl Ad Spending 2026",   "+892%",   "Sports/Biz",   "890K"),
+            ("ℹ️", "INFO",     "sbadge-info", "Tech Layoffs Wave Q1",          "+756%",   "Business",     "670K"),
+            ("ℹ️", "INFO",     "sbadge-info", "Climate Summit COP30 Prep",     "+612%",   "Environment",  "510K"),
+        ]
+        rows = "".join(
+            f'<div class="sim-slack-card-section">'
+            f'<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">'
+            f'<span style="font-size:16px;">{ic}</span>'
+            f'<span class="{badge}">{sev}</span>'
+            f'<span class="sim-slack-card-text" style="font-weight:600;flex:1;">{topic}</span>'
+            f'<span class="sim-slack-card-muted">{cat}</span>'
+            f'</div>'
+            f'<div style="margin-left:30px;margin-top:3px;">'
+            f'<span style="color:#2bac76;font-size:12px;font-weight:700;">{spike} spike</span>'
+            f'&nbsp;&nbsp;<span class="sim-slack-card-muted">Reach: {reach} posts</span>'
+            f'</div>'
+            f'</div>'
+            for ic, sev, badge, topic, spike, cat, reach in topics
+        )
+        return _sc(f"""
+<div class="sim-slack-card-title">📈 Trending Alerts — WKRN News</div>
+<div class="sim-slack-card-section sim-slack-card-muted">
+  Live monitoring • {datetime.now().strftime("%b %d %Y, %H:%M")} • 5 topics active
+</div>
+{rows}
+<div style="margin-top:8px;">
+  <span class="sim-slack-btn primary">🔔 Alert Newsroom</span>
+  <span class="sim-slack-btn">📋 Full Report</span>
+  <span class="sim-slack-btn">📊 Analytics</span>
+</div>""")
+
+    def _teams_trending():
+        return _tc("""
+<div class="sim-teams-card-title">📈 Trending Alerts — Live Monitor</div>
+<div class="sim-teams-card-section">
+  <table style="width:100%;border-collapse:collapse;font-size:13px;">
+    <tr style="font-weight:600;color:#252424;border-bottom:1px solid #e0e0e0;">
+      <td style="padding:4px 6px;">Severity</td><td style="padding:4px 6px;">Topic</td>
+      <td style="padding:4px 6px;">Spike</td><td style="padding:4px 6px;">Category</td></tr>
+    <tr><td style="padding:3px 6px;"><span class="tbadge-crit">CRITICAL</span></td>
+      <td style="padding:3px 6px;font-weight:600;color:#252424;">AI Regulation Senate Vote</td>
+      <td style="padding:3px 6px;color:#107c10;font-weight:700;">+2,847%</td>
+      <td style="padding:3px 6px;color:#616161;">Politics</td></tr>
+    <tr><td style="padding:3px 6px;"><span class="tbadge-warn">WARNING</span></td>
+      <td style="padding:3px 6px;font-weight:600;color:#252424;">Gaza Ceasefire Talks</td>
+      <td style="padding:3px 6px;color:#107c10;font-weight:700;">+1,234%</td>
+      <td style="padding:3px 6px;color:#616161;">World</td></tr>
+    <tr><td style="padding:3px 6px;"><span class="tbadge-info">INFO</span></td>
+      <td style="padding:3px 6px;color:#252424;">Super Bowl Ad Spending 2026</td>
+      <td style="padding:3px 6px;color:#107c10;font-weight:700;">+892%</td>
+      <td style="padding:3px 6px;color:#616161;">Sports</td></tr>
+    <tr><td style="padding:3px 6px;"><span class="tbadge-info">INFO</span></td>
+      <td style="padding:3px 6px;color:#252424;">Tech Layoffs Wave Q1</td>
+      <td style="padding:3px 6px;color:#107c10;font-weight:700;">+756%</td>
+      <td style="padding:3px 6px;color:#616161;">Business</td></tr>
+    <tr><td style="padding:3px 6px;"><span class="tbadge-info">INFO</span></td>
+      <td style="padding:3px 6px;color:#252424;">Climate Summit COP30 Prep</td>
+      <td style="padding:3px 6px;color:#107c10;font-weight:700;">+612%</td>
+      <td style="padding:3px 6px;color:#616161;">Environment</td></tr>
+  </table>
+</div>
+<div>
+  <span class="sim-teams-btn">🔔 Alert Newsroom</span>
+  <span class="sim-teams-btn-sec">📋 Full Report</span>
+</div>""")
+
+    def _slack_compliance():
+        return _sc("""
+<div class="sim-slack-card-title">⚖️ Compliance Scan — Morning Broadcast</div>
+<div class="sim-slack-card-section">
+  <span class="sbadge-crit">2 Critical</span>&nbsp;<span class="sbadge-warn">1 Warning</span>&nbsp;<span class="sbadge-ok">47 Clear</span>&nbsp;
+  <span class="sim-slack-card-muted" style="margin-left:8px;">Scan completed in 1.2s • FCC Part 73 / §315</span>
+</div>
+<div class="sim-slack-card-section">
+  <div style="margin-bottom:6px;"><span class="sbadge-crit">🔴 CRITICAL</span>
+    <span class="sim-slack-card-text" style="margin-left:8px;font-weight:600;">00:23:45 — Profanity (FCC Part 73)</span></div>
+  <div class="sim-slack-card-text">"...hot-mic expletive during live field segment..."</div>
+  <div class="sim-slack-card-muted" style="margin-top:4px;">⚡ Auto-hold applied &nbsp;|&nbsp; Segment flagged for review</div>
+</div>
+<div class="sim-slack-card-section">
+  <div style="margin-bottom:6px;"><span class="sbadge-crit">🔴 CRITICAL</span>
+    <span class="sim-slack-card-text" style="margin-left:8px;font-weight:600;">01:45:12 — Political Ad Disclosure Missing</span></div>
+  <div class="sim-slack-card-text">30-second political spot missing required sponsor identification</div>
+  <div class="sim-slack-card-muted" style="margin-top:4px;">FCC §315 violation risk &nbsp;|&nbsp; Estimated fine: $40,000+</div>
+</div>
+<div class="sim-slack-card-section">
+  <div style="margin-bottom:6px;"><span class="sbadge-warn">⚠️ WARNING</span>
+    <span class="sim-slack-card-text" style="margin-left:8px;font-weight:600;">00:41:30 — Loudness Violation (EBU R128)</span></div>
+  <div class="sim-slack-card-text">Commercial segment +8 LUFS above program level (−15 vs −23 LUFS target)</div>
+  <div class="sim-slack-card-muted" style="margin-top:4px;">CALM Act non-compliance &nbsp;|&nbsp; Viewer complaint risk</div>
+</div>
+<div style="margin-top:8px;">
+  <span class="sim-slack-btn primary">✅ Mark Reviewed</span>
+  <span class="sim-slack-btn">📄 Full Report</span>
+  <span class="sim-slack-btn">📨 Alert Legal</span>
+  <span class="sim-slack-btn">⏸️ Hold Broadcast</span>
+</div>""")
+
+    def _teams_compliance():
+        return _tc("""
+<div class="sim-teams-card-title" style="color:#a80000;">⚖️ Compliance Alert — 2 Critical Issues</div>
+<div class="sim-teams-card-section">
+  <span class="tbadge-crit">CRITICAL</span>&nbsp;
+  <span style="color:#252424;font-size:13px;font-weight:600;margin-left:4px;">00:23:45 — Profanity (FCC Part 73)</span><br>
+  <span class="sim-teams-card-text">Hot-mic expletive in live field segment. Auto-hold applied.</span>
+</div>
+<div class="sim-teams-card-section">
+  <span class="tbadge-crit">CRITICAL</span>&nbsp;
+  <span style="color:#252424;font-size:13px;font-weight:600;margin-left:4px;">01:45:12 — Political Ad Missing Disclosure</span><br>
+  <span class="sim-teams-card-text">FCC §315 — sponsor ID required. Estimated fine: $40,000+</span>
+</div>
+<div class="sim-teams-card-section">
+  <span class="tbadge-warn">WARNING</span>&nbsp;
+  <span style="color:#252424;font-size:13px;font-weight:600;margin-left:4px;">00:41:30 — Loudness Violation</span><br>
+  <span class="sim-teams-card-text">CALM Act — commercial +8 LUFS above program level</span>
+</div>
+<div>
+  <span class="sim-teams-btn">✅ Mark Reviewed</span>
+  <span class="sim-teams-btn-sec">📄 Full Report</span>
+  <span class="sim-teams-btn-sec">📨 Alert Legal</span>
+</div>""")
+
+    def _slack_deepfake():
+        return _sc("""
+<div class="sim-slack-card-title">🕵️ Deepfake Detection — Forensic Analysis</div>
+<div class="sim-slack-card-section">
+  <span class="sbadge-ok" style="font-size:13px;padding:4px 12px;">✅ AUTHENTIC</span>
+  <span class="sim-slack-card-muted" style="margin-left:10px;">Risk Score: 0.042 (Very Low) &nbsp;|&nbsp; C2PA: Signed ✅</span>
+</div>
+<div class="sim-slack-card-section">
+  <div class="sim-slack-card-muted" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Layer 1 — Audio Analysis</div>
+  <div class="sim-slack-status-row"><div class="sim-slack-dot-g"></div><div class="sim-slack-lbl">Spectral coherence</div><div class="sim-slack-val">0.98 ✅ Pass</div></div>
+  <div class="sim-slack-status-row"><div class="sim-slack-dot-g"></div><div class="sim-slack-lbl">Neural artifact score</div><div class="sim-slack-val">0.01 ✅ Pass</div></div>
+  <div class="sim-slack-status-row"><div class="sim-slack-dot-g"></div><div class="sim-slack-lbl">Lip-sync correlation</div><div class="sim-slack-val">0.97 ✅ Pass</div></div>
+</div>
+<div class="sim-slack-card-section">
+  <div class="sim-slack-card-muted" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Layer 2 — Video Analysis</div>
+  <div class="sim-slack-status-row"><div class="sim-slack-dot-g"></div><div class="sim-slack-lbl">Face mesh stability</div><div class="sim-slack-val">0.96 ✅ Pass</div></div>
+  <div class="sim-slack-status-row"><div class="sim-slack-dot-g"></div><div class="sim-slack-lbl">GAN fingerprint</div><div class="sim-slack-val">None detected ✅</div></div>
+  <div class="sim-slack-status-row"><div class="sim-slack-dot-g"></div><div class="sim-slack-lbl">Compression artifacts</div><div class="sim-slack-val">0.03 ✅ Pass</div></div>
+</div>
+<div class="sim-slack-card-section">
+  <div class="sim-slack-card-muted" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Layer 3 — Metadata + C2PA Provenance</div>
+  <div class="sim-slack-status-row"><div class="sim-slack-dot-g"></div><div class="sim-slack-lbl">C2PA provenance chain</div><div class="sim-slack-val">Valid — 3 entries ✅</div></div>
+  <div class="sim-slack-status-row"><div class="sim-slack-dot-g"></div><div class="sim-slack-lbl">Edit history</div><div class="sim-slack-val">Unmodified ✅</div></div>
+  <div class="sim-slack-status-row"><div class="sim-slack-dot-g"></div><div class="sim-slack-lbl">Camera / timestamp</div><div class="sim-slack-val">Canon EOS R5 • WKRN • 2024-03-15</div></div>
+</div>
+<div style="margin-top:8px;">
+  <span class="sim-slack-btn primary">📋 Full Report</span>
+  <span class="sim-slack-btn">🔗 C2PA Certificate</span>
+  <span class="sim-slack-btn">📨 Share</span>
+</div>""")
+
+    def _teams_deepfake():
+        return _tc("""
+<div class="sim-teams-card-title">🕵️ Deepfake Detection — Forensic Analysis</div>
+<div class="sim-teams-card-section">
+  <span class="tbadge-ok" style="font-size:13px;padding:4px 12px;">✅ AUTHENTIC</span>
+  <span style="color:#616161;font-size:13px;margin-left:10px;">Risk Score: 0.042 — Very Low</span>
+</div>
+<div class="sim-teams-card-section">
+  <div class="sim-teams-card-text">
+    <strong>Audio:</strong> Spectral coherence 0.98 ✅ &nbsp; Neural artifacts 0.01 ✅ &nbsp; Lip-sync 0.97 ✅<br>
+    <strong>Video:</strong> Face mesh 0.96 ✅ &nbsp; GAN fingerprint: None ✅ &nbsp; Artifacts 0.03 ✅<br>
+    <strong>C2PA:</strong> Provenance chain valid (3 entries) ✅ &nbsp; Camera: Canon EOS R5
+  </div>
+</div>
+<div>
+  <span class="sim-teams-btn">📋 Full Report</span>
+  <span class="sim-teams-btn-sec">🔗 C2PA Certificate</span>
+</div>""")
+
+    def _slack_signal():
+        return _sc("""
+<div class="sim-slack-card-title">📡 Signal Quality — Live Broadcast Monitor</div>
+<div class="sim-slack-card-section">
+  <span class="sbadge-ok">✅ ALL CLEAR</span>
+  <span class="sim-slack-card-muted" style="margin-left:10px;">Channel: WKRN-HD &nbsp;|&nbsp; Checked 14 seconds ago</span>
+</div>
+<div class="sim-slack-card-section">
+  <div class="sim-slack-card-muted" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Audio — EBU R128</div>
+  <div class="sim-slack-status-row"><div class="sim-slack-dot-g"></div><div class="sim-slack-lbl">Integrated loudness</div><div class="sim-slack-val">−22.8 LUFS &nbsp;✅ (target −23 ±1)</div></div>
+  <div class="sim-slack-status-row"><div class="sim-slack-dot-g"></div><div class="sim-slack-lbl">True peak</div><div class="sim-slack-val">−1.4 dBTP &nbsp;✅ (&lt; −1.0 limit)</div></div>
+  <div class="sim-slack-status-row"><div class="sim-slack-dot-g"></div><div class="sim-slack-lbl">Loudness range (LRA)</div><div class="sim-slack-val">8.2 LU &nbsp;✅ (&lt; 18 LU)</div></div>
+</div>
+<div class="sim-slack-card-section">
+  <div class="sim-slack-card-muted" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Video</div>
+  <div class="sim-slack-status-row"><div class="sim-slack-dot-g"></div><div class="sim-slack-lbl">Black frames</div><div class="sim-slack-val">0 detected &nbsp;✅</div></div>
+  <div class="sim-slack-status-row"><div class="sim-slack-dot-g"></div><div class="sim-slack-lbl">Freeze frames</div><div class="sim-slack-val">0 detected &nbsp;✅</div></div>
+  <div class="sim-slack-status-row"><div class="sim-slack-dot-g"></div><div class="sim-slack-lbl">Bitrate</div><div class="sim-slack-val">18.2 Mbps &nbsp;✅ (stable)</div></div>
+</div>
+<div class="sim-slack-card-section">
+  <div class="sim-slack-card-muted" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Captions (CEA-608)</div>
+  <div class="sim-slack-status-row"><div class="sim-slack-dot-g"></div><div class="sim-slack-lbl">Present</div><div class="sim-slack-val">Yes &nbsp;✅</div></div>
+  <div class="sim-slack-status-row"><div class="sim-slack-dot-g"></div><div class="sim-slack-lbl">Sync drift</div><div class="sim-slack-val">±12ms &nbsp;✅ (&lt; 500ms limit)</div></div>
+</div>
+<div style="margin-top:8px;">
+  <span class="sim-slack-btn primary">🔄 Re-check Now</span>
+  <span class="sim-slack-btn">📊 History</span>
+  <span class="sim-slack-btn">🔔 Configure Thresholds</span>
+</div>""")
+
+    def _teams_signal():
+        return _tc("""
+<div class="sim-teams-card-title">📡 Signal Quality — WKRN-HD</div>
+<div class="sim-teams-card-section">
+  <span class="tbadge-ok">✅ ALL CLEAR</span>
+  <span style="color:#616161;font-size:12px;margin-left:8px;">Checked 14s ago</span>
+</div>
+<div class="sim-teams-card-section">
+  <table style="width:100%;border-collapse:collapse;font-size:13px;">
+    <tr><td style="padding:3px 8px;color:#252424;font-weight:600;">Audio (EBU R128)</td><td></td></tr>
+    <tr><td style="padding:2px 16px;color:#616161;">Integrated loudness</td><td style="color:#107c10;font-weight:600;">−22.8 LUFS ✅</td></tr>
+    <tr><td style="padding:2px 16px;color:#616161;">True peak</td><td style="color:#107c10;font-weight:600;">−1.4 dBTP ✅</td></tr>
+    <tr><td style="padding:3px 8px;color:#252424;font-weight:600;">Video</td><td></td></tr>
+    <tr><td style="padding:2px 16px;color:#616161;">Black frames</td><td style="color:#107c10;font-weight:600;">0 detected ✅</td></tr>
+    <tr><td style="padding:2px 16px;color:#616161;">Bitrate</td><td style="color:#107c10;font-weight:600;">18.2 Mbps ✅</td></tr>
+    <tr><td style="padding:3px 8px;color:#252424;font-weight:600;">Captions (CEA-608)</td><td></td></tr>
+    <tr><td style="padding:2px 16px;color:#616161;">Sync drift</td><td style="color:#107c10;font-weight:600;">±12ms ✅</td></tr>
+  </table>
+</div>
+<div>
+  <span class="sim-teams-btn">🔄 Re-check</span>
+  <span class="sim-teams-btn-sec">📊 History</span>
+</div>""")
+
+    def _slack_caption():
+        captions_preview = [
+            ("00:00:00", "00:00:04", "Sarah Mitchell (Anchor)", "Good morning, I'm Sarah Mitchell, and this is WKRN Morning News.", "99%"),
+            ("00:00:04", "00:00:09", "Sarah Mitchell (Anchor)", "Breaking overnight: A massive fire has destroyed a warehouse in downtown Nashville.", "98%"),
+            ("00:00:10", "00:00:15", "Sarah Mitchell (Anchor)", "Fire crews responded around 2 AM and battled the blaze for nearly four hours.", "97%"),
+            ("00:00:16", "00:00:20", "Sarah Mitchell (Anchor)", "We go live now to reporter Jake Thompson at the scene.", "98%"),
+            ("00:00:21", "00:00:27", "Jake Thompson (Reporter)", "Sarah, as you can see behind me, crews are still working to contain hot spots.", "96%"),
+        ]
+        rows = "".join(
+            f'<div class="sim-slack-card-section" style="font-size:13px;">'
+            f'<span style="color:#9c27b0;font-family:monospace;">{s} → {e}</span>'
+            f'<span class="sim-slack-card-muted" style="margin-left:10px;">{spk}</span>'
+            f'<span style="color:#2bac76;float:right;">{conf}</span><br>'
+            f'<span class="sim-slack-card-text">{txt}</span>'
+            f'</div>'
+            for s, e, spk, txt, conf in captions_preview
+        )
+        return _sc(f"""
+<div class="sim-slack-card-title">📝 Caption Agent — Auto-Generated</div>
+<div class="sim-slack-card-section">
+  <span class="sbadge-ok">13 segments</span>&nbsp;
+  <span class="sim-slack-card-muted">Avg accuracy: 96.8% &nbsp;|&nbsp; Source: Morning News Broadcast</span>
+</div>
+{rows}
+<div class="sim-slack-card-section sim-slack-card-muted">+ 8 more segments...</div>
+<div style="margin-top:8px;">
+  <span class="sim-slack-btn primary">📥 Download SRT</span>
+  <span class="sim-slack-btn">📥 Download VTT</span>
+  <span class="sim-slack-btn">✅ Approve All</span>
+</div>""")
+
+    def _teams_caption():
+        return _tc("""
+<div class="sim-teams-card-title">📝 Caption Agent — 13 Segments Generated</div>
+<div class="sim-teams-card-section">
+  <span class="tbadge-ok">96.8% Accuracy</span>
+  <span style="color:#616161;font-size:12px;margin-left:8px;">Morning News Broadcast</span>
+</div>
+<div class="sim-teams-card-section">
+  <div class="sim-teams-card-text">
+    <strong>00:00:00 → 00:00:04</strong> [Sarah Mitchell] — "Good morning, I'm Sarah Mitchell..." <span style="color:#107c10;">99%</span><br>
+    <strong>00:00:04 → 00:00:09</strong> [Sarah Mitchell] — "Breaking overnight: A massive fire..." <span style="color:#107c10;">98%</span><br>
+    <strong>00:00:10 → 00:00:15</strong> [Sarah Mitchell] — "Fire crews responded around 2 AM..." <span style="color:#107c10;">97%</span><br>
+    <span style="color:#9e9e9e;">+ 10 more segments...</span>
+  </div>
+</div>
+<div>
+  <span class="sim-teams-btn">📥 Download SRT</span>
+  <span class="sim-teams-btn-sec">📥 Download VTT</span>
+</div>""")
+
+    def _slack_clip():
+        clips = [
+            ("97%", "#2bac76", "Reporter's Close Call with Debris", "02:25 → 02:42", "TikTok, Twitter/X, Instagram Reels", "500K – 2M views"),
+            ("95%", "#2bac76", "Emotional Reunion: Lost Dog Found After Tornado", "14:52 → 15:18", "Facebook, Instagram, TikTok", "1M – 5M views"),
+            ("94%", "#f59e0b", "Lightning Strikes During Live Weather Report", "35:05 → 35:25", "Twitter/X, TikTok, YouTube", "300K – 1M views"),
+            ("92%", "#f59e0b", "Mayor's Mic Drop Response to Heckler", "25:43 → 26:08", "Twitter/X, TikTok, Reddit", "200K – 800K views"),
+        ]
+        rows = "".join(
+            f'<div class="sim-slack-card-section" style="display:flex;gap:12px;align-items:flex-start;">'
+            f'<div style="font-size:18px;font-weight:700;color:{color};min-width:42px;">{score}</div>'
+            f'<div style="flex:1;">'
+            f'<div class="sim-slack-card-text" style="font-weight:600;">{title}</div>'
+            f'<div class="sim-slack-card-muted">{timing} &nbsp;|&nbsp; {platforms}</div>'
+            f'<div style="color:#2bac76;font-size:12px;margin-top:2px;">📊 Predicted: {views}</div>'
+            f'</div>'
+            f'<div><span class="sim-slack-btn">🎬 Export</span><span class="sim-slack-btn">📱 Post</span></div>'
+            f'</div>'
+            for score, color, title, timing, platforms, views in clips
+        )
+        return _sc(f"""
+<div class="sim-slack-card-title">🎬 Clip Agent — Viral Moments Detected</div>
+<div class="sim-slack-card-section">
+  <span class="sbadge-ok">4 clips found</span>&nbsp;
+  <span class="sim-slack-card-muted">Top score: 97% &nbsp;|&nbsp; Source: Morning News Broadcast</span>
+</div>
+{rows}
+<div style="margin-top:8px;">
+  <span class="sim-slack-btn primary">📋 Full Analysis</span>
+  <span class="sim-slack-btn">📤 Export All</span>
+  <span class="sim-slack-btn">📅 Schedule All</span>
+</div>""")
+
+    def _teams_clip():
+        return _tc("""
+<div class="sim-teams-card-title">🎬 Clip Agent — 4 Viral Moments Found</div>
+<div class="sim-teams-card-section">
+  <table style="width:100%;border-collapse:collapse;font-size:13px;">
+    <tr style="font-weight:600;color:#252424;border-bottom:1px solid #e0e0e0;">
+      <td style="padding:4px 8px;">Score</td><td style="padding:4px 8px;">Clip</td><td style="padding:4px 8px;">Predicted Views</td></tr>
+    <tr><td style="padding:3px 8px;color:#107c10;font-weight:700;">97%</td>
+      <td style="padding:3px 8px;color:#252424;">Reporter's Close Call with Debris</td>
+      <td style="padding:3px 8px;color:#107c10;">500K – 2M</td></tr>
+    <tr><td style="padding:3px 8px;color:#107c10;font-weight:700;">95%</td>
+      <td style="padding:3px 8px;color:#252424;">Emotional Reunion: Lost Dog Found</td>
+      <td style="padding:3px 8px;color:#107c10;">1M – 5M</td></tr>
+    <tr><td style="padding:3px 8px;color:#ca5010;font-weight:700;">94%</td>
+      <td style="padding:3px 8px;color:#252424;">Lightning During Live Weather</td>
+      <td style="padding:3px 8px;color:#107c10;">300K – 1M</td></tr>
+    <tr><td style="padding:3px 8px;color:#ca5010;font-weight:700;">92%</td>
+      <td style="padding:3px 8px;color:#252424;">Mayor's Mic Drop Response</td>
+      <td style="padding:3px 8px;color:#107c10;">200K – 800K</td></tr>
+  </table>
+</div>
+<div>
+  <span class="sim-teams-btn">📤 Export All</span>
+  <span class="sim-teams-btn-sec">📅 Schedule</span>
+</div>""")
+
+    def _slack_archive(query="tornado Nashville"):
+        results = [
+            ("Nashville Tornado Coverage — March 2024", "2024-03-14", "3:45:00", "HD 1080p", "6.7 GB", "weather, tornado, nashville, emergency", "97%"),
+            ("Presidential Debate 2024 — Full Coverage", "2024-09-10", "2:15:00", "HD 1080p", "4.2 GB", "politics, election, debate", "61%"),
+            ("Hurricane Milton — 72 Hour Coverage", "2024-10-09", "4:30:00", "HD 1080p", "8.1 GB", "weather, hurricane, florida", "54%"),
+        ]
+        rows = "".join(
+            f'<div class="sim-slack-card-section">'
+            f'<div style="display:flex;justify-content:space-between;align-items:flex-start;">'
+            f'<div class="sim-slack-card-text" style="font-weight:600;">📹 {title}</div>'
+            f'<span style="color:#2bac76;font-size:12px;font-weight:700;">Match: {rel}</span>'
+            f'</div>'
+            f'<div class="sim-slack-card-muted">{date} &nbsp;|&nbsp; {dur} &nbsp;|&nbsp; {fmt} &nbsp;|&nbsp; {size}</div>'
+            f'<div class="sim-slack-card-muted">Tags: {tags}</div>'
+            f'</div>'
+            for title, date, dur, fmt, size, tags, rel in results
+        )
+        return _sc(f"""
+<div class="sim-slack-card-title">🔍 Archive Search — "{query}"</div>
+<div class="sim-slack-card-section">
+  <span class="sbadge-info">3 results</span>&nbsp;
+  <span class="sim-slack-card-muted">Searched 847 indexed assets in 0.3s</span>
+</div>
+{rows}
+<div style="margin-top:8px;">
+  <span class="sim-slack-btn primary">🔍 Refine Search</span>
+  <span class="sim-slack-btn">📋 Export Metadata</span>
+  <span class="sim-slack-btn">📥 Request Clips</span>
+</div>""")
+
+    def _teams_archive(query="tornado Nashville"):
+        return _tc(f"""
+<div class="sim-teams-card-title">🔍 Archive Search — "{query}"</div>
+<div class="sim-teams-card-section">
+  <span class="tbadge-info">3 results</span>
+  <span style="color:#616161;font-size:12px;margin-left:8px;">Searched 847 assets in 0.3s</span>
+</div>
+<div class="sim-teams-card-section">
+  <div class="sim-teams-card-text">
+    <strong>📹 Nashville Tornado Coverage — March 2024</strong> <span style="color:#107c10;">97% match</span><br>
+    <span style="color:#9e9e9e;">2024-03-14 | 3:45:00 | HD 1080p | 6.7 GB</span><br><br>
+    <strong>📹 Presidential Debate 2024</strong> <span style="color:#ca5010;">61% match</span><br>
+    <span style="color:#9e9e9e;">2024-09-10 | 2:15:00 | HD 1080p | 4.2 GB</span><br><br>
+    <strong>📹 Hurricane Milton — 72 Hour Coverage</strong> <span style="color:#ca5010;">54% match</span><br>
+    <span style="color:#9e9e9e;">2024-10-09 | 4:30:00 | HD 1080p | 8.1 GB</span>
+  </div>
+</div>
+<div>
+  <span class="sim-teams-btn">📋 Export Metadata</span>
+  <span class="sim-teams-btn-sec">📥 Request Clips</span>
+</div>""")
+
+    def _slack_unknown(text):
+        return _sc(f"""
+<div class="sim-slack-card-title">🤖 MediaAgentIQ understood: <em>"{text[:60]}"</em></div>
+<div class="sim-slack-card-section sim-slack-card-text">
+  I analysed your message and routed it to the <strong>Trending Agent</strong> (best match).<br>
+  Here's the live result — or try a specific slash command for more detail.
+</div>
+{_slack_trending()[len('<div class="sim-slack-card">'):-len('</div>')]}""")
+
+    def _teams_unknown(text):
+        return _tc(f"""
+<div class="sim-teams-card-title">🤖 Routed: "{text[:50]}"</div>
+<div class="sim-teams-card-section sim-teams-card-text">
+  Your message was routed to the Trending Agent (best match). Type <strong>/miq-help</strong> to see all commands.
+</div>""")
+
+    # ── Command router ────────────────────────────────────────────────────
+
+    def process_cmd(text, platform="slack"):
+        t = text.strip().lower()
+        # Extract archive query if present
+        archive_q = "tornado Nashville"
+        if "/miq-archive" in t:
+            parts = text.strip().split(None, 1)
+            archive_q = parts[1] if len(parts) > 1 else "tornado Nashville"
+
+        if "help" in t or "/miq-help" in t:
+            return _slack_help() if platform == "slack" else _teams_help()
+        elif "status" in t or "/miq-status" in t:
+            return _slack_status() if platform == "slack" else _teams_status()
+        elif "trend" in t or "/miq-trend" in t:
+            return _slack_trending() if platform == "slack" else _teams_trending()
+        elif "compliance" in t or "fcc" in t or "/miq-compliance" in t:
+            return _slack_compliance() if platform == "slack" else _teams_compliance()
+        elif "deepfake" in t or "fake" in t or "forensic" in t or "/miq-deepfake" in t:
+            return _slack_deepfake() if platform == "slack" else _teams_deepfake()
+        elif "signal" in t or "loudness" in t or "ebu" in t or "/miq-signal" in t:
+            return _slack_signal() if platform == "slack" else _teams_signal()
+        elif "caption" in t or "subtitle" in t or "/miq-caption" in t:
+            return _slack_caption() if platform == "slack" else _teams_caption()
+        elif "clip" in t or "viral" in t or "/miq-clip" in t:
+            return _slack_clip() if platform == "slack" else _teams_clip()
+        elif "archive" in t or "search" in t or "/miq-archive" in t:
+            return (_slack_archive(archive_q) if platform == "slack"
+                    else _teams_archive(archive_q))
+        else:
+            return (_slack_unknown(text) if platform == "slack"
+                    else _teams_unknown(text))
+
+    # ── Helpers ───────────────────────────────────────────────────────────
+
+    def _now_ts():
+        return datetime.now().strftime("%I:%M %p")
+
+    def _render_slack_msg(msg):
+        role = msg["role"]
+        ts   = msg.get("ts", "")
+        if role == "user":
+            av_cls = "sim-slack-av user"
+            name   = "You"
+            badge  = ""
+            body   = (f'<span class="sim-slack-cmd-text">{msg["text"]}</span>'
+                      if msg["text"].startswith("/")
+                      else f'<span class="sim-slack-msg-text">{msg["text"]}</span>')
+        else:
+            av_cls = "sim-slack-av"
+            name   = "MediaAgentIQ"
+            badge  = '<span class="sim-slack-app-badge">APP</span>'
+            body   = msg.get("card", "")
+        av_icon = "🎬" if role == "bot" else "👤"
+        return (
+            f'<div class="sim-slack-msg">'
+            f'  <div class="{av_cls}">{av_icon}</div>'
+            f'  <div style="flex:1;min-width:0;">'
+            f'    <div class="sim-slack-msg-hdr">'
+            f'      <span class="sim-slack-msg-name">{name}</span>{badge}'
+            f'      <span class="sim-slack-msg-ts">{ts}</span>'
+            f'    </div>'
+            f'    {body}'
+            f'  </div>'
+            f'</div>'
+        )
+
+    def _render_teams_msg(msg):
+        role = msg["role"]
+        ts   = msg.get("ts", "")
+        if role == "user":
+            av_cls = "sim-teams-av user"
+            name   = "You"
+            body   = f'<div class="sim-teams-msg-text">{msg["text"]}</div>'
+        else:
+            av_cls = "sim-teams-av"
+            name   = "MediaAgentIQ"
+            body   = f'<div>{msg.get("card", "")}</div>'
+        av_icon = "M" if role == "bot" else "Y"
+        return (
+            f'<div class="sim-teams-msg">'
+            f'  <div class="{av_cls}">{av_icon}</div>'
+            f'  <div style="flex:1;min-width:0;">'
+            f'    <div><span class="sim-teams-msg-name">{name}</span>'
+            f'    <span class="sim-teams-msg-ts">{ts}</span></div>'
+            f'    {body}'
+            f'  </div>'
+            f'</div>'
+        )
+
+    def _send(text, platform):
+        ts = _now_ts()
+        key_msgs = f"{platform}_msgs"
+        st.session_state[key_msgs].append({"role": "user", "text": text, "card": None, "ts": ts})
+        with st.spinner(f"MediaAgentIQ is typing{'...' if platform == 'slack' else ' in Teams...'}"):
+            time.sleep(1.1)
+            card = process_cmd(text, platform)
+        st.session_state[key_msgs].append({"role": "bot", "text": None, "card": card, "ts": _now_ts()})
+
+    # ── Session state init ────────────────────────────────────────────────
+
+    if "slack_msgs" not in st.session_state:
+        st.session_state.slack_msgs = [
+            {"role": "bot", "text": None, "card": _slack_welcome(), "ts": "09:00 AM"}
+        ]
+    if "teams_msgs" not in st.session_state:
+        st.session_state.teams_msgs = [
+            {"role": "bot", "text": None, "card": _teams_welcome(), "ts": "09:00 AM"}
+        ]
+
+    # ── Page header ───────────────────────────────────────────────────────
+
+    st.title("💬 Channel Simulator")
+    st.caption("Live simulation of Slack & Microsoft Teams integration — agents respond in real time, no external accounts needed")
+
+    sim_info = st.info(
+        "💡 **How it works:** Type a slash command or plain message, and MediaAgentIQ routes it to the "
+        "correct agent and returns a formatted Block Kit / Adaptive Card — exactly as users would see it "
+        "in a real workspace."
+    )
+
+    # ── Platform tabs ─────────────────────────────────────────────────────
+
+    slack_tab, teams_tab = st.tabs(["  Slack", "  Microsoft Teams"])
+
+    # ══ SLACK TAB ═══════════════════════════════════════════════════════════
+    with slack_tab:
+
+        col_side, col_main = st.columns([1, 4])
+
+        # Slack sidebar
+        with col_side:
+            st.markdown("""
+<div class="sim-slack-workspace">
+  <div class="sim-slack-ws-dot"></div>
+  <div class="sim-slack-ws-name">WKRN Newsroom</div>
+</div>
+<div class="sim-slack-sidebar">
+  <div class="sim-slack-section-hdr">Channels</div>
+  <div class="sim-slack-ch active"><span class="sim-slack-ch-hash">#</span>newsroom
+    <span class="sim-slack-badge">3</span></div>
+  <div class="sim-slack-ch"><span class="sim-slack-ch-hash">#</span>noc-alerts</div>
+  <div class="sim-slack-ch"><span class="sim-slack-ch-hash">#</span>compliance</div>
+  <div class="sim-slack-ch"><span class="sim-slack-ch-hash">#</span>brand-safety</div>
+  <div class="sim-slack-ch"><span class="sim-slack-ch-hash">#</span>social-publishing</div>
+  <div class="sim-slack-ch"><span class="sim-slack-ch-hash">#</span>archive</div>
+  <div class="sim-slack-section-hdr" style="margin-top:12px;">Apps</div>
+  <div class="sim-slack-ch active" style="color:#fff;">🎬 MediaAgentIQ</div>
+</div>""", unsafe_allow_html=True)
+
+        # Slack main area
+        with col_main:
+            st.markdown("""
+<div class="sim-slack-area-hdr">
+  <span style="color:#d1d2d3;font-size:18px;">#</span>
+  <span class="sim-slack-area-hdr-name">newsroom</span>
+  <span class="sim-slack-area-hdr-desc">WKRN News · 24 members · MediaAgentIQ integrated</span>
+</div>""", unsafe_allow_html=True)
+
+            # Message history
+            all_msgs_html = "".join(_render_slack_msg(m) for m in st.session_state.slack_msgs)
+            st.markdown(
+                f'<div class="sim-slack-msgs">{all_msgs_html}</div>',
+                unsafe_allow_html=True
+            )
+
+            # Input form
+            with st.form("slack_input_form", clear_on_submit=True):
+                col_inp, col_btn = st.columns([6, 1])
+                slack_input = col_inp.text_input(
+                    "",
+                    placeholder="Message #newsroom  —  try: /miq-help, /miq-trending, /miq-compliance ...",
+                    label_visibility="collapsed"
+                )
+                slack_submitted = col_btn.form_submit_button("Send ↵", use_container_width=True)
+
+            if slack_submitted and slack_input.strip():
+                _send(slack_input.strip(), "slack")
+                st.rerun()
+
+            # Clear button
+            if len(st.session_state.slack_msgs) > 1:
+                if st.button("🗑️ Clear Chat", key="slack_clear", help="Reset the Slack conversation"):
+                    st.session_state.slack_msgs = [
+                        {"role": "bot", "text": None, "card": _slack_welcome(), "ts": _now_ts()}
+                    ]
+                    st.rerun()
+
+        # Quick command buttons — below the two-column layout
+        st.markdown("---")
+        st.markdown("**⚡ Quick Commands** — click to run instantly:")
+        q1, q2, q3, q4, q5, q6, q7, q8, q9 = st.columns(9)
+        cmds_s = [
+            (q1, "/miq-help",       "sk_help"),
+            (q2, "/miq-status",     "sk_status"),
+            (q3, "/miq-trending",   "sk_trending"),
+            (q4, "/miq-compliance", "sk_compliance"),
+            (q5, "/miq-deepfake",   "sk_deepfake"),
+            (q6, "/miq-signal",     "sk_signal"),
+            (q7, "/miq-caption",    "sk_caption"),
+            (q8, "/miq-clip",       "sk_clip"),
+            (q9, "/miq-archive",    "sk_archive"),
+        ]
+        for col, label, key in cmds_s:
+            if col.button(label, key=key, use_container_width=True):
+                _send(label, "slack")
+                st.rerun()
+
+    # ══ TEAMS TAB ═══════════════════════════════════════════════════════════
+    with teams_tab:
+
+        col_side_t, col_main_t = st.columns([1, 4])
+
+        # Teams sidebar
+        with col_side_t:
+            st.markdown("""
+<div class="sim-teams-header">
+  <span style="font-size:20px;">⊞</span>
+  <span class="sim-teams-title">WKRN News</span>
+</div>
+<div class="sim-teams-sidebar">
+  <div style="padding:10px 14px;color:#9e9e9e;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;">Teams</div>
+  <div class="sim-teams-ch active">📺 Newsroom</div>
+  <div class="sim-teams-ch">🔔 NOC Alerts</div>
+  <div class="sim-teams-ch">⚖️ Compliance</div>
+  <div class="sim-teams-ch">🛡️ Brand Safety</div>
+  <div style="padding:10px 14px;color:#9e9e9e;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-top:8px;">Apps</div>
+  <div class="sim-teams-ch active">🎬 MediaAgentIQ Bot</div>
+</div>""", unsafe_allow_html=True)
+
+        # Teams main area
+        with col_main_t:
+            st.markdown("""
+<div class="sim-teams-area-hdr">
+  <span style="font-size:18px;">📺</span>
+  <span class="sim-teams-area-hdr-name">Newsroom</span>
+  <span style="color:#9e9e9e;font-size:12px;margin-left:8px;">WKRN News · MediaAgentIQ Bot connected</span>
+</div>""", unsafe_allow_html=True)
+
+            # Message history
+            all_msgs_html_t = "".join(_render_teams_msg(m) for m in st.session_state.teams_msgs)
+            st.markdown(
+                f'<div class="sim-teams-msgs">{all_msgs_html_t}</div>',
+                unsafe_allow_html=True
+            )
+
+            # Input form
+            with st.form("teams_input_form", clear_on_submit=True):
+                col_inp_t, col_btn_t = st.columns([6, 1])
+                teams_input = col_inp_t.text_input(
+                    "",
+                    placeholder="Type a message or /miq-help ...",
+                    label_visibility="collapsed"
+                )
+                teams_submitted = col_btn_t.form_submit_button("Send ↵", use_container_width=True)
+
+            if teams_submitted and teams_input.strip():
+                _send(teams_input.strip(), "teams")
+                st.rerun()
+
+            # Clear button
+            if len(st.session_state.teams_msgs) > 1:
+                if st.button("🗑️ Clear Chat", key="teams_clear", help="Reset the Teams conversation"):
+                    st.session_state.teams_msgs = [
+                        {"role": "bot", "text": None, "card": _teams_welcome(), "ts": _now_ts()}
+                    ]
+                    st.rerun()
+
+        # Quick commands for Teams
+        st.markdown("---")
+        st.markdown("**⚡ Quick Commands** — click to run instantly:")
+        t1, t2, t3, t4, t5, t6, t7, t8, t9 = st.columns(9)
+        cmds_t = [
+            (t1, "/miq-help",       "tm_help"),
+            (t2, "/miq-status",     "tm_status"),
+            (t3, "/miq-trending",   "tm_trending"),
+            (t4, "/miq-compliance", "tm_compliance"),
+            (t5, "/miq-deepfake",   "tm_deepfake"),
+            (t6, "/miq-signal",     "tm_signal"),
+            (t7, "/miq-caption",    "tm_caption"),
+            (t8, "/miq-clip",       "tm_clip"),
+            (t9, "/miq-archive",    "tm_archive"),
+        ]
+        for col, label, key in cmds_t:
+            if col.button(label, key=key, use_container_width=True):
+                _send(label, "teams")
+                st.rerun()
+
+    st.divider()
+    st.caption("Simulation runs entirely in-browser — no Slack/Teams accounts, no ngrok, no API keys required.")
+
+
 # ============== Footer ==============
 
 st.divider()
 col1, col2, col3 = st.columns(3)
 with col1:
-    st.caption("MediaAgentIQ v2.0.0 | Enterprise Edition")
+    st.caption("MediaAgentIQ v3.1.0 | Enterprise Edition")
 with col2:
     st.caption("AI-Powered Media Operations Platform")
 with col3:
