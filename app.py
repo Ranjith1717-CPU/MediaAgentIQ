@@ -37,6 +37,23 @@ except Exception as _e:
     import logging as _logging
     _logging.getLogger("app").warning(f"Gateway router not loaded: {_e}")
 
+# Startup: initialise connectors (Slack/Teams) based on settings
+@app.on_event("startup")
+async def startup_connectors():
+    try:
+        from settings import settings
+        from connectors import setup_connectors
+        # Use production mode for channels if Slack token is configured
+        demo = not bool(settings.SLACK_BOT_TOKEN)
+        await setup_connectors(demo_mode=demo)
+        import logging
+        logging.getLogger("app").info(
+            f"Connectors initialised — Slack: {'production' if not demo else 'demo'} mode"
+        )
+    except Exception as e:
+        import logging
+        logging.getLogger("app").warning(f"Connector startup warning: {e}")
+
 # Mount static files
 app.mount("/static", StaticFiles(directory="static"), name="static")
 

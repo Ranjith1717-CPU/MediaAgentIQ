@@ -254,5 +254,13 @@ class TeamsChannelConnector(BaseConnector):
 
 
 # ─── Singleton instance ───────────────────────────────────────────────────────
+# demo_mode is False when TEAMS_APP_ID is set in .env
 
-teams_channel = TeamsChannelConnector(demo_mode=True)
+def _resolve_demo_mode() -> bool:
+    try:
+        from settings import settings
+        return not bool(settings.TEAMS_APP_ID)
+    except Exception:
+        return True
+
+teams_channel = TeamsChannelConnector(demo_mode=_resolve_demo_mode())

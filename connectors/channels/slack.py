@@ -251,5 +251,13 @@ class SlackChannelConnector(BaseConnector):
 
 
 # ─── Singleton instance ───────────────────────────────────────────────────────
+# demo_mode is False when SLACK_BOT_TOKEN is set in .env
 
-slack_channel = SlackChannelConnector(demo_mode=True)
+def _resolve_demo_mode() -> bool:
+    try:
+        from settings import settings
+        return not bool(settings.SLACK_BOT_TOKEN)
+    except Exception:
+        return True
+
+slack_channel = SlackChannelConnector(demo_mode=_resolve_demo_mode())
