@@ -61,6 +61,12 @@ class AgentType(Enum):
     AI_PRODUCTION_DIRECTOR = "ai_production_director"
     BRAND_SAFETY = "brand_safety"
     CARBON_INTELLIGENCE = "carbon_intelligence"
+    # Phase 1 Pipeline agents (broadcast pipeline gaps)
+    INGEST_TRANSCODE = "ingest_transcode"
+    SIGNAL_QUALITY = "signal_quality"
+    PLAYOUT_SCHEDULING = "playout_scheduling"
+    OTT_DISTRIBUTION = "ott_distribution"
+    NEWSROOM_INTEGRATION = "newsroom_integration"
 
 
 @dataclass
@@ -236,7 +242,20 @@ class AgentOrchestrator:
         self.register_agent(AgentType.BRAND_SAFETY, BrandSafetyAgent())
         self.register_agent(AgentType.CARBON_INTELLIGENCE, CarbonIntelligenceAgent())
 
-        logger.info("All 14 agents registered (8 original + 6 future-ready)")
+        # Phase 1 Pipeline agents
+        from agents.ingest_transcode_agent import IngestTranscodeAgent
+        from agents.signal_quality_agent import SignalQualityAgent
+        from agents.playout_scheduling_agent import PlayoutSchedulingAgent
+        from agents.ott_distribution_agent import OTTDistributionAgent
+        from agents.newsroom_integration_agent import NewsroomIntegrationAgent
+
+        self.register_agent(AgentType.INGEST_TRANSCODE, IngestTranscodeAgent())
+        self.register_agent(AgentType.SIGNAL_QUALITY, SignalQualityAgent())
+        self.register_agent(AgentType.PLAYOUT_SCHEDULING, PlayoutSchedulingAgent())
+        self.register_agent(AgentType.OTT_DISTRIBUTION, OTTDistributionAgent())
+        self.register_agent(AgentType.NEWSROOM_INTEGRATION, NewsroomIntegrationAgent())
+
+        logger.info("All 19 agents registered (8 original + 6 future-ready + 5 Phase 1 pipeline)")
 
     # ==================== Task Management ====================
 
@@ -431,7 +450,41 @@ class AgentOrchestrator:
             job_id="carbon_monitor"
         )
 
-        logger.info("Default schedules configured (4 original + 6 future-ready)")
+        # ========== Phase 1 Pipeline Agent Schedules ==========
+
+        # Signal Quality — monitor live streams every 2 minutes
+        self.schedule_job(
+            AgentType.SIGNAL_QUALITY,
+            {"mode": "live_monitor"},
+            interval_seconds=120,
+            job_id="signal_quality_monitor"
+        )
+
+        # Newsroom Integration — sync rundown every 3 minutes
+        self.schedule_job(
+            AgentType.NEWSROOM_INTEGRATION,
+            {"mode": "sync"},
+            interval_seconds=180,
+            job_id="newsroom_sync"
+        )
+
+        # Playout Scheduling — refresh schedule every 5 minutes
+        self.schedule_job(
+            AgentType.PLAYOUT_SCHEDULING,
+            {"mode": "schedule"},
+            interval_seconds=300,
+            job_id="playout_refresh"
+        )
+
+        # OTT Distribution — check CDN health every 10 minutes
+        self.schedule_job(
+            AgentType.OTT_DISTRIBUTION,
+            {"mode": "health_check"},
+            interval_seconds=600,
+            job_id="ott_health"
+        )
+
+        logger.info("Default schedules configured (4 original + 6 future-ready + 4 Phase 1 pipeline)")
 
     def pause_job(self, job_id: str) -> bool:
         """Pause a scheduled job."""

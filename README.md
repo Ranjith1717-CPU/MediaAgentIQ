@@ -2,25 +2,26 @@
 
 **AI Agent Platform for Media & Broadcast Operations**
 
-14 specialized AI agents working **autonomously 24/7** to automate your broadcast workflow — from captioning to compliance, deepfake detection to carbon intelligence.
+19 specialized AI agents running **autonomously 24/7** across the full broadcast pipeline — from ingest to playout, captioning to compliance, deepfake detection to carbon intelligence. Agents are now reachable directly from **Slack and Microsoft Teams**.
 
-![Version](https://img.shields.io/badge/Version-3.0.0-blue) ![Python](https://img.shields.io/badge/Python-3.9+-green) ![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen) ![Agents](https://img.shields.io/badge/Agents-14-purple)
-
----
-
-## ✨ What's New in v3.0 — Future-Ready Edition
-
-- **🔮 6 New Future-Ready Agents** - Market gap innovations not yet available in broadcast
-- **🕵️ Deepfake Detection** - 3-layer forensic AI synthetic media detection for live broadcasts
-- **✅ Live Fact-Check** - Real-time claim verification across 8 fact databases during air
-- **📊 Audience Intelligence** - Second-by-second viewer retention prediction & drop-off prevention
-- **🎬 AI Production Director** - Autonomous camera cuts, lower-thirds, rundown optimization
-- **🛡️ Brand Safety** - GARM-standard real-time contextual ad safety scoring
-- **🌿 Carbon Intelligence** - Broadcast carbon footprint tracking & ESG report generation
+![Version](https://img.shields.io/badge/Version-3.1.0-blue) ![Python](https://img.shields.io/badge/Python-3.9+-green) ![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen) ![Agents](https://img.shields.io/badge/Agents-19-purple) ![Channels](https://img.shields.io/badge/Channels-Slack%20%7C%20Teams-orange)
 
 ---
 
-## 🤖 The 14 AI Agents
+## ✨ What's New in v3.1 — Pipeline + Channel Edition
+
+- **🔌 Connector Framework** — MCP-style plugin architecture. Connect any external system as a tool agents can discover and call
+- **💬 Slack & Teams Integration** — Trigger any agent directly from Slack (`/miq-compliance`) or Teams. Get interactive results with action buttons
+- **🧠 Conversational Gateway** — NLP + slash commands. Natural language routing via Claude LLM with multi-turn conversation context
+- **📥 Ingest & Transcode Agent** — Front-door of the broadcast pipeline. FFmpeg / AWS MediaConvert with 6 output profiles
+- **📡 Signal Quality Monitor Agent** — EBU R128 loudness, black frame, freeze detection, NOC alerts
+- **📺 Playout & Scheduling Agent** — Automation server integration (Harmonic, GV Maestro), SCTE-35 break injection
+- **🌐 OTT / Multi-Platform Distribution Agent** — HLS/DASH packaging, CDN publishing, adaptive bitrate
+- **📰 Newsroom Integration Agent** — iNews/ENPS MOS sync, wire ingestion, rundown management
+
+---
+
+## 🤖 The 19 AI Agents
 
 ### Original 8 (Market-Available)
 
@@ -35,7 +36,7 @@
 | 📜 **Rights Agent** | License tracking + violation detection | ✅ Every 1hr | Legal protection |
 | 📈 **Trending Agent** | Real-time trend monitoring + alerts | ✅ Every 5min | Never miss a story |
 
-### Future-Ready 6 (Market Gaps — Not Yet Available in Broadcast)
+### Future-Ready 6 (Market Gaps)
 
 | Agent | Market Gap Addressed | Auto-Trigger | Key Standard |
 |-------|---------------------|--------------|--------------|
@@ -45,6 +46,53 @@
 | 🎬 **AI Production Director** | No autonomous broadcast production AI | Every 1 min | Human-approval gate |
 | 🛡️ **Brand Safety** | No real-time contextual ad scoring | On every upload | GARM Standard |
 | 🌿 **Carbon Intelligence** | No broadcast carbon tracking exists | Every 30 min | GHG Protocol / GRI 305 |
+
+### Phase 1 Pipeline Agents (Broadcast Pipeline Gaps)
+
+| Agent | Pipeline Stage | Schedule | Integration |
+|-------|---------------|----------|-------------|
+| 📥 **Ingest & Transcode** | Ingest | On upload | FFmpeg / AWS MediaConvert |
+| 📡 **Signal Quality Monitor** | Production | Every 2 min | FFprobe / EBU R128 |
+| 📺 **Playout & Scheduling** | Distribution | Every 5 min | Harmonic / GV Maestro |
+| 🌐 **OTT Distribution** | Distribution | Every 10 min | HLS/DASH / CloudFront / Akamai |
+| 📰 **Newsroom Integration** | Pre-production | Every 3 min | iNews / ENPS / MOS |
+
+---
+
+## 💬 Trigger Agents from Slack & Teams
+
+Users interact with agents directly in their existing workspace tools.
+
+**Slash commands (power users):**
+```
+/miq-compliance https://cdn.example.com/clip.mp4
+/miq-trending --live --topic=elections
+/miq-deepfake https://storage.example.com/video.mp4
+/miq-ingest https://s3.example.com/raw_footage.mxf
+/miq-signal rtmp://live-stream/channel1
+/miq-status
+/miq-connectors
+/miq-help
+```
+
+**Natural language (everyone):**
+```
+@mediaagentiq check compliance on today's 6pm news
+@mediaagentiq what's trending right now?
+@mediaagentiq is this video a deepfake?
+@mediaagentiq translate the clip to Spanish
+@mediaagentiq sync the newsroom rundown
+```
+
+**Interactive results with action buttons:**
+```
+┌────────────────────────────────────────┐
+│ ⚖️ Compliance Scan Result              │
+│ Risk Score: 12/100  ✅                  │
+│ Issues Found: 0                         │
+│ [📄 Full Report] [🔔 Alert Team] [✅ Reviewed] │
+└────────────────────────────────────────┘
+```
 
 ---
 
@@ -58,46 +106,60 @@ streamlit run streamlit_app.py
 ```
 Open: **http://localhost:8501**
 
-### Option 2: FastAPI Backend
+### Option 2: FastAPI Backend (with Slack/Teams gateway)
 ```bash
 pip install -r requirements.txt
 uvicorn app:app --reload
 ```
-Open: **http://localhost:8000**
+Open: **http://localhost:8000**  |  API Docs: **http://localhost:8000/docs**
 
-### Option 3: Autonomous Mode
+### Option 3: Autonomous Mode (19 agents running 24/7)
 ```bash
 python orchestrator.py
 ```
-Agents run in background automatically!
 
 ---
 
 ## 🏗️ Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                           MediaAgentIQ v3.0 Platform                         │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  Original 8 Agents                                                           │
-│  ┌────────┐ ┌──────┐ ┌──────────┐ ┌─────────┐ ┌──────┐ ┌──────┐ ┌──────┐  │
-│  │Caption │ │ Clip │ │Compliance│ │ Archive │ │Social│ │Local │ │Rights│  │
-│  └────────┘ └──────┘ └──────────┘ └─────────┘ └──────┘ └──────┘ └──────┘  │
-│                                                                              │
-│  Future-Ready 6 Agents (Market Gaps)                                        │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐          │
-│  │Deepfake  │ │  Live    │ │ Audience │ │  AI Prod │ │  Brand   │          │
-│  │Detection │ │FactCheck │ │Intelligence│ │ Director │ │  Safety  │ Carbon  │
-│  └──────────┘ └──────────┘ └──────────┘ └──────────┘ └──────────┘          │
-│                              │                                               │
-│            ┌─────────────────┴───────────────────┐                          │
-│            │      Autonomous Orchestrator          │                          │
-│            │  Task Queue • Scheduler • Events     │                          │
-│            └─────────────────────────────────────┘                          │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  Services: Whisper AI • GPT-4 Vision • ElevenLabs Dubbing                   │
-│  Integrations: Avid MAM • NMOS IS-04/05 • AWS/Azure • Social APIs           │
-└─────────────────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                          MediaAgentIQ v3.1 Platform                          │
+├──────────────────────────────────────────────────────────────────────────────┤
+│  User Channels (NEW)                                                         │
+│  ┌─────────────┐  ┌─────────────────┐  ┌────────────────┐                   │
+│  │  Slack Bot  │  │  MS Teams Bot   │  │  Streamlit UI  │  FastAPI           │
+│  │  /miq-* cmds│  │  Adaptive Cards │  │  (14→19 agents)│                   │
+│  └──────┬──────┘  └────────┬────────┘  └────────────────┘                   │
+│         └─────────────┬────┘                                                 │
+│  ┌───────────────────▼─────────────────────────────────┐                    │
+│  │           Conversational Gateway (NEW)               │                    │
+│  │  Router (NLP+slash) • Formatter (BlockKit/Cards)     │                    │
+│  │  Conversation Context • Webhook Handler              │                    │
+│  └───────────────────┬─────────────────────────────────┘                    │
+│                      │                                                       │
+│  ┌───────────────────▼─────────────────────────────────┐                    │
+│  │              Autonomous Orchestrator                  │                    │
+│  │     Task Queue (Priority) • Scheduler • Events       │                    │
+│  └───────────────────┬─────────────────────────────────┘                    │
+│                      │                                                       │
+│  ┌───────────────────▼─────────────────────────────────┐                    │
+│  │                Agent Layer (19 Agents)               │                    │
+│  │  Original 8 • Future-Ready 6 • Phase 1 Pipeline 5   │                    │
+│  └───────────────────┬─────────────────────────────────┘                    │
+│                      │                                                       │
+│  ┌───────────────────▼─────────────────────────────────┐                    │
+│  │          Connector Framework / MCP Layer (NEW)       │                    │
+│  │  ┌──────┐ ┌──────┐ ┌────────┐ ┌───────┐ ┌────────┐  │                    │
+│  │  │Slack │ │Teams │ │  MAM   │ │Playout│ │  CDN   │  │                    │
+│  │  │ Bot  │ │ Bot  │ │ (Avid) │ │Harmonic│ │Akamai │  │                    │
+│  │  └──────┘ └──────┘ └────────┘ └───────┘ └────────┘  │                    │
+│  │  ┌──────┐ ┌──────┐ ┌────────┐ ┌───────┐             │                    │
+│  │  │  S3  │ │iNews │ │FFmpeg/ │ │AWS    │             │                    │
+│  │  │      │ │ MOS  │ │MediaCvt│ │Elemental            │                    │
+│  │  └──────┘ └──────┘ └────────┘ └───────┘             │                    │
+│  └─────────────────────────────────────────────────────┘                    │
+└──────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -106,129 +168,179 @@ Agents run in background automatically!
 
 ```
 MediaAgentIQ/
-├── streamlit_app.py               # 🖥️  Main Streamlit UI (14 agent pages)
-├── orchestrator.py                # 🤖 Autonomous Agent Orchestrator
-├── app.py                         # 🌐 FastAPI Backend
-├── settings.py                    # ⚙️  Pydantic Configuration
+├── streamlit_app.py               # 🖥️  Main Streamlit UI
+├── orchestrator.py                # 🤖 Autonomous Orchestrator (19 agents, 14 schedules)
+├── app.py                         # 🌐 FastAPI Backend + Gateway mount
+├── settings.py                    # ⚙️  Pydantic Configuration (all env vars)
 │
-├── agents/                        # 🤖 14 AI Agents
+├── gateway/                       # 💬 NEW — Conversational Channel Gateway
+│   ├── __init__.py
+│   ├── router.py                 #    NLP + slash command → agent routing
+│   ├── formatter.py              #    Agent output → Slack Block Kit / Teams Cards
+│   ├── conversation.py           #    Per-user multi-turn context
+│   └── webhook_handler.py        #    FastAPI routes (/slack/*, /teams/*)
+│
+├── connectors/                    # 🔌 NEW — MCP-Style Connector Framework
+│   ├── __init__.py               #    setup_connectors() startup helper
+│   ├── base_connector.py         #    BaseConnector abstract class
+│   ├── registry.py               #    ConnectorRegistry + call_tool() MCP dispatch
+│   └── channels/                 #    User-facing channel connectors
+│       ├── slack.py              #    Slack Bot (Block Kit, alerts, slash cmds)
+│       └── teams.py              #    Teams Bot (Adaptive Cards, proactive alerts)
+│
+├── agents/                        # 🤖 19 AI Agents
 │   ├── base_agent.py             #    Dual-mode base class
-│   │
 │   │   — Original 8 —
-│   ├── caption_agent.py          #    Whisper transcription
-│   ├── clip_agent.py             #    GPT-4 Vision viral detection
-│   ├── compliance_agent.py       #    FCC monitoring
-│   ├── archive_agent.py          #    MAM integration
+│   ├── caption_agent.py
+│   ├── clip_agent.py
+│   ├── compliance_agent.py
+│   ├── archive_agent.py
 │   ├── social_publishing_agent.py
-│   ├── localization_agent.py     #    ElevenLabs dubbing
+│   ├── localization_agent.py
 │   ├── rights_agent.py
 │   ├── trending_agent.py
-│   │
 │   │   — Future-Ready 6 —
-│   ├── deepfake_detection_agent.py    # C2PA forensic analysis
-│   ├── live_fact_check_agent.py       # 8-database real-time verification
-│   ├── audience_intelligence_agent.py # Retention curve prediction
-│   ├── ai_production_director_agent.py# Autonomous broadcast production
-│   ├── brand_safety_agent.py          # GARM-standard ad scoring
-│   └── carbon_intelligence_agent.py   # GHG Protocol ESG reporting
+│   ├── deepfake_detection_agent.py
+│   ├── live_fact_check_agent.py
+│   ├── audience_intelligence_agent.py
+│   ├── ai_production_director_agent.py
+│   ├── brand_safety_agent.py
+│   ├── carbon_intelligence_agent.py
+│   │   — Phase 1 Pipeline 5 (NEW) —
+│   ├── ingest_transcode_agent.py      # FFmpeg / AWS MediaConvert
+│   ├── signal_quality_agent.py        # EBU R128, black frame, freeze
+│   ├── playout_scheduling_agent.py    # Harmonic / GV Maestro
+│   ├── ott_distribution_agent.py      # HLS/DASH / CDN
+│   └── newsroom_integration_agent.py  # iNews / ENPS / MOS
 │
 ├── services/                      # 🔧 AI Service Wrappers
-├── integrations/                  # 🔌 Avid MAM, NMOS IS-04/05
-├── templates/                     # 📄 FastAPI HTML templates
-├── static/                        # 🎨 CSS & JavaScript
-└── .env.example                   # 🔑 API keys template
+│   ├── transcription.py          #    Whisper API
+│   ├── vision.py                 #    GPT-4 Vision
+│   └── dubbing.py                #    ElevenLabs
+│
+├── integrations/                  # 🔌 Broadcast System Integrations
+│   ├── avid/                     #    Avid Media Central
+│   └── grass_valley/             #    NMOS IS-04/IS-05
+│
+└── .env.example                   # 🔑 Environment variables template
 ```
 
 ---
 
 ## ⚙️ Configuration
 
-Create `.env` file:
+### Core `.env` settings
+
 ```bash
+# Mode
+PRODUCTION_MODE=false          # true = real AI APIs, false = demo mode
+
 # AI Services
 OPENAI_API_KEY=sk-...
 ELEVENLABS_API_KEY=...
 
-# Mode
-PRODUCTION_MODE=false  # true for real AI, false for demo
+# Slack Bot (for /miq-* commands and agent alerts)
+SLACK_BOT_TOKEN=xoxb-...
+SLACK_SIGNING_SECRET=...
+SLACK_DEFAULT_CHANNEL=#mediaagentiq
 
-# Integrations (optional)
-AVID_API_URL=https://your-avid-server/api
-NMOS_REGISTRY_URL=http://nmos-registry:8080
+# Microsoft Teams Bot
+TEAMS_APP_ID=...
+TEAMS_APP_PASSWORD=...
+TEAMS_TENANT_ID=your-tenant-id
+
+# Phase 1 Pipeline Agents
+AUTOMATION_SERVER_URL=http://harmonic-server/api   # Playout
+AUTOMATION_SERVER_TYPE=harmonic                     # harmonic | gv_maestro
+CDN_PROVIDER=cloudfront                             # cloudfront | akamai | fastly
+INEWS_API_URL=http://inews-server/api              # Newsroom
+
+# Future-Ready Agent Settings
+DEEPFAKE_RISK_THRESHOLD=0.60
+PRODUCTION_DIRECTOR_AUTO_ACCEPT=false
+BRAND_SAFETY_DEFAULT_FLOOR=70
+CARBON_GRID_REGION=US_Northeast
 ```
 
 ---
 
-## 🔌 Integrations
-
-| System | Protocol | Status |
-|--------|----------|--------|
-| Media Asset Management | REST API, MOS, BXF | ✅ Ready |
-| Broadcast Automation | MOS, VDCP, RS-422 | ✅ Ready |
-| NMOS IP Infrastructure | IS-04, IS-05, IS-07 | ✅ Ready |
-| Cloud Platforms | AWS, Azure, GCP | ✅ Ready |
-| Social Media | Platform APIs, OAuth 2.0 | ✅ Ready |
-| AI Transcription | Whisper, gRPC | ✅ Ready |
-| Deepfake / C2PA Provenance | C2PA REST API | 🔮 Future Ready |
-| Fact-Check Databases | REST API, RSS/Atom | 🔮 Future Ready |
-| Audience Analytics | REST API, WebSocket | 🔮 Future Ready |
-| Graphics & Newsroom (Vizrt, iNews) | Vizrt DataHub, MOS | 🔮 Future Ready |
-| Brand Safety / Ad Tech | OpenRTB, IAS API | 🔮 Future Ready |
-| Carbon ESG APIs (ElectricityMap) | REST API | 🔮 Future Ready |
-
----
-
-## 🤖 Autonomous Mode
-
-Agents run automatically in the background:
+## 🤖 Autonomous Mode — 14 Scheduled Jobs
 
 | Agent | Schedule | Trigger Events |
 |-------|----------|----------------|
-| Trending | Every 5 min | Breaking news alerts |
-| Compliance | Every 10 min | Violation detection |
-| Rights | Every 1 hour | Expiring licenses |
-| Archive | Every 6 hours | Index optimization |
-| Deepfake Detection | Every 2 min | Auto-hold suspicious content |
-| Live Fact-Check | Every 3 min | Anchor alerts on false claims |
-| Audience Intelligence | Every 5 min | Drop-off prevention cues |
-| AI Production Director | Every 1 min | Camera + graphics decisions |
-| Brand Safety | Every 2 min | Block unsafe ad insertions |
-| Carbon Intelligence | Every 30 min | ESG metric updates |
+| AI Production Director | Every 1 min | BREAKING_NEWS |
+| Deepfake Detection | Every 2 min | NEW_CONTENT |
+| Brand Safety | Every 2 min | NEW_CONTENT |
+| Live Fact-Check | Every 3 min | CAPTION_COMPLETE, BREAKING_NEWS |
+| Trending | Every 5 min | — |
+| Audience Intelligence | Every 5 min | NEW_CONTENT |
+| Playout & Scheduling | Every 5 min | — |
+| Compliance | Every 10 min | — |
+| OTT Distribution | Every 10 min | — |
+| Newsroom Integration | Every 3 min | — |
+| Signal Quality Monitor | Every 2 min | — |
+| Rights | Every 1 hour | — |
+| Carbon Intelligence | Every 30 min | — |
+| Archive | Every 6 hours | — |
 
 **Event-Driven Chains:**
 ```
-New Content  → Caption + Clip + Compliance + Archive + Deepfake + Brand Safety + Audience
+New Content  → Caption + Clip + Compliance + Archive + Deepfake + Brand Safety + Audience + Ingest
 Captions Done → Localization + Social + Live Fact-Check
 Viral Clip   → Social Publishing
 Breaking News → AI Production Director + Live Fact-Check
 ```
 
-Start autonomous mode:
-```bash
-python orchestrator.py
+---
+
+## 🔌 Connector Framework (MCP-Style)
+
+The connector framework exposes external systems as tools that agents can discover and call — similar to MCP (Model Context Protocol).
+
+```python
+from connectors import connector_registry, setup_connectors
+
+# Connect all channels at startup
+await setup_connectors(demo_mode=True)
+
+# Agent sends an alert via Slack
+slack = connector_registry.get("slack")
+await slack.send_alert("Signal Quality Critical", "Stream dropped", severity="critical")
+
+# MCP-style tool call — agent doesn't need to know which connector handles it
+result = await connector_registry.call_tool(
+    "slack_send_message",
+    {"channel": "#noc-alerts", "text": "Ingest job complete"}
+)
+
+# Discover all available tools (for LLM tool-use)
+tools = connector_registry.get_all_tool_definitions()
 ```
+
+**Available MCP Tools (v3.1):**
+- `slack_send_message` — Send a Block Kit card to any Slack channel
+- `slack_send_alert` — Send a severity-coded proactive alert
+- `slack_read_channel` — Read recent messages from a channel
+- `teams_send_message` — Send an Adaptive Card to Teams
+- `teams_send_alert` — Send a proactive alert card to Teams
 
 ---
 
-## 📸 Features
+## 🌐 Slack Bot Setup
 
-### All-in-One Workflow
-Process content through ALL 14 agents with one click:
-- Upload once, analyze everywhere
-- Real-time parallel processing across all 14 agents
-- Combined results dashboard with 14-tab results view
-- Batch export options
+1. Create a Slack app at https://api.slack.com/apps
+2. Enable **Event Subscriptions** → Request URL: `https://your-domain.com/slack/events`
+3. Enable **Slash Commands** → add `/miq-*` commands pointing to `/slack/commands`
+4. Enable **Interactivity** → Request URL: `https://your-domain.com/slack/actions`
+5. Add Bot Token Scopes: `chat:write`, `channels:history`, `commands`
+6. Install to workspace → copy Bot Token and Signing Secret to `.env`
 
-### Integration Showcase
-- Live connection testing
-- Architecture diagrams
-- API documentation
-- WebSocket & Webhook support
+## 🟦 Teams Bot Setup
 
-### Real-time Processing
-- Step-by-step progress indicators
-- Agent capability showcases
-- Interactive demo workflows
+1. Register a bot in Azure Bot Service
+2. Set messaging endpoint: `https://your-domain.com/teams/messages`
+3. Copy App ID and Password to `.env`
+4. Add the bot to your Teams channel
 
 ---
 
@@ -236,9 +348,15 @@ Process content through ALL 14 agents with one click:
 
 | Component | Technology |
 |-----------|------------|
-| **Frontend** | Streamlit, HTML5, Tailwind CSS |
+| **Frontend** | Streamlit, HTML5 |
 | **Backend** | FastAPI, Python 3.9+ |
 | **AI** | OpenAI (Whisper, GPT-4), ElevenLabs |
+| **Channels** | Slack Bot SDK, Teams Bot Framework |
+| **Transcoding** | FFmpeg, AWS MediaConvert |
+| **Packaging** | AWS MediaPackage, HLS/DASH |
+| **CDN** | Akamai, CloudFront, Fastly |
+| **Newsroom** | iNews REST API, MOS Protocol |
+| **Playout** | Harmonic Polaris, GV Maestro REST |
 | **Database** | SQLite (async) |
 | **Orchestration** | AsyncIO, Custom Scheduler |
 
@@ -248,69 +366,57 @@ Process content through ALL 14 agents with one click:
 
 - [Full Documentation](MEDIAAGENTIQ_DOCUMENTATION.md)
 - API Reference: `http://localhost:8000/docs`
+- Gateway Health: `http://localhost:8000/gateway/health`
 
 ---
 
-## ⚙️ Future-Ready Agent Configuration
+## 📈 Changelog
 
-Add to your `.env` file to tune the new agents:
+### v3.1.0 (Latest) — Pipeline + Channel Edition
+- ✅ Conversational Gateway — NLP + slash command routing to all 19 agents
+- ✅ Slack Bot integration — Block Kit cards, slash commands, interactive buttons
+- ✅ Microsoft Teams integration — Adaptive Cards, Bot Framework
+- ✅ MCP-style Connector Framework — BaseConnector, ConnectorRegistry, tool discovery
+- ✅ IngestTranscodeAgent — FFmpeg / AWS MediaConvert, 6 output profiles
+- ✅ SignalQualityAgent — EBU R128 / ATSC A/85, black frame, freeze detection
+- ✅ PlayoutSchedulingAgent — Harmonic / GV Maestro, SCTE-35 break injection
+- ✅ OTTDistributionAgent — HLS/DASH, CloudFront/Akamai CDN, ABR ladder
+- ✅ NewsroomIntegrationAgent — iNews/ENPS MOS sync, wire ingestion
+- ✅ 4 new autonomous schedules (signal, newsroom, playout, OTT)
+- ✅ Multi-turn conversation context across Slack/Teams sessions
 
-```bash
-# Deepfake Detection
-DEEPFAKE_RISK_THRESHOLD=0.60      # 0.0-1.0, above this = hold from broadcast
-DEEPFAKE_AUTO_HOLD=true
-DEEPFAKE_SENSITIVITY=balanced     # strict | balanced | lenient
+### v3.0.0 — Future-Ready Edition
+- ✅ 6 future-ready agents (Deepfake, Fact-Check, Audience, Production Director, Brand Safety, Carbon)
+- ✅ Extended orchestrator with event subscriptions and scheduled jobs
 
-# Live Fact-Check
-FACT_CHECK_AUTO_ALERT=true
-FACT_CHECK_CLAIM_MIN_CONFIDENCE=0.70
-FACT_CHECK_DATABASES=ap,reuters,politifact,factcheck_org,snopes
+### v2.0.0
+- ✅ Autonomous Agent Orchestrator
+- ✅ All-in-One Workflow
+- ✅ MAM integration (Avid), NMOS integration (IS-04/IS-05)
 
-# Audience Intelligence
-AUDIENCE_PREDICTION_INTERVAL_SECS=300
-AUDIENCE_DROP_OFF_ALERT_THRESHOLD=0.04   # 4% drop triggers alert
-
-# AI Production Director
-PRODUCTION_DIRECTOR_AUTO_ACCEPT=false    # false = human approval required
-PRODUCTION_DIRECTOR_CAMERA_LATENCY_MS=500
-
-# Brand Safety
-BRAND_SAFETY_DEFAULT_FLOOR=70     # 0-100 min score for ad insertion
-BRAND_SAFETY_AUTO_BLOCK=true
-BRAND_SAFETY_GARM_ENABLED=true
-
-# Carbon Intelligence
-CARBON_GRID_REGION=US_Northeast
-CARBON_ESG_REPORT_ENABLED=true
-CARBON_RENEWABLE_PPA=0.0          # % of electricity from renewable PPAs
-```
+### v1.0.0
+- ✅ 8 AI agents (demo mode), FastAPI backend, basic Streamlit UI
 
 ---
 
 ## 🔮 Roadmap
 
 - [x] Dual-mode architecture (demo + production)
-- [x] Autonomous agent orchestrator
-- [x] All-in-One workflow
-- [x] Integration showcase
-- [x] Real-time processing indicators
-- [x] Deepfake detection agent
-- [x] Live fact-check agent
-- [x] Audience intelligence agent
-- [x] AI production director agent
-- [x] Brand safety agent (GARM)
-- [x] Carbon intelligence agent (GHG Protocol)
+- [x] Autonomous agent orchestrator (14 scheduled jobs)
+- [x] 19 AI agents covering the broadcast pipeline
+- [x] Slack Bot with slash commands + interactive cards
+- [x] Microsoft Teams Bot with Adaptive Cards
+- [x] MCP-style connector framework
+- [x] Multi-turn conversational context
+- [ ] Pre-production agents (Story Intelligence, Script & Prompter, Rundown Planning)
+- [ ] Technical QC Agent (full automated QC suite)
+- [ ] Graphics Automation Agent (Vizrt / Chyron integration)
+- [ ] Revenue Intelligence Agent
+- [ ] NOC Monitoring Agent
 - [ ] WebSocket real-time updates
 - [ ] User authentication
-- [ ] Mobile companion app
 - [ ] Kubernetes deployment
 
 ---
 
-## 📝 License
-
-MIT License - Built for Media & Broadcast professionals
-
----
-
-**MediaAgentIQ v3.0.0** | AI-Powered Media Operations Platform — Future-Ready Edition
+**MediaAgentIQ v3.1.0** | AI-Powered Broadcast Operations Platform — Pipeline + Channel Edition

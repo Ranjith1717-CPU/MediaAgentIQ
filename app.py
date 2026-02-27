@@ -26,8 +26,16 @@ from config import UPLOAD_DIR, OUTPUT_DIR, DEBUG
 app = FastAPI(
     title="MediaAgentIQ",
     description="AI Agent Platform for Media & Broadcast Operations",
-    version="1.0.0"
+    version="3.1.0"
 )
+
+# Mount the channel gateway (Slack + Teams webhooks)
+try:
+    from gateway.webhook_handler import gateway_router
+    app.include_router(gateway_router)
+except Exception as _e:
+    import logging as _logging
+    _logging.getLogger("app").warning(f"Gateway router not loaded: {_e}")
 
 # Mount static files
 app.mount("/static", StaticFiles(directory="static"), name="static")

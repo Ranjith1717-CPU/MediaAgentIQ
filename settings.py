@@ -221,6 +221,110 @@ class Settings(BaseSettings):
         description="Percentage of electricity from renewable PPAs (0.0-100.0)"
     )
 
+    # ==================== Slack Channel Connector ====================
+    SLACK_BOT_TOKEN: Optional[str] = Field(
+        default=None,
+        description="Slack Bot User OAuth Token (xoxb-...) for sending messages"
+    )
+    SLACK_SIGNING_SECRET: Optional[str] = Field(
+        default=None,
+        description="Slack app signing secret for webhook verification"
+    )
+    SLACK_DEFAULT_CHANNEL: str = Field(
+        default="#mediaagentiq",
+        description="Default Slack channel for proactive agent alerts"
+    )
+
+    # ==================== Teams Channel Connector ====================
+    TEAMS_APP_ID: Optional[str] = Field(
+        default=None,
+        description="Microsoft Teams Bot app registration ID (Azure AD)"
+    )
+    TEAMS_APP_PASSWORD: Optional[str] = Field(
+        default=None,
+        description="Microsoft Teams Bot app registration password"
+    )
+    TEAMS_TENANT_ID: str = Field(
+        default="common",
+        description="Azure AD tenant ID for Teams Bot authentication"
+    )
+
+    # ==================== Phase 1 Pipeline Agent Settings ====================
+
+    # Ingest & Transcode Agent
+    INGEST_DEFAULT_PROFILES: str = Field(
+        default="broadcast_hd,proxy_edit,web_mp4",
+        description="Comma-separated default transcode profiles for ingest"
+    )
+    INGEST_USE_CLOUD: bool = Field(
+        default=False,
+        description="Use AWS MediaConvert (true) vs local FFmpeg (false)"
+    )
+    AWS_MEDIACONVERT_ENDPOINT: Optional[str] = Field(
+        default=None,
+        description="AWS MediaConvert endpoint URL"
+    )
+    AWS_MEDIACONVERT_ROLE_ARN: Optional[str] = Field(
+        default=None,
+        description="IAM role ARN for AWS MediaConvert"
+    )
+
+    # Signal Quality Agent
+    SIGNAL_QUALITY_LOUDNESS_TARGET_LUFS: float = Field(
+        default=-23.0,
+        description="Target integrated loudness for EBU R128 compliance (LUFS)"
+    )
+    SIGNAL_QUALITY_TRUE_PEAK_LIMIT: float = Field(
+        default=-1.0,
+        description="Maximum true peak level in dBTP (EBU R128)"
+    )
+    SIGNAL_QUALITY_ALERT_ON_CRITICAL: bool = Field(
+        default=True,
+        description="Send Slack/Teams alert on critical signal quality issues"
+    )
+
+    # Playout & Scheduling Agent
+    AUTOMATION_SERVER_URL: Optional[str] = Field(
+        default=None,
+        description="Playout automation server REST API URL (Harmonic / GV Maestro)"
+    )
+    AUTOMATION_SERVER_TYPE: str = Field(
+        default="harmonic",
+        description="Automation server type: harmonic | gv_maestro | ross_overdrive"
+    )
+
+    # OTT Distribution Agent
+    CDN_PROVIDER: str = Field(
+        default="cloudfront",
+        description="Default CDN provider: cloudfront | akamai | fastly"
+    )
+    CDN_ORIGIN_URL: Optional[str] = Field(
+        default=None,
+        description="CDN origin server URL"
+    )
+    OTT_DRM_ENABLED: bool = Field(
+        default=False,
+        description="Enable DRM on HLS/DASH streams"
+    )
+    AWS_MEDIAPACKAGE_CHANNEL_ID: Optional[str] = Field(
+        default=None,
+        description="AWS MediaPackage channel ID for HLS/DASH packaging"
+    )
+
+    # Newsroom Integration Agent
+    INEWS_API_URL: Optional[str] = Field(
+        default=None,
+        description="iNews REST API base URL"
+    )
+    ENPS_API_URL: Optional[str] = Field(
+        default=None,
+        description="ENPS REST API base URL (alternative to iNews)"
+    )
+    NEWSROOM_SYNC_INTERVAL_SECS: int = Field(
+        default=180,
+        description="How often to sync rundown from newsroom system (seconds)"
+    )
+
     # ==================== API Timeouts ====================
     API_TIMEOUT_SECONDS: int = Field(
         default=30,
