@@ -13,8 +13,10 @@ Agents can run autonomously without user intervention.
 
 import asyncio
 import logging
+import time
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Callable
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Callable, Tuple
 from enum import Enum
 from dataclasses import dataclass, field
 from collections import deque
@@ -205,6 +207,20 @@ class AgentOrchestrator:
                 AgentType.LIVE_FACT_CHECK,
             ],
         }
+
+        # System-level memory (system_state.md)
+        self._system_memory_enabled = False
+        self._system_memory_file: Optional[Path] = None
+        self._memory_state_interval = 300
+        try:
+            from settings import settings as _s
+            if _s.MEMORY_ENABLED:
+                self._system_memory_file = Path(_s.MEMORY_DIR) / "agents" / "system_state.md"
+                self._system_memory_file.parent.mkdir(parents=True, exist_ok=True)
+                self._system_memory_enabled = True
+                self._memory_state_interval = _s.MEMORY_SYSTEM_STATE_INTERVAL_SECS
+        except Exception as _e:
+            logger.warning(f"Orchestrator: system memory init failed: {_e}")
 
         logger.info("AgentOrchestrator initialized")
 
@@ -608,8 +624,13 @@ class AgentOrchestrator:
 
             logger.info(f"Task {task.id} completed: {task.agent_type.value}")
 
-            # Emit events based on results
-            await self._handle_task_completion(task)
+            # Emit events based on results; patch memory with triggered events
+            triggered = await self._handle_task_completion(task)
+            if triggered and hasattr(agent, "_memory") and agent._memory:
+                try:
+                    agent._memory.update_last_entry_triggered(triggered)
+                except Exception as _e:
+                    logger.debug(f"update_last_entry_triggered failed (non-fatal): {_e}")
 
             # Execute callback if provided
             if task.callback:
@@ -629,16 +650,37 @@ class AgentOrchestrator:
             del self.running_tasks[task.id]
             self.completed_tasks.append(task)
 
-    async def _handle_task_completion(self, task: Task) -> None:
-        """Handle task completion and emit appropriate events."""
+    async def _handle_task_completion(self, task: Task) -> List[Tuple[str, List[str]]]:
+        """
+        Handle task completion and emit appropriate events.
+        Returns list of (event_type_str, [subscriber_agent_values]) for memory patching.
+        """
+        triggered: List[Tuple[str, List[str]]] = []
+
         if not task.result or not task.result.get("success"):
-            return
+            return triggered
 
         data = task.result.get("data", {})
 
-        # Caption complete -> trigger localization/social
+        def _emit(event: Event) -> None:
+            """Emit event, log it, and record in triggered list."""
+            subscribed = self.event_subscriptions.get(event.type, [])
+            self.emit_event(event)
+            sub_values = [a.value for a in subscribed]
+            triggered.append((event.type.value, sub_values))
+            payload_summary = self._summarize_event_payload(event.data)
+            self._log_inter_agent_event(
+                event_type=event.type.value,
+                source_agent=event.source_agent or task.agent_type.value,
+                source_task_id=task.id,
+                subscribers=sub_values,
+                payload_summary=payload_summary,
+                tasks_queued=len(subscribed),
+            )
+
+        # Caption complete -> trigger localization/social/fact-check
         if task.agent_type == AgentType.CAPTION:
-            self.emit_event(Event(
+            _emit(Event(
                 type=EventType.CAPTION_COMPLETE,
                 data={"captions": data},
                 source_agent="caption"
@@ -647,7 +689,7 @@ class AgentOrchestrator:
         # Clip detected -> trigger social
         elif task.agent_type == AgentType.CLIP:
             if data.get("viral_moments"):
-                self.emit_event(Event(
+                _emit(Event(
                     type=EventType.CLIP_DETECTED,
                     data={"clips": data["viral_moments"]},
                     source_agent="clip"
@@ -658,7 +700,7 @@ class AgentOrchestrator:
             issues = data.get("issues", [])
             critical = [i for i in issues if i.get("severity") == "critical"]
             if critical:
-                self.emit_event(Event(
+                _emit(Event(
                     type=EventType.COMPLIANCE_ALERT,
                     data={"issues": critical},
                     source_agent="compliance"
@@ -669,7 +711,7 @@ class AgentOrchestrator:
             trends = data.get("trends", [])
             hot_trends = [t for t in trends if t.get("velocity_score", 0) > 90]
             if hot_trends:
-                self.emit_event(Event(
+                _emit(Event(
                     type=EventType.TRENDING_SPIKE,
                     data={"trends": hot_trends},
                     source_agent="trending"
@@ -677,7 +719,7 @@ class AgentOrchestrator:
 
             breaking = data.get("breaking_news", [])
             if breaking:
-                self.emit_event(Event(
+                _emit(Event(
                     type=EventType.BREAKING_NEWS,
                     data={"news": breaking},
                     source_agent="trending"
@@ -687,7 +729,7 @@ class AgentOrchestrator:
         elif task.agent_type == AgentType.RIGHTS:
             violations = data.get("violations", [])
             if violations:
-                self.emit_event(Event(
+                _emit(Event(
                     type=EventType.VIOLATION_DETECTED,
                     data={"violations": violations},
                     source_agent="rights"
@@ -696,11 +738,103 @@ class AgentOrchestrator:
             expiring = data.get("expiring_soon", [])
             critical_expiring = [l for l in expiring if l.get("days_until_expiry", 999) < 30]
             if critical_expiring:
-                self.emit_event(Event(
+                _emit(Event(
                     type=EventType.LICENSE_EXPIRING,
                     data={"licenses": critical_expiring},
                     source_agent="rights"
                 ))
+
+        return triggered
+
+    def _log_inter_agent_event(
+        self,
+        event_type: str,
+        source_agent: str,
+        source_task_id: str,
+        subscribers: List[str],
+        payload_summary: str,
+        tasks_queued: int,
+    ) -> None:
+        """Write an inter-agent event to inter_agent_comms.md via any available memory layer."""
+        try:
+            for agent in self.agents.values():
+                mem = getattr(agent, "_memory", None)
+                if mem is not None:
+                    mem.log_inter_agent_event(
+                        event_type=event_type,
+                        source_agent=source_agent,
+                        source_task_id=source_task_id,
+                        subscribers=subscribers,
+                        payload_summary=payload_summary,
+                        tasks_queued=tasks_queued,
+                    )
+                    return  # One write is sufficient (shared file)
+        except Exception as _e:
+            logger.debug(f"_log_inter_agent_event failed (non-fatal): {_e}")
+
+    def _summarize_event_payload(self, data: dict) -> str:
+        """Produce a compact 3-key summary of an event data dict."""
+        if not isinstance(data, dict):
+            return str(data)[:80]
+        parts = []
+        for k, v in list(data.items())[:3]:
+            if isinstance(v, list):
+                parts.append(f"{k}={len(v)}")
+            elif isinstance(v, dict):
+                parts.append(f"{k}={{...}}")
+            else:
+                parts.append(f"{k}={str(v)[:30]}")
+        return ", ".join(parts) if parts else "{}"
+
+    def _write_system_state_snapshot(self) -> None:
+        """Fully rewrite system_state.md with current orchestrator stats."""
+        if not self._system_memory_file:
+            return
+        try:
+            ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            uptime_s = None
+            if self.stats["uptime_start"]:
+                uptime_s = int((datetime.now() - self.stats["uptime_start"]).total_seconds())
+
+            lines = [
+                "# MediaAgentIQ — System State Snapshot",
+                f"_Generated: {ts} | Uptime: {uptime_s}s | Running: {self._running}_",
+                "",
+                "## Orchestrator Stats",
+                f"- Tasks processed: {self.stats['tasks_processed']}",
+                f"- Tasks failed: {self.stats['tasks_failed']}",
+                f"- Events triggered: {self.stats['events_triggered']}",
+                f"- Queue size: {len(self.task_queue)}",
+                f"- Running tasks: {len(self.running_tasks)}",
+                "",
+                "## Agent Registry",
+                "| Agent | Registered |",
+                "|-------|------------|",
+            ]
+            for at, agent in self.agents.items():
+                lines.append(f"| {at.value} | yes |")
+
+            lines += [
+                "",
+                "## Scheduled Jobs",
+                "| Job ID | Agent | Interval (s) | Run Count | Next Run |",
+                "|--------|-------|--------------|-----------|----------|",
+            ]
+            for job in self.scheduled_jobs.values():
+                next_run = job.next_run.strftime("%H:%M:%S") if job.next_run else "N/A"
+                lines.append(
+                    f"| {job.id} | {job.agent_type.value} | {job.interval_seconds} "
+                    f"| {job.run_count} | {next_run} |"
+                )
+
+            lines += ["", "## Recent Completed Tasks (last 10)", "| Task ID | Agent | Status |", "|---------|-------|--------|"]
+            recent = list(self.completed_tasks)[-10:]
+            for t in reversed(recent):
+                lines.append(f"| {t.id} | {t.agent_type.value} | {t.status.value} |")
+
+            self._system_memory_file.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        except Exception as _e:
+            logger.debug(f"_write_system_state_snapshot failed (non-fatal): {_e}")
 
     async def _task_worker(self) -> None:
         """Background worker that processes tasks from the queue."""
@@ -746,8 +880,11 @@ class AgentOrchestrator:
         logger.info("Scheduler worker stopped")
 
     async def _monitor_worker(self) -> None:
-        """Background worker that monitors system health."""
+        """Background worker that monitors system health and writes state snapshots."""
         logger.info("Monitor worker started")
+
+        _last_state_write = 0.0
+        _state_interval = float(self._memory_state_interval)
 
         while self._running:
             # Log stats every minute
@@ -762,6 +899,11 @@ class AgentOrchestrator:
                     f"failed={self.stats['tasks_failed']}, "
                     f"events={self.stats['events_triggered']}"
                 )
+
+                now = time.monotonic()
+                if self._system_memory_enabled and (now - _last_state_write) >= _state_interval:
+                    self._write_system_state_snapshot()
+                    _last_state_write = now
 
         logger.info("Monitor worker stopped")
 

@@ -15,6 +15,8 @@ from typing import Any, Dict, Optional, TYPE_CHECKING
 from datetime import datetime
 import json
 import logging
+import time
+import uuid
 
 if TYPE_CHECKING:
     from settings import Settings
@@ -59,6 +61,16 @@ class BaseAgent(ABC):
             f"Mode: {'Production' if self.is_production_mode else 'Demo'}"
         )
 
+        # Persistent memory layer (non-fatal if unavailable)
+        self._memory: Optional["AgentMemoryLayer"] = None  # type: ignore[name-defined]
+        if self._settings.MEMORY_ENABLED:
+            try:
+                from memory import AgentMemoryLayer
+                self._memory = AgentMemoryLayer(agent_name=self.name, settings=self._settings)
+                self._memory.load()
+            except Exception as _e:
+                logger.warning(f"{self.name}: Memory layer init failed (non-fatal): {_e}")
+
     @property
     def settings(self) -> "Settings":
         """Get the settings instance."""
@@ -87,28 +99,37 @@ class BaseAgent(ABC):
         Returns:
             Standardized response dict with success, data, error keys
         """
+        _start = time.monotonic()
+
         # Validate input
         if not await self.validate_input(input_data):
-            return self.create_response(
+            result = self.create_response(
                 success=False,
                 error=f"Invalid input for {self.name}"
             )
+            _duration_ms = (time.monotonic() - _start) * 1000
+            self._save_to_memory(input_data, result, _duration_ms, [])
+            return result
 
         try:
             # Route to appropriate processing method
             if self.is_production_mode:
                 logger.debug(f"{self.name}: Production processing")
-                return await self._production_process(input_data)
+                result = await self._production_process(input_data)
             else:
                 logger.debug(f"{self.name}: Demo processing")
-                return await self._demo_process(input_data)
+                result = await self._demo_process(input_data)
 
         except Exception as e:
             logger.error(f"{self.name} processing error: {e}", exc_info=True)
-            return self.create_response(
+            result = self.create_response(
                 success=False,
                 error=str(e)
             )
+
+        _duration_ms = (time.monotonic() - _start) * 1000
+        self._save_to_memory(input_data, result, _duration_ms, [])
+        return result
 
     @abstractmethod
     async def validate_input(self, input_data: Any) -> bool:
@@ -274,6 +295,31 @@ class BaseAgent(ABC):
             f"{self.name} | {action}"
             + (f" | {details}" if details else "")
         )
+
+    def _save_to_memory(
+        self,
+        input_data: Any,
+        result: Dict[str, Any],
+        duration_ms: float,
+        triggered_events: list,
+    ) -> None:
+        """Persist a task entry to the agent's memory file. Never raises."""
+        if not self._memory:
+            return
+        try:
+            task_id = str(uuid.uuid4())[:8]
+            self._memory.save_task(task_id, input_data, result, duration_ms, triggered_events)
+        except Exception as _e:
+            logger.debug(f"{self.name}: Memory save failed (non-fatal): {_e}")
+
+    def get_memory_context_prompt(self) -> str:
+        """Return recent memory entries formatted for LLM system prompts."""
+        if not self._memory:
+            return ""
+        try:
+            return self._memory.get_memory_context_prompt()
+        except Exception:
+            return ""
 
 
 class ProductionNotReadyError(Exception):

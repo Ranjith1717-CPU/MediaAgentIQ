@@ -335,6 +335,16 @@ class Settings(BaseSettings):
         description="Transcription API timeout (5 minutes)"
     )
 
+    # ==================== Memory Layer ====================
+    MEMORY_ENABLED: bool = Field(default=True, description="Enable persistent .md memory for all agents")
+    MEMORY_DIR: str = Field(default="memory", description="Root directory for agent memory .md files")
+    MEMORY_MAX_ENTRIES_PER_AGENT: int = Field(default=500, description="Max task entries per agent before trimming")
+    MEMORY_TRIM_TO: int = Field(default=400, description="Entries to keep after trim (must be < MAX)")
+    MEMORY_RECENT_CONTEXT_ENTRIES: int = Field(default=5, description="Recent entries to load for LLM context")
+    MEMORY_INTER_AGENT_MAX_ENTRIES: int = Field(default=2000, description="Max entries in inter_agent_comms.md")
+    MEMORY_TASK_HISTORY_MAX_ENTRIES: int = Field(default=5000, description="Max entries in task_history.md")
+    MEMORY_SYSTEM_STATE_INTERVAL_SECS: int = Field(default=300, description="How often orchestrator writes system_state.md")
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
