@@ -4,7 +4,19 @@
 
 19 specialized AI agents running **autonomously 24/7** across the full broadcast pipeline — from ingest to playout, captioning to compliance, deepfake detection to carbon intelligence. Agents are now reachable directly from **Slack and Microsoft Teams**.
 
-![Version](https://img.shields.io/badge/Version-3.2.0-blue) ![Python](https://img.shields.io/badge/Python-3.9+-green) ![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen) ![Agents](https://img.shields.io/badge/Agents-19-purple) ![Channels](https://img.shields.io/badge/Channels-Slack%20%7C%20Teams-orange) ![Memory](https://img.shields.io/badge/Memory-Persistent%20.md%20Logs-teal)
+![Version](https://img.shields.io/badge/Version-3.3.0-blue) ![Python](https://img.shields.io/badge/Python-3.9+-green) ![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen) ![Agents](https://img.shields.io/badge/Agents-19-purple) ![Channels](https://img.shields.io/badge/Channels-Slack%20%7C%20Teams-orange) ![Memory](https://img.shields.io/badge/Memory-Persistent%20.md%20Logs-teal) ![HOPE](https://img.shields.io/badge/HOPE-Standing%20Instructions-red)
+
+---
+
+## ✨ What's New in v3.3 — HOPE Engine Edition
+
+- **🔮 HOPE Engine** — Standing-instruction layer. Tell an agent something once from Slack and it acts autonomously every time, forever, until you cancel: _"Whenever you detect breaking war news, alert me immediately"_
+- **📋 Per-Agent Companion Files** — OpenClaw-style `HOPE.md`, `AGENTS.md`, `MEMORY.md`, `SOUL.md`, `TOOLS.md`, `IDENTITY.md` auto-created per agent in `memory/agents/{slug}/`
+- **🔇 Mute Hours + Rate Limiting** — Quiet hours (23:00–07:00) suppress non-CRITICAL alerts. 10 alerts/hour cap for NORMAL/HIGH. CRITICAL always fires
+- **📬 4th Gateway Routing Tier** — HOPE intent detection intercepts standing-instruction phrases (`whenever`, `alert me if`, `watch for`, `stop watching`, `list my rules`) before LLM fallback
+- **👤 UserProfile** — `memory/system/USER.md` maps alert priority to Slack channels (DM / #breaking-alerts / #media-alerts / digest)
+- **4 new HOPE_* settings** — `HOPE_ENABLED`, `HOPE_MAX_ALERTS_PER_HOUR`, `HOPE_MUTE_START_HOUR`, `HOPE_MUTE_END_HOUR`
+- **3 new slash commands** — `/miq-hope`, `/miq-hope-cancel`, `/miq-hope-list`
 
 ---
 
@@ -84,6 +96,11 @@ Users interact with agents directly in their existing workspace tools.
 /miq-status
 /miq-connectors
 /miq-help
+
+# HOPE — Standing Instructions
+/miq-hope                          # Create a standing rule (interactive)
+/miq-hope-list                     # List all active rules
+/miq-hope-cancel hope_001          # Cancel a rule by ID
 ```
 
 **Natural language (everyone):**
@@ -93,6 +110,13 @@ Users interact with agents directly in their existing workspace tools.
 @mediaagentiq is this video a deepfake?
 @mediaagentiq translate the clip to Spanish
 @mediaagentiq sync the newsroom rundown
+
+# HOPE — fire-and-forget standing instructions
+@mediaagentiq whenever you detect Trump speaking, alert me immediately
+@mediaagentiq every morning send me a digest of breaking war news
+@mediaagentiq alert me if brand safety score drops below 70
+@mediaagentiq stop watching hope_001
+@mediaagentiq list my rules for archive agent
 ```
 
 **Interactive results with action buttons:**
@@ -161,9 +185,17 @@ python orchestrator.py
 │  └───────────────────┬─────────────────────────────────┘                    │
 │                      │                                                       │
 │  ┌───────────────────▼─────────────────────────────────┐                    │
-│  │     Persistent Agent Memory Layer (NEW v3.2)         │                    │
-│  │  memory/agents/{agent}.md  •  inter_agent_comms.md   │                    │
-│  │  task_history.md (global)  •  system_state.md (5min) │                    │
+│  │     HOPE Engine — Standing Instructions (NEW v3.3)   │                    │
+│  │  HopeRule + HopeEngine • HOPE.md per agent           │                    │
+│  │  Mute hours • Rate limiting • Daily digest           │                    │
+│  │  UserProfile (USER.md) • 4-tier gateway routing      │                    │
+│  └───────────────────┬─────────────────────────────────┘                    │
+│                      │                                                       │
+│  ┌───────────────────▼─────────────────────────────────┐                    │
+│  │     Persistent Agent Memory Layer (v3.2)             │                    │
+│  │  memory/agents/{slug}/ (HOPE + 5 companion files)    │                    │
+│  │  inter_agent_comms.md • task_history.md (global)     │                    │
+│  │  system_state.md (5min) • logs/YYYY-MM-DD.md         │                    │
 │  └───────────────────┬─────────────────────────────────┘                    │
 │                      │                                                       │
 │  ┌───────────────────▼─────────────────────────────────┐                    │
@@ -191,11 +223,23 @@ MediaAgentIQ/
 ├── app.py                         # 🌐 FastAPI Backend + Gateway mount
 ├── settings.py                    # ⚙️  Pydantic Configuration (all env vars)
 │
-├── memory/                        # 🧠 NEW v3.2 — Persistent Agent Memory Layer
-│   ├── __init__.py
+├── memory/                        # 🧠 Persistent Memory + HOPE Engine
+│   ├── __init__.py                #    Exports AgentMemoryLayer, HopeEngine, HopeRule, UserProfile
 │   ├── agent_memory.py            #    AgentMemoryLayer (per-agent .md logs, trimming, LLM context)
+│   ├── hope_engine.py             #    🔮 NEW v3.3 — HopeRule dataclass + HopeEngine class
+│   ├── user_profile.py            #    🔮 NEW v3.3 — UserProfile reads USER.md
+│   ├── system/                   ←    auto-created at runtime
+│   │   ├── USER.md                #    User notification prefs (Slack handle, timezone, channels)
+│   │   └── IDENTITY.md            #    Platform metadata
 │   └── agents/                   ←    auto-created at runtime
-│       ├── {agent_name}.md        #    Per-agent task log (entries/success/avg duration)
+│       ├── {slug}/                #    Per-agent subdirectory (NEW v3.3)
+│       │   ├── HOPE.md            #    Standing rules for this agent
+│       │   ├── AGENTS.md          #    Agent relationships
+│       │   ├── MEMORY.md          #    Task summaries
+│       │   ├── SOUL.md            #    Agent personality
+│       │   ├── TOOLS.md           #    Available tools
+│       │   ├── IDENTITY.md        #    Agent metadata
+│       │   └── logs/              #    Daily log files (YYYY-MM-DD.md)
 │       ├── inter_agent_comms.md   #    Cross-agent event log
 │       ├── task_history.md        #    Global audit trail (markdown table)
 │       └── system_state.md        #    Orchestrator snapshot (rewritten every 300s)
@@ -271,6 +315,12 @@ MEMORY_RECENT_CONTEXT_ENTRIES=5            # Entries injected into LLM prompts
 MEMORY_INTER_AGENT_MAX_ENTRIES=2000        # Max entries in inter_agent_comms.md
 MEMORY_TASK_HISTORY_MAX_ENTRIES=5000       # Max rows in task_history.md
 MEMORY_SYSTEM_STATE_INTERVAL_SECS=300      # system_state.md rewrite interval
+
+# HOPE Engine (enabled by default — no API keys needed)
+HOPE_ENABLED=true                          # Set false to disable standing-instruction engine
+HOPE_MAX_ALERTS_PER_HOUR=10               # Rate-limit non-critical alerts per hour
+HOPE_MUTE_START_HOUR=23                   # Start of quiet hours (local time, 24h)
+HOPE_MUTE_END_HOUR=7                      # End of quiet hours (CRITICAL bypasses mute)
 
 # AI Services
 OPENAI_API_KEY=sk-...
@@ -397,6 +447,7 @@ tools = connector_registry.get_all_tool_definitions()
 | **Database** | SQLite (async) |
 | **Orchestration** | AsyncIO, Custom Scheduler |
 | **Agent Memory** | Persistent `.md` logs, per-agent + global audit, LLM context injection |
+| **HOPE Engine** | Standing-instruction `.md` rules, mute hours, rate limiting, daily digest |
 
 ---
 
@@ -410,7 +461,20 @@ tools = connector_registry.get_all_tool_definitions()
 
 ## 📈 Changelog
 
-### v3.2.0 (Latest) — Persistent Agent Memory Edition
+### v3.3.0 (Latest) — HOPE Engine Edition
+- ✅ `memory/hope_engine.py` — `HopeRule` dataclass + `HopeEngine` class (add/cancel/list/evaluate/fire)
+- ✅ `memory/user_profile.py` — `UserProfile` reads `memory/system/USER.md` for Slack channel routing
+- ✅ `memory/system/USER.md` + `IDENTITY.md` — OpenClaw-style platform identity + user preference files
+- ✅ Per-agent `memory/agents/{slug}/` subdirs — `HOPE.md`, `AGENTS.md`, `MEMORY.md`, `SOUL.md`, `TOOLS.md`, `IDENTITY.md`, `logs/`
+- ✅ `BaseAgent`: HOPE init + post-`process()` evaluation hook + `add/cancel/list_hope_rules()` methods
+- ✅ 4th gateway routing tier — HOPE intent detection (9 trigger phrases) before LLM fallback
+- ✅ `format_hope_created/cancelled/list/alert()` Slack Block Kit formatters (CRITICAL = `<!here>` + bold)
+- ✅ Mute hours (23:00–07:00), CRITICAL bypasses mute; 10 alerts/hour rate limit per agent
+- ✅ 3 new slash commands: `/miq-hope`, `/miq-hope-cancel`, `/miq-hope-list`
+- ✅ 4 new `HOPE_*` settings in `settings.py`
+- ✅ Failure-safe throughout: corrupt HOPE.md recreated from scratch; no exception propagates to agent
+
+### v3.2.0 — Persistent Agent Memory Edition
 - ✅ `memory/` Python package — `AgentMemoryLayer` class with per-agent `.md` log files
 - ✅ Per-agent memory: entries/success rate/avg duration tracked in live header; auto-trim at configurable limits
 - ✅ `inter_agent_comms.md` — cross-agent event log with source, subscribers, payload summary
@@ -459,6 +523,8 @@ tools = connector_registry.get_all_tool_definitions()
 - [x] Multi-turn conversational context
 - [x] Persistent agent memory layer (.md logs per agent + global audit)
 - [x] LLM context injection from agent memory
+- [x] HOPE Engine — standing-instruction layer with autonomous Slack alerting
+- [x] Per-agent OpenClaw-style companion files (HOPE.md, SOUL.md, IDENTITY.md, etc.)
 - [ ] Pre-production agents (Story Intelligence, Script & Prompter, Rundown Planning)
 - [ ] Technical QC Agent (full automated QC suite)
 - [ ] Graphics Automation Agent (Vizrt / Chyron integration)
@@ -470,4 +536,4 @@ tools = connector_registry.get_all_tool_definitions()
 
 ---
 
-**MediaAgentIQ v3.2.0** | AI-Powered Broadcast Operations Platform — Persistent Agent Memory Edition
+**MediaAgentIQ v3.3.0** | AI-Powered Broadcast Operations Platform — HOPE Engine Edition
