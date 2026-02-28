@@ -4,11 +4,22 @@
 
 19 specialized AI agents running **autonomously 24/7** across the full broadcast pipeline — from ingest to playout, captioning to compliance, deepfake detection to carbon intelligence. Agents are now reachable directly from **Slack and Microsoft Teams**.
 
-![Version](https://img.shields.io/badge/Version-3.1.0-blue) ![Python](https://img.shields.io/badge/Python-3.9+-green) ![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen) ![Agents](https://img.shields.io/badge/Agents-19-purple) ![Channels](https://img.shields.io/badge/Channels-Slack%20%7C%20Teams-orange)
+![Version](https://img.shields.io/badge/Version-3.2.0-blue) ![Python](https://img.shields.io/badge/Python-3.9+-green) ![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen) ![Agents](https://img.shields.io/badge/Agents-19-purple) ![Channels](https://img.shields.io/badge/Channels-Slack%20%7C%20Teams-orange) ![Memory](https://img.shields.io/badge/Memory-Persistent%20.md%20Logs-teal)
 
 ---
 
-## ✨ What's New in v3.1 — Pipeline + Channel Edition
+## ✨ What's New in v3.2 — Persistent Agent Memory Edition
+
+- **🧠 Persistent Agent Memory** — Every agent now accumulates knowledge across runs. Per-agent `.md` log files track decisions, durations, inputs, outputs, and triggered events
+- **📋 Inter-Agent Event Log** — `inter_agent_comms.md` captures every cross-agent event with source, subscribers, and payload summaries
+- **📜 Global Task History** — `task_history.md` maintains a compact audit trail of every task across all 19 agents
+- **🗂️ System State Snapshots** — `system_state.md` is fully rewritten every 5 minutes with queue size, agent registry, job schedules, and recent task history
+- **🤖 LLM Context Injection** — `agent.get_memory_context_prompt()` surfaces the last N entries as a formatted system-prompt block for context-aware decisions
+- **🔧 8 new MEMORY_* settings** — Fully configurable: max entries per file, trim thresholds, context window size, snapshot interval, all on by default with zero API key requirements
+
+---
+
+## ✨ What Was New in v3.1 — Pipeline + Channel Edition
 
 - **🔌 Connector Framework** — MCP-style plugin architecture. Connect any external system as a tool agents can discover and call
 - **💬 Slack & Teams Integration** — Trigger any agent directly from Slack (`/miq-compliance`) or Teams. Get interactive results with action buttons
@@ -124,23 +135,24 @@ python orchestrator.py
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│                          MediaAgentIQ v3.1 Platform                          │
+│                          MediaAgentIQ v3.2 Platform                          │
 ├──────────────────────────────────────────────────────────────────────────────┤
-│  User Channels (NEW)                                                         │
+│  User Channels                                                                │
 │  ┌─────────────┐  ┌─────────────────┐  ┌────────────────┐                   │
 │  │  Slack Bot  │  │  MS Teams Bot   │  │  Streamlit UI  │  FastAPI           │
-│  │  /miq-* cmds│  │  Adaptive Cards │  │  (14→19 agents)│                   │
+│  │  /miq-* cmds│  │  Adaptive Cards │  │  (19 agents)   │                   │
 │  └──────┬──────┘  └────────┬────────┘  └────────────────┘                   │
 │         └─────────────┬────┘                                                 │
 │  ┌───────────────────▼─────────────────────────────────┐                    │
-│  │           Conversational Gateway (NEW)               │                    │
+│  │           Conversational Gateway                     │                    │
 │  │  Router (NLP+slash) • Formatter (BlockKit/Cards)     │                    │
 │  │  Conversation Context • Webhook Handler              │                    │
 │  └───────────────────┬─────────────────────────────────┘                    │
 │                      │                                                       │
 │  ┌───────────────────▼─────────────────────────────────┐                    │
 │  │              Autonomous Orchestrator                  │                    │
-│  │     Task Queue (Priority) • Scheduler • Events       │                    │
+│  │   Task Queue (Priority) • Scheduler • Event System   │                    │
+│  │   Inter-Agent Event Log • System State Snapshots     │                    │
 │  └───────────────────┬─────────────────────────────────┘                    │
 │                      │                                                       │
 │  ┌───────────────────▼─────────────────────────────────┐                    │
@@ -149,7 +161,13 @@ python orchestrator.py
 │  └───────────────────┬─────────────────────────────────┘                    │
 │                      │                                                       │
 │  ┌───────────────────▼─────────────────────────────────┐                    │
-│  │          Connector Framework / MCP Layer (NEW)       │                    │
+│  │     Persistent Agent Memory Layer (NEW v3.2)         │                    │
+│  │  memory/agents/{agent}.md  •  inter_agent_comms.md   │                    │
+│  │  task_history.md (global)  •  system_state.md (5min) │                    │
+│  └───────────────────┬─────────────────────────────────┘                    │
+│                      │                                                       │
+│  ┌───────────────────▼─────────────────────────────────┐                    │
+│  │          Connector Framework / MCP Layer             │                    │
 │  │  ┌──────┐ ┌──────┐ ┌────────┐ ┌───────┐ ┌────────┐  │                    │
 │  │  │Slack │ │Teams │ │  MAM   │ │Playout│ │  CDN   │  │                    │
 │  │  │ Bot  │ │ Bot  │ │ (Avid) │ │Harmonic│ │Akamai │  │                    │
@@ -173,7 +191,16 @@ MediaAgentIQ/
 ├── app.py                         # 🌐 FastAPI Backend + Gateway mount
 ├── settings.py                    # ⚙️  Pydantic Configuration (all env vars)
 │
-├── gateway/                       # 💬 NEW — Conversational Channel Gateway
+├── memory/                        # 🧠 NEW v3.2 — Persistent Agent Memory Layer
+│   ├── __init__.py
+│   ├── agent_memory.py            #    AgentMemoryLayer (per-agent .md logs, trimming, LLM context)
+│   └── agents/                   ←    auto-created at runtime
+│       ├── {agent_name}.md        #    Per-agent task log (entries/success/avg duration)
+│       ├── inter_agent_comms.md   #    Cross-agent event log
+│       ├── task_history.md        #    Global audit trail (markdown table)
+│       └── system_state.md        #    Orchestrator snapshot (rewritten every 300s)
+│
+├── gateway/                       # 💬 Conversational Channel Gateway
 │   ├── __init__.py
 │   ├── router.py                 #    NLP + slash command → agent routing
 │   ├── formatter.py              #    Agent output → Slack Block Kit / Teams Cards
@@ -234,6 +261,16 @@ MediaAgentIQ/
 ```bash
 # Mode
 PRODUCTION_MODE=false          # true = real AI APIs, false = demo mode
+
+# Memory Layer (enabled by default — no API keys needed)
+MEMORY_ENABLED=true                        # Set false to disable all .md logging
+MEMORY_DIR=memory                          # Root dir for agent memory files
+MEMORY_MAX_ENTRIES_PER_AGENT=500           # Trim trigger per-agent file
+MEMORY_TRIM_TO=400                         # Entries kept after trim
+MEMORY_RECENT_CONTEXT_ENTRIES=5            # Entries injected into LLM prompts
+MEMORY_INTER_AGENT_MAX_ENTRIES=2000        # Max entries in inter_agent_comms.md
+MEMORY_TASK_HISTORY_MAX_ENTRIES=5000       # Max rows in task_history.md
+MEMORY_SYSTEM_STATE_INTERVAL_SECS=300      # system_state.md rewrite interval
 
 # AI Services
 OPENAI_API_KEY=sk-...
@@ -359,6 +396,7 @@ tools = connector_registry.get_all_tool_definitions()
 | **Playout** | Harmonic Polaris, GV Maestro REST |
 | **Database** | SQLite (async) |
 | **Orchestration** | AsyncIO, Custom Scheduler |
+| **Agent Memory** | Persistent `.md` logs, per-agent + global audit, LLM context injection |
 
 ---
 
@@ -372,7 +410,18 @@ tools = connector_registry.get_all_tool_definitions()
 
 ## 📈 Changelog
 
-### v3.1.0 (Latest) — Pipeline + Channel Edition
+### v3.2.0 (Latest) — Persistent Agent Memory Edition
+- ✅ `memory/` Python package — `AgentMemoryLayer` class with per-agent `.md` log files
+- ✅ Per-agent memory: entries/success rate/avg duration tracked in live header; auto-trim at configurable limits
+- ✅ `inter_agent_comms.md` — cross-agent event log with source, subscribers, payload summary
+- ✅ `task_history.md` — global compact audit trail (markdown table, max 5 000 rows)
+- ✅ `system_state.md` — orchestrator snapshot fully rewritten every 300 s
+- ✅ `BaseAgent.get_memory_context_prompt()` — inject last N entries into any LLM system prompt
+- ✅ 8 new `MEMORY_*` settings in `settings.py` (all defaults work out-of-the-box)
+- ✅ Failure-safe: all memory I/O wrapped in `try/except`; agents continue if `memory/` is absent
+- ✅ Orchestrator `_handle_task_completion` now returns triggered-event list + logs to inter-agent comms
+
+### v3.1.0 — Pipeline + Channel Edition
 - ✅ Conversational Gateway — NLP + slash command routing to all 19 agents
 - ✅ Slack Bot integration — Block Kit cards, slash commands, interactive buttons
 - ✅ Microsoft Teams integration — Adaptive Cards, Bot Framework
@@ -408,6 +457,8 @@ tools = connector_registry.get_all_tool_definitions()
 - [x] Microsoft Teams Bot with Adaptive Cards
 - [x] MCP-style connector framework
 - [x] Multi-turn conversational context
+- [x] Persistent agent memory layer (.md logs per agent + global audit)
+- [x] LLM context injection from agent memory
 - [ ] Pre-production agents (Story Intelligence, Script & Prompter, Rundown Planning)
 - [ ] Technical QC Agent (full automated QC suite)
 - [ ] Graphics Automation Agent (Vizrt / Chyron integration)
@@ -419,4 +470,4 @@ tools = connector_registry.get_all_tool_definitions()
 
 ---
 
-**MediaAgentIQ v3.1.0** | AI-Powered Broadcast Operations Platform — Pipeline + Channel Edition
+**MediaAgentIQ v3.2.0** | AI-Powered Broadcast Operations Platform — Persistent Agent Memory Edition

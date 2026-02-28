@@ -1,11 +1,12 @@
-# MediaAgentIQ v3.1 — Complete Documentation
+# MediaAgentIQ v3.2 — Complete Documentation
 
 ## 📋 Overview
 
-MediaAgentIQ is an enterprise AI-powered agent platform for media and broadcast organizations. It provides **19 specialized AI agents** that run **autonomously 24/7** across the full broadcast pipeline, and are now reachable directly from **Slack and Microsoft Teams**.
+MediaAgentIQ is an enterprise AI-powered agent platform for media and broadcast organizations. It provides **19 specialized AI agents** that run **autonomously 24/7** across the full broadcast pipeline, with persistent memory that lets each agent accumulate knowledge across runs — and are reachable directly from **Slack and Microsoft Teams**.
 
 **Key Features:**
 - 🤖 **Autonomous Operation** — 19 agents, 14 scheduled jobs, event-driven chains
+- 🧠 **Persistent Agent Memory** — Every agent maintains a `.md` log of past decisions, inputs, outputs, and triggered events. Memory is injected into LLM prompts for context-aware operation
 - 🔄 **Dual-Mode Architecture** — Demo mode (no API keys) + Production mode (real AI)
 - 💬 **Slack & Teams Integration** — Trigger any agent from your workspace via `/miq-*` slash commands or natural language
 - 🔌 **MCP Connector Framework** — Plugin architecture. Any external system exposed as a tool agents can discover and call
@@ -51,9 +52,20 @@ Autonomous Orchestrator   [orchestrator.py]
   Priority Task Queue (CRITICAL → HIGH → NORMAL → LOW)
   Scheduler (14 recurring jobs)
   Event System (8 event types, chain reactions)
+  Inter-Agent Event Logger → inter_agent_comms.md
+  System State Snapshots  → system_state.md (every 300s)
          │
 Agent Layer (19 agents)   [agents/]
   Original 8 + Future-Ready 6 + Phase 1 Pipeline 5
+  BaseAgent: timing + memory save on every process() call
+         │
+Persistent Agent Memory Layer   [memory/]    ← NEW v3.2
+  AgentMemoryLayer (one instance per agent)
+  memory/agents/{agent_slug}.md   → per-agent task log
+  memory/agents/inter_agent_comms.md → cross-agent event log
+  memory/agents/task_history.md   → global audit table
+  memory/agents/system_state.md   → orchestrator snapshot
+  get_memory_context_prompt()     → LLM system-prompt injection
          │
 Connector Framework       [connectors/]
   BaseConnector → ConnectorRegistry → MCP tool dispatch
@@ -68,16 +80,62 @@ Services Layer            [services/]
 
 ### Dual-Mode Processing
 
-Every agent supports two modes:
+Every agent supports two modes, with automatic timing and memory persistence on every call:
 ```python
 class BaseAgent:
     async def process(self, input_data):
+        _start = time.monotonic()
         await self.validate_input(input_data)
         if self.is_production_mode:
-            return await self._production_process(input_data)  # Real AI/APIs
+            result = await self._production_process(input_data)  # Real AI/APIs
         else:
-            return await self._demo_process(input_data)         # Realistic mock data
+            result = await self._demo_process(input_data)         # Realistic mock data
+        # Automatically saves to memory/agents/{agent}.md
+        self._save_to_memory(input_data, result, duration_ms, triggered_events=[])
+        return result
+
+    def get_memory_context_prompt(self) -> str:
+        """Return last N task entries as a formatted LLM system-prompt block."""
+        return self._memory.get_memory_context_prompt()
 ```
+
+### Memory Layer
+
+`AgentMemoryLayer` is instantiated for every agent during `__init__` when `MEMORY_ENABLED=True`. It writes to plain `.md` files — human-readable, version-controllable, and zero-dependency.
+
+**Per-agent file** (`memory/agents/caption_agent.md`):
+```markdown
+# Caption Agent — Memory Log
+_Last updated: 2026-02-28 14:23:01 | Entries: 47 | Success rate: 96.8% | Avg duration: 312ms_
+
+---
+
+## [2026-02-28 14:23:01] Task `a3f7c1` SUCCESS (demo)
+**Input**: `news_segment_04.mp4`
+**Output**: segments=11, qa_issues=1, confidence_avg=0.97
+**Triggered**: caption_complete → localization_agent, social_publishing_agent, live_fact_check_agent
+**Duration**: 234ms
+```
+
+**Inter-agent event log** (`memory/agents/inter_agent_comms.md`):
+```markdown
+## [2026-02-28 14:23:01] CAPTION_COMPLETE
+**Source**: caption (task `a3f7c1`)
+**Subscribers**: localization, social, live_fact_check
+**Payload summary**: captions=1, data={...}
+**Tasks queued**: 3
+```
+
+**Key methods:**
+
+| Method | Returns | Notes |
+|--------|---------|-------|
+| `load()` | — | Creates file if missing, warms context cache |
+| `save_task(task_id, input, result, duration_ms, triggered)` | — | Appends entry, trims, updates header |
+| `update_last_entry_triggered(triggered)` | — | Patches last entry after events fire |
+| `log_inter_agent_event(...)` | — | Appends to shared `inter_agent_comms.md` |
+| `get_agent_stats()` | `dict` | O(1) parse of header line: entries/success/avg |
+| `get_memory_context_prompt()` | `str` | Last N entries for LLM injection |
 
 ---
 
@@ -536,6 +594,16 @@ CARBON_ESG_REPORT_ENABLED=true
 CARBON_RENEWABLE_PPA=0.0
 CARBON_REPORTING_INTERVAL_SECS=1800
 
+# ─── Memory Layer ─────────────────────────────────────────
+MEMORY_ENABLED=true                        # Disable to turn off all .md logging
+MEMORY_DIR=memory                          # Root directory (relative to project)
+MEMORY_MAX_ENTRIES_PER_AGENT=500           # Trim trigger per agent file
+MEMORY_TRIM_TO=400                         # Entries kept after trim
+MEMORY_RECENT_CONTEXT_ENTRIES=5            # Entries injected into LLM prompts
+MEMORY_INTER_AGENT_MAX_ENTRIES=2000        # Max entries in inter_agent_comms.md
+MEMORY_TASK_HISTORY_MAX_ENTRIES=5000       # Max rows in task_history.md
+MEMORY_SYSTEM_STATE_INTERVAL_SECS=300      # system_state.md rewrite interval
+
 # ─── Database ─────────────────────────────────────────────
 DATABASE_URL=sqlite+aiosqlite:///mediaagentiq.db
 
@@ -600,13 +668,22 @@ MediaAgentIQ/
 ├── streamlit_app.py               # Streamlit UI (19 agent pages)
 ├── orchestrator.py                # Autonomous Orchestrator (19 agents, 14 jobs)
 ├── app.py                         # FastAPI + gateway mount
-├── settings.py                    # Pydantic config (60+ typed settings)
+├── settings.py                    # Pydantic config (70+ typed settings incl. MEMORY_*)
 ├── config.py                      # Legacy config
 ├── database.py                    # SQLite async
 ├── requirements.txt
 ├── .env.example
 │
-├── gateway/                       # Conversational Gateway (NEW v3.1)
+├── memory/                        # Persistent Agent Memory Layer (NEW v3.2)
+│   ├── __init__.py                # exports AgentMemoryLayer
+│   ├── agent_memory.py            # AgentMemoryLayer: .md I/O, trim, stats, LLM prompt
+│   └── agents/                   ← auto-created at runtime
+│       ├── caption_agent.md       # per-agent task log (19 files total)
+│       ├── inter_agent_comms.md   # cross-agent event log (shared)
+│       ├── task_history.md        # global compact audit table
+│       └── system_state.md        # orchestrator snapshot (rewritten every 300s)
+│
+├── gateway/                       # Conversational Gateway (v3.1)
 │   ├── __init__.py
 │   ├── router.py                  # slash + NLP + LLM routing
 │   ├── formatter.py               # Block Kit + Adaptive Card formatters for all 19 agents
@@ -695,6 +772,18 @@ CMD ["sh", "-c", "streamlit run streamlit_app.py & uvicorn app:app --host 0.0.0.
 
 ## 📈 Changelog
 
+### v3.2.0 — Persistent Agent Memory Edition
+- ✅ `memory/` package — `AgentMemoryLayer` with per-agent `.md` logs in `memory/agents/`
+- ✅ Per-agent files: header line tracks entries / success rate / avg duration (O(1) read)
+- ✅ Auto-trim: entries trimmed to `MEMORY_TRIM_TO` when count exceeds `MEMORY_MAX_ENTRIES_PER_AGENT`
+- ✅ `inter_agent_comms.md` — every cross-agent event logged with source, subscribers, payload
+- ✅ `task_history.md` — global audit table across all 19 agents (max 5 000 rows)
+- ✅ `system_state.md` — orchestrator snapshot (queue, jobs, last 10 tasks) rewritten every 300 s
+- ✅ `get_memory_context_prompt()` on `BaseAgent` — inject last N entries into any LLM system prompt
+- ✅ Orchestrator `_handle_task_completion` returns triggered-event list; `update_last_entry_triggered` patches last `.md` entry
+- ✅ 8 new `MEMORY_*` settings in `settings.py` — all have sensible defaults, work with zero config
+- ✅ Failure-safe design: every memory call wrapped in `try/except`; missing `memory/` package never crashes agents
+
 ### v3.1.0 — Pipeline + Channel Edition
 - ✅ Conversational Gateway (`gateway/`) — NLP + slash routing, Block Kit/Adaptive Card formatting, multi-turn context
 - ✅ Slack Bot integration — full webhook handler, 17 slash commands, interactive button callbacks
@@ -721,4 +810,4 @@ CMD ["sh", "-c", "streamlit run streamlit_app.py & uvicorn app:app --host 0.0.0.
 
 ---
 
-*Last Updated: February 2026 | MediaAgentIQ v3.1.0*
+*Last Updated: February 2026 | MediaAgentIQ v3.2.0 — Persistent Agent Memory Edition*
