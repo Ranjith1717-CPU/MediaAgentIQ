@@ -71,6 +71,19 @@ class BaseAgent(ABC):
             except Exception as _e:
                 logger.warning(f"{self.name}: Memory layer init failed (non-fatal): {_e}")
 
+        # HOPE standing-instruction engine (non-fatal if unavailable)
+        self._hope: Optional["HopeEngine"] = None  # type: ignore[name-defined]
+        if self._settings.HOPE_ENABLED:
+            try:
+                from memory import HopeEngine
+                self._hope = HopeEngine(
+                    agent_slug=_slug_from_name(self.name),
+                    settings=self._settings,
+                )
+                self._hope.load()
+            except Exception as _e:
+                logger.warning(f"{self.name}: HOPE engine init failed (non-fatal): {_e}")
+
     @property
     def settings(self) -> "Settings":
         """Get the settings instance."""
@@ -129,6 +142,16 @@ class BaseAgent(ABC):
 
         _duration_ms = (time.monotonic() - _start) * 1000
         self._save_to_memory(input_data, result, _duration_ms, [])
+
+        # HOPE evaluation — non-fatal
+        if self._hope:
+            try:
+                matched = self._hope.evaluate(result)
+                for rule in matched:
+                    self._hope.fire_action(rule, result, notifier=self._get_notifier())
+            except Exception as _he:
+                logger.debug(f"{self.name}: HOPE eval failed (non-fatal): {_he}")
+
         return result
 
     @abstractmethod
@@ -320,6 +343,54 @@ class BaseAgent(ABC):
             return self._memory.get_memory_context_prompt()
         except Exception:
             return ""
+
+
+    # ==================== HOPE Management Methods ====================
+
+    def add_hope_rule(
+        self,
+        condition: str,
+        schedule: str,
+        action: str,
+        priority: str = "NORMAL",
+    ) -> dict:
+        """Called by gateway when user sends a HOPE create command."""
+        if not self._hope:
+            return {"error": "HOPE not enabled"}
+        rule = self._hope.add_rule(condition, schedule, action, priority)
+        return {"rule_id": rule.rule_id, "agent": self.name, "status": "created"}
+
+    def cancel_hope_rule(self, rule_id: str) -> dict:
+        """Cancel (deactivate) a HOPE rule by ID."""
+        if not self._hope:
+            return {"error": "HOPE not enabled"}
+        self._hope.cancel_rule(rule_id)
+        return {"rule_id": rule_id, "status": "cancelled"}
+
+    def list_hope_rules(self) -> list:
+        """Return all HOPE rules for this agent as a list of dicts."""
+        if not self._hope:
+            return []
+        return [vars(r) for r in self._hope.list_rules()]
+
+    def _get_notifier(self):
+        """Return Slack notifier. Non-fatal if unavailable."""
+        try:
+            from connectors.channels.slack import SlackConnector
+            return SlackConnector(settings=self._settings)
+        except Exception:
+            return None
+
+
+# ─── Slug helper (module-level so __init__ can call it) ───────────────────────
+
+def _slug_from_name(name: str) -> str:
+    """Convert agent display name to a filesystem-safe slug."""
+    import re as _re
+    slug = name.lower().strip()
+    slug = _re.sub(r"[^a-z0-9]+", "_", slug)
+    slug = slug.strip("_")
+    return slug or "agent"
 
 
 class ProductionNotReadyError(Exception):

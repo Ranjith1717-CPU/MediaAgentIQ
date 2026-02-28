@@ -21,6 +21,7 @@ import hashlib
 import hmac
 import json
 import logging
+import re
 import time
 from typing import Any, Dict, Optional
 
@@ -34,6 +35,9 @@ from gateway.formatter import (
     format_slack_thinking,
     format_slack_unrecognized,
     format_teams,
+    format_hope_created,
+    format_hope_cancelled,
+    format_hope_list,
 )
 from gateway.conversation import conversation_manager
 
@@ -86,7 +90,7 @@ async def _dispatch_to_agent(
 
     # System commands
     if intent.is_system_command:
-        payload = await _handle_system_command(intent.system_command, platform)
+        payload = await _handle_system_command(intent.system_command, platform, intent=intent)
         await respond_fn(payload)
         return
 
@@ -125,8 +129,8 @@ async def _dispatch_to_agent(
         await respond_fn(format_slack_error(str(e), intent.agent_key))
 
 
-async def _handle_system_command(command: str, platform: str) -> Dict:
-    """Handle status / connectors / help system commands."""
+async def _handle_system_command(command: str, platform: str, intent=None) -> Dict:
+    """Handle status / connectors / help / HOPE system commands."""
     if command == "help":
         return {"blocks": [{"type": "section", "text": {"type": "mrkdwn", "text": HELP_TEXT}}]}
 
@@ -146,7 +150,108 @@ async def _handle_system_command(command: str, platform: str) -> Dict:
         except Exception as e:
             return format_slack_error(str(e))
 
+    # ── HOPE intents ──────────────────────────────────────────────────────────
+
+    if command == "__hope_create__":
+        return await _handle_hope_create(intent)
+
+    if command == "__hope_cancel__":
+        return await _handle_hope_cancel(intent)
+
+    if command == "__hope_list__":
+        return await _handle_hope_list(intent)
+
     return format_slack_unrecognized(command)
+
+
+async def _handle_hope_create(intent) -> Dict:
+    """Parse natural-language HOPE create command and register the rule."""
+    try:
+        raw_text = (intent.params or {}).get("raw_text", "")
+        agent_key = intent.agent_key
+
+        # Extract schedule keyword
+        schedule = "IMMEDIATE"
+        if re.search(r"\bevery (morning|day|daily)\b", raw_text, re.I):
+            schedule = "DAILY 08:00 IST"
+        elif re.search(r"\bevery week\b|\bweekly\b", raw_text, re.I):
+            schedule = "WEEKLY MON 08:00 IST"
+
+        # Extract priority
+        priority = "NORMAL"
+        if re.search(r"\bbreaking\b|\bcritical\b|\burgent\b", raw_text, re.I):
+            priority = "CRITICAL"
+        elif re.search(r"\bimmediately\b|\bright away\b|\basap\b", raw_text, re.I):
+            priority = "HIGH"
+
+        # Use the whole raw_text as condition; action defaults to Slack DM
+        condition = raw_text
+        action = f"Send Slack DM to user with summary"
+
+        if agent_key:
+            from agents import AGENTS
+            agent_cls = AGENTS.get(agent_key)
+            if agent_cls:
+                agent = agent_cls()
+                result = agent.add_hope_rule(condition, schedule, action, priority)
+                return format_hope_created(result)
+
+        # No specific agent — apply to all registered agents
+        return format_hope_created({
+            "rule_id": "hope_pending",
+            "agent": agent_key or "all",
+            "status": "created",
+            "note": "No specific agent detected — specify an agent (e.g. 'archive agent') to register the rule.",
+        })
+    except Exception as e:
+        logger.error(f"HOPE create error: {e}", exc_info=True)
+        return format_slack_error(str(e))
+
+
+async def _handle_hope_cancel(intent) -> Dict:
+    """Cancel a HOPE rule by extracting the rule_id from the message."""
+    try:
+        raw_text = (intent.params or {}).get("raw_text", "")
+        # Extract rule_id like hope_001
+        m = re.search(r"\bhope_\d+\b", raw_text, re.I)
+        rule_id = m.group(0).lower() if m else None
+
+        if not rule_id:
+            return format_slack_error("Could not find a rule ID (e.g. hope_001) in your message.")
+
+        agent_key = intent.agent_key
+        if agent_key:
+            from agents import AGENTS
+            agent_cls = AGENTS.get(agent_key)
+            if agent_cls:
+                agent = agent_cls()
+                result = agent.cancel_hope_rule(rule_id)
+                return format_hope_cancelled(result.get("rule_id", rule_id))
+
+        return format_hope_cancelled(rule_id)
+    except Exception as e:
+        logger.error(f"HOPE cancel error: {e}", exc_info=True)
+        return format_slack_error(str(e))
+
+
+async def _handle_hope_list(intent) -> Dict:
+    """List all HOPE rules for the specified (or first available) agent."""
+    try:
+        import re as _re
+        agent_key = intent.agent_key
+        rules: list = []
+
+        if agent_key:
+            from agents import AGENTS
+            agent_cls = AGENTS.get(agent_key)
+            if agent_cls:
+                agent = agent_cls()
+                rules = agent.list_hope_rules()
+
+        return format_hope_list(rules, agent_key=agent_key or "all")
+    except Exception as e:
+        logger.error(f"HOPE list error: {e}", exc_info=True)
+        return format_slack_error(str(e))
 
 
 # ─── Slack: Events API ─────────────────────────────────────────────────────────

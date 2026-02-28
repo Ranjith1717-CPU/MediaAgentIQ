@@ -615,6 +615,162 @@ def format_teams(
     }
 
 
+# ─── HOPE formatters ──────────────────────────────────────────────────────────
+
+def format_hope_created(rule: dict) -> dict:
+    """Slack block confirming a new HOPE rule was registered."""
+    rule_id = rule.get("rule_id", "hope_???")
+    agent = rule.get("agent", "unknown")
+    status = rule.get("status", "created")
+    note = rule.get("note", "")
+
+    lines = [
+        f"*Rule ID:* `{rule_id}`",
+        f"*Agent:* {agent}",
+        f"*Status:* {status}",
+    ]
+    if note:
+        lines.append(f"_Note: {note}_")
+
+    return {
+        "blocks": [
+            _sl_header("✅ HOPE Rule Created"),
+            _sl_section("\n".join(lines)),
+            _sl_context(
+                "Rule is now ACTIVE and will evaluate on every agent result. "
+                f"To cancel: `stop watching {rule_id}`"
+            ),
+        ]
+    }
+
+
+def format_hope_cancelled(rule_id: str) -> dict:
+    """Slack block confirming a HOPE rule was cancelled."""
+    return {
+        "blocks": [
+            _sl_header("🔕 HOPE Rule Cancelled"),
+            _sl_section(f"Rule `{rule_id}` has been set to *INACTIVE*. No further alerts will fire."),
+            _sl_context("To see remaining rules: 'list my rules'"),
+        ]
+    }
+
+
+def format_hope_list(rules: list, agent_key: str = "all") -> dict:
+    """Slack block table of HOPE rules — active rules highlighted."""
+    if not rules:
+        return {
+            "blocks": [
+                _sl_header("📋 HOPE Rules"),
+                _sl_section(
+                    f"_No rules found for agent `{agent_key}`._\n"
+                    "Create one: _\"Whenever you detect X, alert me\"_"
+                ),
+            ]
+        }
+
+    active = [r for r in rules if r.get("status") == "ACTIVE"]
+    inactive = [r for r in rules if r.get("status") != "ACTIVE"]
+
+    def _rule_line(r: dict) -> str:
+        rid = r.get("rule_id", "?")
+        cond = r.get("condition", "")[:50]
+        sched = r.get("schedule", "IMMEDIATE")
+        prio = r.get("priority", "NORMAL")
+        count = r.get("trigger_count", 0)
+        return f"`{rid}` *{prio}* | {sched} | _{cond}_ | fired: {count}"
+
+    blocks = [_sl_header(f"📋 HOPE Rules — {agent_key}")]
+
+    if active:
+        lines = "\n".join(_rule_line(r) for r in active)
+        blocks.append(_sl_section(f"*Active ({len(active)}):*\n{lines}"))
+
+    if inactive:
+        lines = "\n".join(f"~~`{r.get('rule_id','?')}`~~ _{r.get('condition','')[:40]}_" for r in inactive)
+        blocks.append(_sl_section(f"*Inactive ({len(inactive)}):*\n{lines}"))
+
+    blocks.append(_sl_context(
+        f"Total: {len(rules)} rules | "
+        "Cancel a rule: 'stop watching hope_001' | "
+        "Add: 'whenever you see X, alert me'"
+    ))
+    return {"blocks": blocks}
+
+
+def format_hope_alert(rule, result: dict, priority: str) -> dict:
+    """
+    Urgent-formatted Slack alert fired by HOPE Engine.
+
+    CRITICAL → 🚨 bold header + @here
+    HIGH     → ⚠️ alert header
+    NORMAL   → informational
+    LOW      → digest summary
+    """
+    priority = priority.upper()
+
+    if priority == "CRITICAL":
+        icon = "🚨"
+        header_text = "🚨 CRITICAL HOPE ALERT"
+    elif priority == "HIGH":
+        icon = "⚠️"
+        header_text = "⚠️ HOPE Alert"
+    elif priority == "NORMAL":
+        icon = "ℹ️"
+        header_text = "ℹ️ HOPE Alert"
+    else:
+        icon = "📋"
+        header_text = "📋 HOPE Digest"
+
+    # Safe attribute or dict access
+    def _attr(obj, key, default=""):
+        if hasattr(obj, key):
+            return getattr(obj, key)
+        if isinstance(obj, dict):
+            return obj.get(key, default)
+        return default
+
+    rule_id = _attr(rule, "rule_id", "hope_???")
+    agent_slug = _attr(rule, "agent_slug", "agent")
+    condition = _attr(rule, "condition", "")
+    action = _attr(rule, "action", "")
+    trigger_count = _attr(rule, "trigger_count", 0)
+
+    # Extract a short summary from result
+    result_summary = ""
+    if isinstance(result, dict):
+        data = result.get("data", result)
+        if isinstance(data, dict):
+            # Grab first few scalar values
+            items = [(k, v) for k, v in data.items() if not isinstance(v, (dict, list))][:3]
+            result_summary = " | ".join(f"{k}: {v}" for k, v in items)
+        else:
+            result_summary = str(data)[:120]
+
+    lines = [
+        f"*Rule:* `{rule_id}` on *{agent_slug}*",
+        f"*Condition matched:* _{condition[:80]}_",
+        f"*Action:* {action}",
+        f"*Result preview:* {result_summary or '_no data_'}",
+        f"*Total fires:* {trigger_count}",
+    ]
+
+    if priority == "CRITICAL":
+        lines.insert(0, "<!here> — *Critical standing-instruction triggered*")
+
+    blocks = [
+        _sl_header(header_text),
+        _sl_section("\n".join(lines)),
+        _sl_divider(),
+        _sl_actions(
+            _sl_button("🔕 Cancel Rule", f"miq_hope_cancel_{rule_id}"),
+            _sl_button("📋 List All Rules", "miq_hope_list"),
+        ),
+        _sl_context(f"MediaAgentIQ HOPE Engine • {priority} priority"),
+    ]
+
+    return {"blocks": blocks}
+
+
 # ─── Error / loading formatters ───────────────────────────────────────────────
 
 def format_slack_thinking(agent_key: str) -> Dict:

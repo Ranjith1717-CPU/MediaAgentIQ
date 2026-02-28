@@ -345,6 +345,12 @@ class Settings(BaseSettings):
     MEMORY_TASK_HISTORY_MAX_ENTRIES: int = Field(default=5000, description="Max entries in task_history.md")
     MEMORY_SYSTEM_STATE_INTERVAL_SECS: int = Field(default=300, description="How often orchestrator writes system_state.md")
 
+    # ==================== HOPE Engine ====================
+    HOPE_ENABLED: bool = Field(default=True, description="Enable HOPE standing-instruction engine")
+    HOPE_MAX_ALERTS_PER_HOUR: int = Field(default=10, description="Rate-limit non-critical HOPE alerts per hour")
+    HOPE_MUTE_START_HOUR: int = Field(default=23, description="Start of quiet hours (local time, 24h)")
+    HOPE_MUTE_END_HOUR: int = Field(default=7, description="End of quiet hours (local time, 24h)")
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

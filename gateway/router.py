@@ -106,7 +106,54 @@ _SLASH_MAP: Dict[str, str] = {
     "/miq-status":      "__status__",
     "/miq-connectors":  "__connectors__",
     "/miq-help":        "__help__",
+    # HOPE commands
+    "/miq-hope":        "__hope_create__",
+    "/miq-hope-cancel": "__hope_cancel__",
+    "/miq-hope-list":   "__hope_list__",
 }
+
+
+# ─── HOPE intent patterns ─────────────────────────────────────────────────────
+
+_HOPE_CREATE_PATTERNS = [
+    r"\bwhenever\b",
+    r"\bevery (morning|day|week)\b",
+    r"\bwatch for\b",
+    r"\balert me (when|if)\b",
+    r"\bnotify me\b",
+    r"\bkeep watching\b",
+]
+_HOPE_CANCEL_PATTERNS = [
+    r"\bstop watching\b",
+    r"\bcancel (hope|rule|alert)\b",
+    r"\bremove rule\b",
+]
+_HOPE_LIST_PATTERNS = [
+    r"\blist (my\s+)?(rules|hope|alerts)\b",
+    r"\bshow (my\s+)?(rules|alerts)\b",
+    r"\bwhat are (my|the) rules\b",
+]
+
+
+def _detect_hope_intent(text: str) -> Optional[str]:
+    """Return HOPE intent string if message is a standing-instruction command."""
+    lower = text.lower()
+    if any(re.search(p, lower) for p in _HOPE_CREATE_PATTERNS):
+        return "__hope_create__"
+    if any(re.search(p, lower) for p in _HOPE_CANCEL_PATTERNS):
+        return "__hope_cancel__"
+    if any(re.search(p, lower) for p in _HOPE_LIST_PATTERNS):
+        return "__hope_list__"
+    return None
+
+
+def _extract_agent_from_message(text: str) -> Optional[str]:
+    """Best-effort: extract an agent key mentioned in a HOPE command."""
+    lower = text.lower()
+    for pattern, agent_key in _KEYWORD_MAP:
+        if re.search(pattern, lower):
+            return agent_key
+    return None
 
 
 # ─── Slash command parser ─────────────────────────────────────────────────────
@@ -340,7 +387,8 @@ async def route(
     Routing priority:
     1. Slash command (/miq-*) → deterministic, instant
     2. Keyword match → fast, no API call
-    3. LLM classification (Claude) → for ambiguous / complex requests
+    3. HOPE intent detection → standing-instruction commands
+    4. LLM classification (Claude) → for ambiguous / complex requests
     """
     text = text.strip()
 
@@ -353,7 +401,20 @@ async def route(
     if keyword_result.confidence >= 0.85:
         return keyword_result
 
-    # 3. LLM fallback for unrecognized or ambiguous
+    # 3. HOPE intent detection (standing-instruction commands)
+    hope_intent = _detect_hope_intent(text)
+    if hope_intent:
+        return RoutedIntent(
+            agent_key=_extract_agent_from_message(text),
+            intent=hope_intent,
+            is_system_command=True,
+            system_command=hope_intent,
+            confidence=1.0,
+            original_message=text,
+            params={"raw_text": text},
+        )
+
+    # 4. LLM fallback for unrecognized or ambiguous
     return await _route_by_llm(text, history=conversation_history)
 
 
@@ -379,6 +440,15 @@ HELP_TEXT = """
 • `/miq-newsroom` — Sync newsroom rundown
 • `/miq-status` — Agent health dashboard
 • `/miq-connectors` — Connector status
+
+*HOPE — Standing Instructions (fire-and-forget rules):*
+• "Whenever you detect Trump speaking, alert me immediately"
+• "Every morning, send me a digest of breaking war news"
+• "Alert me if brand safety score drops below 70"
+• "Stop watching hope_001" — cancel a rule
+• "List my rules for archive agent" — see all rules
+• `/miq-hope-list` — list all HOPE rules
+• `/miq-hope-cancel hope_001` — cancel rule by ID
 
 *Natural language — just ask:*
 • "Check compliance on today's 6pm newscast"
