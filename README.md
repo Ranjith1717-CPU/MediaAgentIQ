@@ -131,6 +131,141 @@ Users interact with agents directly in their existing workspace tools.
 
 ---
 
+## 🌐 The Global Shift to Agent-Native Workspaces
+
+The broadcast industry — and every enterprise industry — is in the middle of the same transition that happened when the web replaced desktop software. Except this time, the shift is from **dashboard UIs** to **conversational agents living inside the tools people already use**.
+
+### Why Slack (and Teams) as the Agent Interface is the Future
+
+When a journalist types `@mediaagentiq is this clip a deepfake?` into Slack and gets a forensic result in four seconds with approve/reject buttons — they never left their workflow. They didn't open a new tab, log into a new tool, or learn a new UI. The agent came to them.
+
+This is the **agent-native workspace** pattern, and it is accelerating rapidly across every industry:
+
+| Platform | Agent Capability | Status (2026) |
+|----------|-----------------|---------------|
+| Microsoft 365 Copilot | Agents embedded in Teams, Word, Excel | GA |
+| Salesforce Agentforce | Autonomous CRM agents in Slack | GA |
+| ServiceNow AI Agents | IT/HR workflow agents via chat | GA |
+| Atlassian Rovo | Jira/Confluence agents with team context | GA |
+| GitHub Copilot Workspace | Code agents triggered from Issues/PRs | GA |
+| Google Workspace Duet AI | Docs/Meet agents with proactive alerts | GA |
+| Slack itself (Bolt SDK) | First-class agent hosting platform | GA |
+
+MediaAgentIQ is doing for broadcast operations what Copilot did for Office — but **three to five years before any incumbent broadcast vendor** (Vizrt, Grass Valley, Harmonic, Avid, Ross Video) has shipped anything comparable.
+
+### The HOPE Pattern: Standing Instructions as the New Primitive
+
+The HOPE Engine introduces what is rapidly becoming a first-class primitive in production AI systems: **standing instructions** — rules you set once that cause agents to act autonomously forever.
+
+```
+"Whenever a deepfake risk score exceeds 60%, hold the clip and alert me immediately"
+→ This one sentence replaces: a cron job + a monitoring dashboard + a PagerDuty rule + a manual workflow
+```
+
+This pattern is appearing across the ecosystem:
+- **Claude Code** has `CLAUDE.md` — persistent instructions that shape Claude's behaviour across every session
+- **OpenAI Assistants API** stores `instructions` that persist across threads
+- **LangGraph** and **AutoGen** implement "persistent agent state" for long-running autonomous tasks
+- **Anthropic MCP** allows agents to persist tool relationships and context across invocations
+
+HOPE is MediaAgentIQ's broadcast-domain implementation of the same idea. It transforms agents from tools you call into **colleagues who watch for things on your behalf**.
+
+### What the Industry Analysts Are Saying
+
+- **Gartner (2025):** By 2028, 33% of enterprise software applications will include agentic AI — up from less than 1% in 2024.
+- **McKinsey Global Institute (2025):** Agentic AI could automate 50–70% of time spent on repetitive knowledge work in media and communications.
+- **IDC (2026):** The market for AI agent platforms will reach $47B by 2028, growing at 42% CAGR. Vertical-specific agents (media, finance, healthcare) will command 60% of that spend.
+- **Forrester (2025):** "Enterprises that deploy agents inside existing collaboration platforms (Slack, Teams) see 3× faster adoption than those requiring separate dashboards."
+
+The broadcast industry lags every other sector in AI adoption by roughly 3 years. The first vendors to build agent platforms purpose-built for broadcast will own the category.
+
+---
+
+## 🧠 Persistent Memory at Scale — What Happens When Memory Grows Large
+
+Every agent in MediaAgentIQ writes to plain `.md` files. This is intentional — it makes memory human-readable, version-controllable with git, zero-dependency, and instantly inspectable. But `.md` files have a practical upper bound before they become slow to read and expensive to inject into LLM prompts.
+
+Here is how the system is designed to handle growth at every scale:
+
+### Current Safeguards (v3.2+)
+
+```
+MEMORY_MAX_ENTRIES_PER_AGENT=500    → trim trigger
+MEMORY_TRIM_TO=400                  → entries kept after trim (oldest 100 removed)
+MEMORY_INTER_AGENT_MAX_ENTRIES=2000 → inter_agent_comms.md cap
+MEMORY_TASK_HISTORY_MAX_ENTRIES=5000→ global audit table cap
+MEMORY_RECENT_CONTEXT_ENTRIES=5     → only last 5 entries injected into LLM prompts
+```
+
+This means a single agent's `MEMORY.md` stays under ~80KB indefinitely. At 19 agents running 14 scheduled jobs, the total memory footprint stabilises around **2–4 MB of text** — well within file-system performance limits.
+
+### The Three-Tier Memory Architecture (Roadmap)
+
+As the platform runs for months and years, raw trim-and-discard is not enough. Real institutional memory needs to be *preserved* and *made searchable*, not thrown away. The roadmap introduces three tiers:
+
+```
+┌────────────────────────────────────────────────────────────────┐
+│  Tier 1 — Hot Memory (current, in .md files)                   │
+│  Last 400–500 entries per agent                                │
+│  Injected directly into LLM prompts as system context          │
+│  Read/write: <1ms                                              │
+├────────────────────────────────────────────────────────────────┤
+│  Tier 2 — Warm Memory (rolling 6 months, in SQLite / Postgres) │
+│  Structured rows: agent, task_id, timestamp, outcome, tags     │
+│  Queried by agent on demand ("what happened to brand safety    │
+│  scores last month?")                                          │
+│  Read: ~5ms full-table scan on local SQLite                    │
+├────────────────────────────────────────────────────────────────┤
+│  Tier 3 — Cold Memory (everything older, in S3 / archive)      │
+│  YYYY-MM.md.gz per agent per month                             │
+│  Retrievable via /miq-recall command or HOPE "remember" rule   │
+│  Not injected into prompts unless explicitly recalled          │
+└────────────────────────────────────────────────────────────────┘
+```
+
+### Memory Distillation — The Critical Long-Term Strategy
+
+Raw task logs grow indefinitely. The transformative capability is periodic **memory distillation** — using an LLM to compress 500 raw entries into a compact, high-signal summary that persists in `SOUL.md`:
+
+```
+Every Sunday at 03:00 UTC, the distillation job runs:
+  1. Read last 500 entries from caption_agent/MEMORY.md
+  2. Send to Claude: "Summarise the key patterns, failure modes, and
+     lessons from these 500 broadcast caption tasks in ≤10 bullet points"
+  3. Append the distilled summary to caption_agent/SOUL.md under
+     "## Institutional Memory — [week of YYYY-MM-DD]"
+  4. The raw 500 entries rotate to Tier 2 / archive
+  5. Next week, the LLM has SOUL.md (distilled wisdom) + last 5 hot
+     entries as context — more signal, less noise
+```
+
+This is exactly how human organisations build institutional knowledge: raw experience (task logs) → distilled lessons (SOUL.md) → cultural wisdom (IDENTITY.md). The agent becomes genuinely smarter over time, not just bigger in storage.
+
+### Memory as a Competitive Moat
+
+An agent platform that has been running for 12 months inside a broadcast organisation has seen:
+- Every compliance edge case that network has encountered
+- Every brand safety override decision and why it was made
+- Every deepfake false positive and the signal patterns that caused them
+- Every breaking-news rundown change and how the Production Director responded
+
+That accumulated, distilled, structured memory is **not replaceable by a competitor installing a fresh agent platform**. It is the institutional knowledge of the broadcast operation, held by the agents. This is why persistent memory is not a feature — it is the long-term strategic moat of the platform.
+
+### Practical File Size Reference
+
+| File | Growth rate | Size at 6 months | Size at 2 years |
+|------|------------|------------------|-----------------|
+| Per-agent MEMORY.md (trimmed) | ~80KB steady state | ~80KB | ~80KB |
+| task_history.md (capped 5K rows) | ~500KB steady state | ~500KB | ~500KB |
+| inter_agent_comms.md (capped 2K) | ~200KB steady state | ~200KB | ~200KB |
+| SOUL.md (distilled weekly) | ~2KB/week added | ~50KB | ~200KB |
+| Daily logs/ archive (per agent) | ~5KB/day | ~9MB/agent | ~36MB/agent |
+| **Total platform memory footprint** | | **~175MB** | **~690MB** |
+
+At two years of continuous operation, 690MB of structured broadcast knowledge — fully human-readable, git-versioned, and LLM-injectable — is a remarkably compact representation of an organisation's operational intelligence.
+
+---
+
 ## 🚀 Quick Start
 
 ### Option 1: Streamlit Demo (Recommended)
