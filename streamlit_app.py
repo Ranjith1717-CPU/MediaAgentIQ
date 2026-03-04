@@ -814,7 +814,7 @@ with st.sidebar:
             "📰 Newsroom Integration",
             # System
             "Integration Showcase",
-            "💬 Channel Simulator",
+            "🔌 Workspace Integration",
             "🔗 Connector Status",
             "🧠 Agent Memory",
         ],
@@ -4559,9 +4559,9 @@ ws.onmessage = (event) => {
         st.button("🛠️ Request Custom Integration", use_container_width=True)
 
 
-# ============== Channel Simulator ==============
+# ============== Workspace Integration ==============
 
-elif page == "💬 Channel Simulator":
+elif page == "🔌 Workspace Integration":
 
     # ── Styles ────────────────────────────────────────────────────────────
     st.markdown("""
@@ -5622,8 +5622,8 @@ elif page == "💬 Channel Simulator":
 
     # ── Page header ───────────────────────────────────────────────────────
 
-    st.title("💬 Channel Simulator")
-    st.caption("Live simulation of Slack & Microsoft Teams integration — agents respond in real time, no external accounts needed")
+    st.title("🔌 Workspace Integration")
+    st.caption("Interactive workspace integration — simulate Slack & Microsoft Teams with live agent responses, no external accounts needed")
 
     sim_info = st.info(
         "💡 **How it works:** Type a slash command or plain message, and MediaAgentIQ routes it to the "
