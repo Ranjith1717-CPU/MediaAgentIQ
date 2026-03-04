@@ -6017,12 +6017,478 @@ elif page == "🔗 Connector Status":
 
 elif page == "🧠 Agent Memory":
     st.title("🧠 Agent Memory & HOPE Engine")
-    st.markdown("Persistent memory layer — every agent task is logged to `.md` files that survive restarts. "
-                "HOPE standing rules are evaluated on every agent run.")
+    st.markdown(
+        "Agents remember **your standing instructions** in `.md` files. "
+        "Every time an agent runs it re-reads those files, evaluates your condition, "
+        "and fires an alert or digest — without you doing anything again."
+    )
 
-    mem_tab, hope_tab, history_tab, companion_tab = st.tabs([
-        "📂 Per-Agent Memory", "⚡ HOPE Rules", "📋 Task History", "📄 Companion Files"
+    live_tab, mem_tab, hope_tab, history_tab, companion_tab = st.tabs([
+        "🎯 Live Use Case", "📂 Per-Agent Memory", "⚡ HOPE Rules", "📋 Task History", "📄 Companion Files"
     ])
+
+    # ── Live Use Case ─────────────────────────────────────────────────────
+    with live_tab:
+
+        st.markdown("""
+<div style="background:linear-gradient(135deg,#1e1b4b,#0f172a);padding:20px 24px;border-radius:12px;
+     border:1px solid #4f46e5;margin-bottom:24px;">
+  <div style="color:#a5b4fc;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">
+    How it works
+  </div>
+  <div style="display:flex;gap:0;flex-wrap:wrap;">
+    <div style="flex:1;min-width:140px;text-align:center;padding:8px;">
+      <div style="font-size:26px;">💬</div>
+      <div style="color:#e2e8f0;font-size:13px;font-weight:600;margin:4px 0;">You say it once</div>
+      <div style="color:#64748b;font-size:12px;">"Alert me when deepfake > 60%"</div>
+    </div>
+    <div style="flex:0;padding:16px 4px;color:#4f46e5;font-size:20px;align-self:center;">→</div>
+    <div style="flex:1;min-width:140px;text-align:center;padding:8px;">
+      <div style="font-size:26px;">🧠</div>
+      <div style="color:#e2e8f0;font-size:13px;font-weight:600;margin:4px 0;">Agent understands</div>
+      <div style="color:#64748b;font-size:12px;">Parses intent, threshold, schedule, priority</div>
+    </div>
+    <div style="flex:0;padding:16px 4px;color:#4f46e5;font-size:20px;align-self:center;">→</div>
+    <div style="flex:1;min-width:140px;text-align:center;padding:8px;">
+      <div style="font-size:26px;">📄</div>
+      <div style="color:#e2e8f0;font-size:13px;font-weight:600;margin:4px 0;">Stored in HOPE.md</div>
+      <div style="color:#64748b;font-size:12px;">Survives restarts · persists forever</div>
+    </div>
+    <div style="flex:0;padding:16px 4px;color:#4f46e5;font-size:20px;align-self:center;">→</div>
+    <div style="flex:1;min-width:140px;text-align:center;padding:8px;">
+      <div style="font-size:26px;">⚡</div>
+      <div style="color:#e2e8f0;font-size:13px;font-weight:600;margin:4px 0;">Evaluated on every run</div>
+      <div style="color:#64748b;font-size:12px;">Agent reads memory before each task</div>
+    </div>
+    <div style="flex:0;padding:16px 4px;color:#4f46e5;font-size:20px;align-self:center;">→</div>
+    <div style="flex:1;min-width:140px;text-align:center;padding:8px;">
+      <div style="font-size:26px;">🔔</div>
+      <div style="color:#e2e8f0;font-size:13px;font-weight:600;margin:4px 0;">Alert fires</div>
+      <div style="color:#64748b;font-size:12px;">Slack / Teams · only when condition met</div>
+    </div>
+  </div>
+</div>""", unsafe_allow_html=True)
+
+        # ── Scenario definitions ───────────────────────────────────────────
+        SCENARIOS = {
+            "🕵️ Alert me when deepfake confidence > 60%": {
+                "instruction": "Alert me whenever deepfake confidence exceeds 60%",
+                "agent": "deepfake_detection_agent",
+                "parsed": {
+                    "condition_field": "deepfake_score",
+                    "operator": ">",
+                    "threshold": 0.60,
+                    "schedule": "IMMEDIATE",
+                    "priority": "HIGH",
+                    "action": "Post alert to #newsroom + #compliance on Slack and Teams",
+                },
+                "hope_id": "hope_071",
+                "runs": [
+                    {"task_id": "task_1039", "ts": "2026-03-04 08:59", "score": 0.12, "fires": False,
+                     "reason": "0.12 < 0.60 — threshold not met, no alert"},
+                    {"task_id": "task_1041", "ts": "2026-03-04 09:22", "score": 0.74, "fires": True,
+                     "reason": "0.74 > 0.60 — threshold MET → alert fired"},
+                ],
+                "alert_headline": "⚠️ DEEPFAKE ALERT — 74% Confidence",
+                "alert_level": "HIGH",
+                "alert_badge": "sbadge-warn",
+                "alert_body": (
+                    "Synthetic media detected at <strong>74% confidence</strong> in the 09:22 AM field segment.<br>"
+                    "Content automatically placed on <strong>HOLD</strong> pending manual review.<br>"
+                    "Forensic layers: GAN fingerprint (0.71) · metadata anomaly (0.68) · C2PA mismatch"
+                ),
+                "alert_buttons": ["✋ Hold Content", "🔍 View Full Report", "✅ Release if Verified"],
+                "memory_entry": (
+                    "2026-03-04 09:22 | task_1041 | SUCCESS\n"
+                    "Input: Field segment — 09:22 AM live feed\n"
+                    "Output: deepfake_score=0.74, verdict=MEDIUM RISK, synthetic_pct=31%\n"
+                    "HOPE: hope_071 FIRED → slack_alert #newsroom + #compliance\n"
+                    "Duration: 3,201 ms"
+                ),
+            },
+            "🕵️ Alert me when deepfake confidence > 80%": {
+                "instruction": "Alert me whenever deepfake confidence exceeds 80%",
+                "agent": "deepfake_detection_agent",
+                "parsed": {
+                    "condition_field": "deepfake_score",
+                    "operator": ">",
+                    "threshold": 0.80,
+                    "schedule": "IMMEDIATE",
+                    "priority": "CRITICAL",
+                    "action": "Immediately alert #newsroom + hold content. Bypass mute hours.",
+                },
+                "hope_id": "hope_072",
+                "runs": [
+                    {"task_id": "task_1039", "ts": "2026-03-04 08:59", "score": 0.12, "fires": False,
+                     "reason": "0.12 < 0.80 — no alert"},
+                    {"task_id": "task_1041", "ts": "2026-03-04 09:22", "score": 0.74, "fires": False,
+                     "reason": "0.74 < 0.80 — below your threshold, no alert"},
+                    {"task_id": "task_1058", "ts": "2026-03-04 11:05", "score": 0.87, "fires": True,
+                     "reason": "0.87 > 0.80 — threshold MET → CRITICAL alert fired"},
+                ],
+                "alert_headline": "🚨 CRITICAL DEEPFAKE — 87% Confidence",
+                "alert_level": "CRITICAL",
+                "alert_badge": "sbadge-crit",
+                "alert_body": (
+                    "High-confidence synthetic media detected at <strong>87%</strong> in the 11:05 AM segment.<br>"
+                    "This rule is CRITICAL priority — <strong>mute hours bypassed</strong>, rate limit bypassed.<br>"
+                    "Content immediately placed on HARD HOLD. Newsroom director notified."
+                ),
+                "alert_buttons": ["🚨 Escalate Now", "🔍 Forensic Report", "📨 Alert Director"],
+                "memory_entry": (
+                    "2026-03-04 11:05 | task_1058 | SUCCESS\n"
+                    "Input: Studio segment — 11:05 AM broadcast\n"
+                    "Output: deepfake_score=0.87, verdict=HIGH RISK, synthetic_pct=62%\n"
+                    "HOPE: hope_072 FIRED (CRITICAL — mute bypass) → slack_alert #newsroom\n"
+                    "Duration: 3,480 ms"
+                ),
+            },
+            "📋 Morning brief — all agent status every day at 6 AM": {
+                "instruction": "Every morning at 6 AM give me a brief on all agent status and top issues",
+                "agent": "trending_agent",
+                "parsed": {
+                    "condition_field": "schedule",
+                    "operator": "==",
+                    "threshold": "06:00",
+                    "schedule": "DAILY 06:00",
+                    "priority": "NORMAL",
+                    "action": "Post morning digest to #newsroom — agent health + trending topics + overnight alerts",
+                },
+                "hope_id": "hope_103",
+                "runs": [
+                    {"task_id": "task_998", "ts": "2026-03-04 06:00", "score": None, "fires": True,
+                     "reason": "Schedule DAILY 06:00 matched — digest fired"},
+                ],
+                "alert_headline": "🌅 Good Morning — MediaAgentIQ Daily Brief",
+                "alert_level": "NORMAL",
+                "alert_badge": "sbadge-info",
+                "alert_body": None,  # Custom rendered below
+                "alert_buttons": ["📊 Full Report", "⚙️ Configure Digest", "🔕 Skip Tomorrow"],
+                "memory_entry": (
+                    "2026-03-04 06:00 | task_998 | SUCCESS\n"
+                    "Input: Scheduled daily digest trigger\n"
+                    "Output: agents_healthy=19, violations_overnight=2, trending_topics=5\n"
+                    "HOPE: hope_103 FIRED (DAILY 06:00) → slack_alert #newsroom + Teams Newsroom\n"
+                    "Duration: 388 ms"
+                ),
+            },
+            "⚖️ Alert me whenever there's a live compliance violation": {
+                "instruction": "Alert me whenever a compliance violation is detected during live broadcast",
+                "agent": "compliance_agent",
+                "parsed": {
+                    "condition_field": "violations_count",
+                    "operator": ">",
+                    "threshold": 0,
+                    "schedule": "IMMEDIATE",
+                    "priority": "HIGH",
+                    "action": "Post to #compliance with violation details + FCC rule + fine estimate",
+                },
+                "hope_id": "hope_042",
+                "runs": [
+                    {"task_id": "task_1038", "ts": "2026-03-04 08:30", "score": 0, "fires": False,
+                     "reason": "violations=0 — commercial block clear, no alert"},
+                    {"task_id": "task_1041", "ts": "2026-03-04 09:02", "score": 2, "fires": True,
+                     "reason": "violations=2 > 0 — threshold MET → alert fired"},
+                ],
+                "alert_headline": "⚖️ COMPLIANCE VIOLATION — 2 Critical Issues",
+                "alert_level": "HIGH",
+                "alert_badge": "sbadge-warn",
+                "alert_body": (
+                    "<strong>00:23:45</strong> — Unbleeped expletive during live field segment "
+                    "(FCC Part 73 · fine range $25K–$500K)<br>"
+                    "<strong>01:15:30</strong> — Political ad missing sponsor disclosure (§315 · fine $40K+)<br>"
+                    "Auto-hold applied. Segment flagged for legal review."
+                ),
+                "alert_buttons": ["✅ Mark Reviewed", "📨 Alert Legal", "📄 Full Report"],
+                "memory_entry": (
+                    "2026-03-04 09:02 | task_1041 | SUCCESS\n"
+                    "Input: Morning Broadcast — live stream\n"
+                    "Output: violations=2, warnings=1, clear=47, confidence_avg=0.96\n"
+                    "HOPE: hope_042 FIRED → slack_alert #compliance + #newsroom\n"
+                    "Duration: 1,182 ms"
+                ),
+            },
+            "📡 Alert me when signal loudness goes above −20 LUFS": {
+                "instruction": "Notify me whenever broadcast loudness exceeds −20 LUFS",
+                "agent": "signal_quality_agent",
+                "parsed": {
+                    "condition_field": "loudness_lufs",
+                    "operator": ">",
+                    "threshold": -20.0,
+                    "schedule": "IMMEDIATE",
+                    "priority": "HIGH",
+                    "action": "Alert #noc-alerts with loudness reading, timestamp, and CALM Act status",
+                },
+                "hope_id": "hope_118",
+                "runs": [
+                    {"task_id": "task_1035", "ts": "2026-03-04 08:15", "score": -23.1, "fires": False,
+                     "reason": "−23.1 LUFS < −20 threshold — compliant, no alert"},
+                    {"task_id": "task_1040", "ts": "2026-03-04 09:01", "score": -15.2, "fires": True,
+                     "reason": "−15.2 LUFS > −20 — threshold MET → alert fired"},
+                ],
+                "alert_headline": "📡 LOUDNESS VIOLATION — −15.2 LUFS",
+                "alert_level": "HIGH",
+                "alert_badge": "sbadge-warn",
+                "alert_body": (
+                    "Current loudness: <strong>−15.2 LUFS</strong> — target −23 ±1 LUFS (EBU R128)<br>"
+                    "Deviation: <strong>+7.8 LUFS</strong> above target · CALM Act non-compliance risk<br>"
+                    "Segment: commercial break 09:01 AM · Duration: 30s affected"
+                ),
+                "alert_buttons": ["🔧 Auto-Correct", "⏸️ Hold Commercial", "📋 Log Incident"],
+                "memory_entry": (
+                    "2026-03-04 09:01 | task_1040 | SUCCESS\n"
+                    "Input: Live broadcast feed — WKRN-HD1\n"
+                    "Output: loudness=-15.2 LUFS, ebu_r128=NON-COMPLIANT, deviation=+7.8 LUFS\n"
+                    "HOPE: hope_118 FIRED → slack_alert #noc-alerts\n"
+                    "Duration: 218 ms"
+                ),
+            },
+        }
+
+        # ── Scenario picker ────────────────────────────────────────────────
+        st.subheader("Step 1 — Tell the agent what to watch for")
+        st.caption("Pick a preset scenario or type your own instruction below.")
+
+        scenario_key = st.selectbox(
+            "Choose a use case:",
+            list(SCENARIOS.keys()),
+            key="live_scenario_sel"
+        )
+        scen = SCENARIOS[scenario_key]
+
+        custom_instruction = st.text_input(
+            "Or type your own instruction (natural language):",
+            value=scen["instruction"],
+            key="live_custom_instruction",
+            placeholder="e.g. Whenever deepfake confidence exceeds 70%, alert me immediately",
+        )
+        instruction_text = custom_instruction.strip() or scen["instruction"]
+
+        run_demo = st.button("▶️ Set Standing Instruction & Run Demo", type="primary", key="run_live_demo")
+        if run_demo:
+            st.session_state["live_demo_active"] = scenario_key
+        show_demo = st.session_state.get("live_demo_active") == scenario_key and (
+            run_demo or st.session_state.get("live_demo_active") == scenario_key
+        )
+
+        if show_demo:
+            st.divider()
+
+            # ── Step 2: Parsing ─────────────────────────────────────────────
+            st.markdown("""
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+  <span style="background:#22c55e;color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">1</span>
+  <span style="color:#e2e8f0;font-weight:700;font-size:15px;">You said:</span>
+</div>""", unsafe_allow_html=True)
+            st.markdown(f"""
+<div style="background:#1e293b;border-left:3px solid #6366f1;padding:12px 16px;border-radius:6px;
+     color:#a5b4fc;font-size:14px;font-style:italic;margin-bottom:16px;">
+  "{instruction_text}"
+</div>""", unsafe_allow_html=True)
+
+            p = scen["parsed"]
+            st.markdown("""
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+  <span style="background:#22c55e;color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">2</span>
+  <span style="color:#e2e8f0;font-weight:700;font-size:15px;">Agent understood:</span>
+</div>""", unsafe_allow_html=True)
+
+            p_cols = st.columns(4)
+            p_cols[0].markdown(f"**Agent**\n\n`{scen['agent']}`")
+            p_cols[1].markdown(f"**Condition**\n\n`{p['condition_field']} {p['operator']} {p['threshold']}`")
+            p_cols[2].markdown(f"**Schedule**\n\n`{p['schedule']}`")
+            p_cols[3].markdown(f"**Priority**\n\n`{p['priority']}`")
+
+            st.caption(f"Action: {p['action']}")
+
+            # ── Step 3: HOPE.md written ──────────────────────────────────────
+            st.markdown("")
+            st.markdown("""
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+  <span style="background:#22c55e;color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">3</span>
+  <span style="color:#e2e8f0;font-weight:700;font-size:15px;">Stored in memory — agent's HOPE.md file updated:</span>
+</div>""", unsafe_allow_html=True)
+
+            hope_md_content = f"""# {scen['agent']} — HOPE Standing Rules
+
+_Last updated: 2026-03-04 09:00:00 | Active rules: 1 | Total fired: 0_
+
+---
+
+## {scen['hope_id']}
+**Condition**: {instruction_text}
+**Parsed condition**: {p['condition_field']} {p['operator']} {p['threshold']}
+**Schedule**: {p['schedule']}
+**Action**: {p['action']}
+**Priority**: {p['priority']}
+**Status**: ACTIVE
+**Created**: 2026-03-04 09:00:00
+**Trigger count**: 0
+**Last triggered**: Never
+
+---
+
+_File: memory/agents/{scen['agent']}/HOPE.md_
+_This file is read by the agent before every task execution._
+_Mute hours: 23:00–07:00 (CRITICAL priority bypasses all guards)_
+"""
+            with st.expander(
+                f"📄 `memory/agents/{scen['agent']}/HOPE.md` — click to inspect",
+                expanded=True
+            ):
+                st.code(hope_md_content, language="markdown")
+
+            # ── Step 4: Agent runs ───────────────────────────────────────────
+            st.markdown("")
+            st.markdown("""
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+  <span style="background:#22c55e;color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">4</span>
+  <span style="color:#e2e8f0;font-weight:700;font-size:15px;">Agent runs — reads HOPE.md — evaluates condition on every task:</span>
+</div>""", unsafe_allow_html=True)
+
+            for run in scen["runs"]:
+                if run["fires"]:
+                    bg, border, icon = "#0c1a0c", "#22c55e", "✅"
+                    score_display = f"{run['score']}" if run["score"] is not None else "schedule matched"
+                else:
+                    bg, border, icon = "#1e293b", "#475569", "⏭️"
+                    score_display = f"{run['score']}" if run["score"] is not None else "—"
+
+                st.markdown(f"""
+<div style="background:{bg};border:1px solid {border};padding:10px 14px;border-radius:8px;margin-bottom:6px;">
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+    <span style="font-size:16px;">{icon}</span>
+    <span style="color:#94a3b8;font-size:12px;">{run['ts']}</span>
+    <code style="color:#a5b4fc;font-size:12px;">{run['task_id']}</code>
+    <span style="color:#cbd5e1;font-size:13px;">Result: <strong>{score_display}</strong></span>
+    <span style="color:{'#22c55e' if run['fires'] else '#64748b'};font-size:12px;margin-left:auto;">
+      {'🔔 ALERT FIRED' if run['fires'] else 'no alert'}
+    </span>
+  </div>
+  <div style="color:#64748b;font-size:12px;margin-top:4px;margin-left:30px;">{run['reason']}</div>
+</div>""", unsafe_allow_html=True)
+
+            # ── Step 5: Memory updated ───────────────────────────────────────
+            st.markdown("")
+            st.markdown("""
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+  <span style="background:#22c55e;color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">5</span>
+  <span style="color:#e2e8f0;font-weight:700;font-size:15px;">Memory log updated — task entry written to agent's .md file:</span>
+</div>""", unsafe_allow_html=True)
+
+            with st.expander(
+                f"📄 `memory/agents/{scen['agent']}.md` — task entry appended",
+                expanded=True
+            ):
+                st.code(scen["memory_entry"], language="markdown")
+
+            # ── Step 6: Alert delivered ──────────────────────────────────────
+            st.markdown("")
+            st.markdown("""
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+  <span style="background:#22c55e;color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">6</span>
+  <span style="color:#e2e8f0;font-weight:700;font-size:15px;">Alert delivered — Slack Block Kit card sent to channel:</span>
+</div>""", unsafe_allow_html=True)
+
+            # Slack card mock
+            btn_html = "".join(
+                f'<span class="sim-slack-btn{"  primary" if i == 0 else ""}" style="margin-bottom:4px;">{b}</span> '
+                for i, b in enumerate(scen["alert_buttons"])
+            )
+
+            if scen["alert_body"] is not None:
+                body_html = f'<div class="sim-slack-card-text" style="line-height:1.8;">{scen["alert_body"]}</div>'
+            else:
+                # Morning brief — custom
+                body_html = """
+<div class="sim-slack-card-section">
+  <div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:8px;">
+    <div style="text-align:center;"><div style="color:#2bac76;font-size:22px;font-weight:700;">19</div>
+      <div class="sim-slack-card-muted">Agents Online</div></div>
+    <div style="text-align:center;"><div style="color:#ef4444;font-size:22px;font-weight:700;">2</div>
+      <div class="sim-slack-card-muted">Overnight Violations</div></div>
+    <div style="text-align:center;"><div style="color:#f59e0b;font-size:22px;font-weight:700;">1</div>
+      <div class="sim-slack-card-muted">Warnings</div></div>
+    <div style="text-align:center;"><div style="color:#d1d2d3;font-size:22px;font-weight:700;">1,247</div>
+      <div class="sim-slack-card-muted">Tasks Yesterday</div></div>
+  </div>
+</div>
+<div class="sim-slack-card-section">
+  <div class="sim-slack-card-muted" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Top Trending Topics</div>
+  <div class="sim-slack-card-text" style="line-height:1.8;">
+    🔴 AI Regulation Senate Vote (+2,847%) · 🟡 Gaza Ceasefire (+1,234%)<br>
+    🔵 Super Bowl Ad Spending (+892%) · 🔵 Tech Layoffs Q1 (+756%)
+  </div>
+</div>
+<div class="sim-slack-card-section">
+  <div class="sim-slack-card-muted" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Overnight Alerts</div>
+  <div class="sim-slack-card-text" style="line-height:1.8;">
+    ⚠️ 23:45 — Compliance: profanity during late news (auto-held)<br>
+    ⚠️ 02:10 — Signal: loudness spike +6 LUFS during infomercial
+  </div>
+</div>"""
+
+            st.markdown(f"""
+<div style="max-width:680px;">
+<div class="sim-slack-workspace" style="border-radius:10px 10px 0 0;">
+  <div class="sim-slack-ws-dot"></div>
+  <div class="sim-slack-ws-name">WKRN Newsroom · #newsroom</div>
+</div>
+<div class="sim-slack-msgs" style="border-radius:0 0 10px 10px;">
+  <div class="sim-slack-msg">
+    <div class="sim-slack-av">🎬</div>
+    <div style="flex:1;min-width:0;">
+      <div class="sim-slack-msg-hdr">
+        <span class="sim-slack-msg-name">MediaAgentIQ</span>
+        <span class="sim-slack-app-badge">APP</span>
+        <span class="sim-slack-msg-ts">{scen['runs'][-1]['ts']}</span>
+      </div>
+      <div class="sim-slack-card">
+        <div class="sim-slack-card-title">{scen['alert_headline']}</div>
+        <div class="sim-slack-card-section">
+          <span class="{scen['alert_badge']}">{scen['alert_level']}</span>&nbsp;
+          <span class="sim-slack-card-muted">HOPE rule {scen['hope_id']} · {scen['agent'].replace('_',' ')}</span>
+        </div>
+        <div class="sim-slack-card-section">{body_html}</div>
+        <div style="margin-top:8px;">{btn_html}</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>""", unsafe_allow_html=True)
+
+            st.markdown("")
+            st.success(
+                f"✅ Standing instruction active. Every time **{scen['agent'].replace('_',' ')}** runs, "
+                f"it re-reads `HOPE.md`, evaluates your condition, and fires this alert — with no further input from you."
+            )
+
+            # ── HOPE.md final state ─────────────────────────────────────────
+            with st.expander("📄 Final HOPE.md — after alert fired", expanded=False):
+                st.code(f"""# {scen['agent']} — HOPE Standing Rules
+
+_Last updated: {scen['runs'][-1]['ts']} | Active rules: 1 | Total fired: 1_
+
+---
+
+## {scen['hope_id']}
+**Condition**: {instruction_text}
+**Parsed condition**: {p['condition_field']} {p['operator']} {p['threshold']}
+**Schedule**: {p['schedule']}
+**Action**: {p['action']}
+**Priority**: {p['priority']}
+**Status**: ACTIVE
+**Created**: 2026-03-04 09:00:00
+**Trigger count**: 1
+**Last triggered**: {scen['runs'][-1]['ts']}
+
+_Next evaluation: on next agent run_
+_Mute hours: 23:00–07:00_
+_Rate limit: max 10 alerts/hr_
+""", language="markdown")
+
+        elif not run_demo and not st.session_state.get("live_demo_active"):
+            st.info("👆 Choose a scenario and click **Set Standing Instruction & Run Demo** to see the full memory lifecycle.")
 
     # ── Per-Agent Memory ──────────────────────────────────────────────────
     with mem_tab:
