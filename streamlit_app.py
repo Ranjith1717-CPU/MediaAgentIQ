@@ -808,10 +808,6 @@ with st.sidebar:
             "🔍 Deepfake Detection", "✅ Live Fact-Check",
             "📊 Audience Intelligence", "🎬 AI Production Director",
             "🛡️ Brand Safety", "🌿 Carbon Intelligence",
-            # ── Phase 1 Pipeline Agents ──
-            "📥 Ingest + Transcode", "📡 Signal Quality",
-            "📋 Playout Scheduling", "🌐 OTT Distribution",
-            "📰 Newsroom Integration",
             # System
             "Integration Showcase",
             "🔌 Workspace Integration",
@@ -830,7 +826,7 @@ with st.sidebar:
     with col2:
         st.caption(f"{datetime.now().strftime('%H:%M:%S')}")
 
-    st.success("All 19 Agents Online")
+    st.success("All 14 Agents Online")
     st.info("💬 Slack + Teams Gateway Active")
 
     # Mode selector
@@ -914,10 +910,6 @@ if page == "Dashboard":
                 {"agent": "⚖️ Compliance Agent",      "interval": "Every 10 min", "last_run": "7 min ago",  "status": "✅ Active"},
                 {"agent": "📜 Rights Agent",           "interval": "Every 1 hour", "last_run": "34 min ago", "status": "✅ Active"},
                 {"agent": "🔍 Archive Agent",          "interval": "Every 6 hours","last_run": "2h ago",     "status": "✅ Active"},
-                {"agent": "📡 Signal Quality",         "interval": "Every 2 min",  "last_run": "1 min ago",  "status": "✅ Active"},
-                {"agent": "📰 Newsroom Integration",   "interval": "Every 3 min",  "last_run": "2 min ago",  "status": "✅ Active"},
-                {"agent": "📋 Playout Scheduling",     "interval": "Every 5 min",  "last_run": "3 min ago",  "status": "✅ Active"},
-                {"agent": "🌐 OTT Distribution",       "interval": "Every 10 min", "last_run": "6 min ago",  "status": "✅ Active"},
             ]
 
             for job in scheduled_jobs:
@@ -1448,23 +1440,14 @@ elif page == "🚀 All-in-One Workflow":
         col11.metric("Brand Safety", f"{active_brand_safety.get('overall_score', 96)}/100", active_brand_safety.get("level", "Premium Safe"))
         col12.metric("Carbon", f"{active_carbon.get('total_co2e_kg', 12.4)} kg CO₂e", f"ESG: {active_carbon.get('esg_score', 81)}/100")
 
-        # Summary Metrics Row 3 — Phase 1 Pipeline agents
-        col13, col14, col15, col16, col17 = st.columns(5)
-        col13.metric("Ingest Jobs", "3 complete", "0 errors")
-        col14.metric("Signal Quality", "✅ All Clear", "EBU R128 −22.8 LUFS")
-        col15.metric("Playout", "12 slots", "Next: 18:00 News")
-        col16.metric("OTT Streams", "5 profiles live", "147K viewers")
-        col17.metric("Newsroom", "8 stories", "2 wires pending")
-
         st.divider()
 
         # Tabbed Results
         (tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10,
-         tab11, tab12, tab13, tab14, tab15, tab16, tab17, tab18, tab19) = st.tabs([
+         tab11, tab12, tab13, tab14) = st.tabs([
             "📝 Captions", "🎬 Viral Clips", "⚖️ Compliance", "🔍 Archive",
             "📱 Social", "🌍 Translations", "📜 Rights", "📈 Trending",
             "🕵️ Deepfake", "✅ Fact-Check", "👥 Audience", "🎥 Production", "🛡️ Brand Safety", "🌿 Carbon",
-            "📥 Ingest", "📡 Signal", "📋 Playout", "🌐 OTT", "📰 Newsroom",
         ])
 
         with tab1:
@@ -1719,115 +1702,6 @@ elif page == "🚀 All-in-One Workflow":
             import json as _json
             st.download_button("📥 Download ESG Report (JSON)", _json.dumps(active_carbon, indent=2),
                 "esg_carbon_report.json", "application/json", use_container_width=True, key="dl_carbon_allinone")
-
-        with tab15:
-            st.markdown("**Ingest + Transcode — Pipeline Status**")
-            col1, col2, col3 = st.columns(3)
-            col1.metric("Jobs Today", "3 complete", "0 errors")
-            col2.metric("Avg Transcode Time", "7m 24s", "4K HDR: 18m 12s")
-            col3.metric("Output Profiles", "6 configured", "Cloud: AWS MediaConvert")
-            jobs = [
-                {"id": "INJ-001", "file": "wkrn_morningnews_raw.mxf",   "status": "✅ Complete", "duration": "4:02:15", "outputs": "Broadcast HD, OTT HLS, Proxy, Thumbnail"},
-                {"id": "INJ-002", "file": "wkrn_sportshighlight_raw.mp4","status": "✅ Complete", "duration": "0:45:30", "outputs": "Broadcast HD, OTT HLS, Web MP4"},
-                {"id": "INJ-003", "file": "wkrn_weather_segment_raw.mxf","status": "⏳ In Progress","duration": "0:12:00", "outputs": "Broadcast HD, Proxy (running)"},
-            ]
-            for j in jobs:
-                st.markdown(f"""
-                <div style="background:#1e293b;padding:10px 14px;border-radius:8px;margin:6px 0;border-left:3px solid #6366f1;">
-                <strong style="color:#e2e8f0;">{j['id']}</strong> — <span style="color:#94a3b8;">{j['file']}</span>
-                &nbsp;&nbsp;<span style="color:#22c55e;">{j['status']}</span><br>
-                <small style="color:#64748b;">Duration: {j['duration']} &nbsp;|&nbsp; Outputs: {j['outputs']}</small>
-                </div>""", unsafe_allow_html=True)
-
-        with tab16:
-            st.markdown("**Signal Quality Monitor — Live Broadcast**")
-            col1, col2, col3, col4 = st.columns(4)
-            col1.metric("Loudness", "−22.8 LUFS", "✅ Target −23 ±1")
-            col2.metric("True Peak", "−1.4 dBTP", "✅ < −1.0 limit")
-            col3.metric("Black Frames", "0 detected", "✅ Clear")
-            col4.metric("Caption Sync", "±12ms", "✅ < 500ms")
-            st.success("📡 WKRN-HD: All Clear | EBU R128 + ATSC A/85 compliant")
-            alerts = [
-                ("09:23:45", "⚠️ WARNING", "Commercial segment +8 LUFS above program level", "#f59e0b"),
-                ("08:15:12", "🔴 CRITICAL", "3.2s black frame during program break — NOC alerted", "#ef4444"),
-            ]
-            st.markdown("**Alert History (Last 24h):**")
-            for ts, sev, msg, col in alerts:
-                st.markdown(f"""
-                <div style="background:rgba({','.join(['239,68,68' if col=='#ef4444' else '245,158,11,0.1' for _ in [1]])},0.1);
-                border-left:3px solid {col};padding:8px 12px;border-radius:6px;margin:4px 0;">
-                <small style="color:#94a3b8;">{ts}</small> &nbsp; <strong>{sev}</strong><br>
-                <span style="color:#e2e8f0;font-size:13px;">{msg}</span></div>""", unsafe_allow_html=True)
-
-        with tab17:
-            st.markdown("**Playout Scheduling — Today's Rundown**")
-            schedule = [
-                ("06:00", "09:00", "WKRN Morning News LIVE", "news_live", "✅ Aired"),
-                ("09:00", "10:00", "Today Show (NBC)",        "network",   "✅ Aired"),
-                ("10:00", "12:00", "The Price Is Right",      "syndicated","✅ Aired"),
-                ("12:00", "12:30", "WKRN News at Noon",       "news_live", "✅ Aired"),
-                ("18:00", "18:30", "WKRN News at 6",          "news_live", "🔵 Scheduled"),
-                ("22:00", "22:30", "WKRN News at 10",         "news_live", "🔵 Scheduled"),
-                ("22:30", "23:30", "Late Show (CBS)",          "network",   "🔵 Scheduled"),
-            ]
-            for s, e, title, t, status in schedule:
-                type_color = "#6366f1" if "news" in t else "#0891b2"
-                st.markdown(f"""
-                <div style="display:flex;gap:12px;align-items:center;padding:7px 12px;
-                background:#1e293b;border-radius:6px;margin:4px 0;border-left:3px solid {type_color};">
-                <span style="color:#94a3b8;font-family:monospace;min-width:110px;">{s} – {e}</span>
-                <span style="color:#e2e8f0;flex:1;">{title}</span>
-                <span style="color:#64748b;font-size:12px;">{status}</span></div>""", unsafe_allow_html=True)
-
-        with tab18:
-            st.markdown("**OTT Distribution — Live Stream Health**")
-            col1, col2, col3 = st.columns(3)
-            col1.metric("Active Streams", "5 profiles", "All healthy")
-            col2.metric("Total Viewers", "147,234", "+2.3K/min")
-            col3.metric("CDN", "CloudFront", "99.98% uptime")
-            abr = [
-                ("4K HDR",   "25 Mbps",  12847,  "✅"),
-                ("1080p60",  "8 Mbps",   89234,  "✅"),
-                ("720p",     "4 Mbps",   31204,  "✅"),
-                ("480p",     "2 Mbps",   10891,  "✅"),
-                ("Audio Only","128 kbps", 3058,  "✅"),
-            ]
-            for profile, br, viewers, health in abr:
-                st.markdown(f"""
-                <div style="display:flex;gap:12px;align-items:center;padding:6px 12px;
-                background:#1e293b;border-radius:6px;margin:3px 0;">
-                <span style="color:#e2e8f0;min-width:90px;font-weight:600;">{profile}</span>
-                <span style="color:#94a3b8;min-width:80px;">{br}</span>
-                <span style="color:#22c55e;flex:1;">{viewers:,} viewers</span>
-                <span>{health}</span></div>""", unsafe_allow_html=True)
-
-        with tab19:
-            st.markdown("**Newsroom Integration — iNews Rundown**")
-            col1, col2 = st.columns(2)
-            col1.metric("Stories Ready", "6 / 8", "2 editing")
-            col2.metric("Wire Stories", "14 new", "AP: 8, Reuters: 4, AFP: 2")
-            rundown = [
-                ("FIRE-DOWNTOWN", "Warehouse Fire Nashville",    "Jake Thompson",   "2:30", "✅ Ready", "LEAD"),
-                ("COUNCIL-VOTE",  "City Council Budget Vote",    "Maria Sanchez",   "1:45", "✅ Ready", "2ND"),
-                ("WEATHER-STORM", "Severe Storm Watch Tonight",  "Weather Team",    "1:15", "✅ Ready", "3RD"),
-                ("ECON-REPORT",   "Fed Rate Decision Analysis",  "David Park",      "2:00", "⏳ Editing","4TH"),
-                ("SPORTS-WIN",    "Titans Win Playoff Opener",   "Sports Desk",     "1:30", "✅ Ready", "5TH"),
-                ("TRAFFIC-ISSUE", "I-24 Closure Update",         "Traffic Desk",    "0:45", "✅ Ready", "KICKER"),
-            ]
-            for slug, title, reporter, dur, status, pos in rundown:
-                status_color = "#22c55e" if "Ready" in status else "#f59e0b"
-                pos_color = "#ef4444" if pos == "LEAD" else "#6366f1"
-                st.markdown(f"""
-                <div style="display:flex;gap:10px;align-items:center;padding:7px 12px;
-                background:#1e293b;border-radius:6px;margin:4px 0;">
-                <span style="background:{pos_color};color:#fff;padding:2px 8px;border-radius:4px;
-                font-size:11px;font-weight:700;min-width:58px;text-align:center;">{pos}</span>
-                <span style="color:#94a3b8;font-family:monospace;font-size:12px;min-width:90px;">{slug}</span>
-                <span style="color:#e2e8f0;flex:1;">{title}</span>
-                <span style="color:#94a3b8;font-size:12px;min-width:55px;">{reporter.split()[0]}</span>
-                <span style="color:#64748b;min-width:35px;">{dur}</span>
-                <span style="color:{status_color};font-size:13px;">{status}</span></div>""",
-                unsafe_allow_html=True)
 
         st.divider()
 
@@ -3826,503 +3700,6 @@ elif page == "🌿 Carbon Intelligence":
                 "carbon_data.json", "application/json", use_container_width=True, key="dl_carbon_page_json")
 
 
-# ======================================================================
-# PHASE 1 PIPELINE AGENTS (Broadcast Pipeline Gaps)
-# ======================================================================
-
-elif page == "📥 Ingest + Transcode":
-    st.title("📥 Ingest + Transcode Agent")
-    st.caption("Broadcast Pipeline — Automated Media Ingest | Multi-Profile Transcoding | MAM Integration | AWS MediaConvert")
-
-    with st.expander("**Agent Capabilities** — Click to expand", expanded=False):
-        col1, col2, col3, col4 = st.columns(4)
-        with col1:
-            st.markdown("""
-            **Format Support**
-            - MXF (XDCAM, P2, IMX)
-            - ProRes 4444 / 422 HQ
-            - H.264 / H.265 HEVC
-            - DPX, DNxHD, RAW
-            """)
-        with col2:
-            st.markdown("""
-            **Output Profiles**
-            - Broadcast HD (MXF 50 Mbps)
-            - Broadcast 4K (MXF 150 Mbps)
-            - OTT HLS (fMP4 ABR)
-            - Proxy Edit (ProRes 422)
-            - Web MP4 + Thumbnail
-            """)
-        with col3:
-            st.markdown("""
-            **Pipeline Steps**
-            - NMOS IS-04 discovery
-            - Checksum validation (MD5/SHA256)
-            - Colour space conversion
-            - LUFS / loudness normalise
-            - MXF structural validation
-            """)
-        with col4:
-            st.markdown("""
-            **Integrations**
-            - AWS MediaConvert (cloud)
-            - FFmpeg (on-prem)
-            - Harmonic Polaris MAM
-            - Avid Interplay
-            - Frame.io review link
-            """)
-
-    st.divider()
-
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        st.markdown(f'<span class="realtime-indicator"></span> **Pipeline Active** — {datetime.now().strftime("%I:%M:%S %p")}', unsafe_allow_html=True)
-    with col2:
-        ingest_run = st.button("▶️ Simulate Ingest", type="primary", use_container_width=True)
-
-    if ingest_run:
-        steps = [
-            {"icon": "📡", "text": "NMOS IS-04 discovery — locating source device"},
-            {"icon": "✅", "text": "File validation — MD5 checksum OK (42.7 GB)"},
-            {"icon": "🎨", "text": "Colour space: BT.709 → BT.2020 HDR conversion"},
-            {"icon": "🔊", "text": "Loudness normalization — −22.8 LUFS (EBU R128)"},
-            {"icon": "🎬", "text": "Transcoding: Broadcast HD (MXF H.264 50 Mbps)"},
-            {"icon": "📺", "text": "Transcoding: OTT HLS (fMP4 8 Mbps ABR)"},
-            {"icon": "🗂️", "text": "Transcoding: Proxy Edit (ProRes 422 HQ)"},
-            {"icon": "🖼️", "text": "Generating thumbnails (10 keyframes)"},
-            {"icon": "🏷️", "text": "Writing MXF metadata + archiving to MAM"},
-        ]
-        container = st.container()
-        simulate_realtime_processing(steps, container)
-
-    # Current jobs table
-    st.subheader("Ingest Queue — Today")
-    jobs_data = [
-        {"ID": "INJ-001", "File": "wkrn_morningnews_raw.mxf",    "Duration": "4:02:15", "Size": "42.7 GB", "Status": "✅ Complete", "Outputs": 4, "Time": "7m 24s"},
-        {"ID": "INJ-002", "File": "wkrn_sportshighlight_raw.mp4", "Duration": "0:45:30", "Size": "8.2 GB",  "Status": "✅ Complete", "Outputs": 3, "Time": "3m 11s"},
-        {"ID": "INJ-003", "File": "wkrn_weather_segment_raw.mxf", "Duration": "0:12:00", "Size": "2.1 GB",  "Status": "⏳ Running",  "Outputs": 2, "Time": "1m 48s..."},
-    ]
-    for j in jobs_data:
-        status_col = "#22c55e" if "Complete" in j["Status"] else "#f59e0b"
-        st.markdown(f"""
-        <div style="background:#1e293b;padding:12px 16px;border-radius:8px;margin:6px 0;
-        display:flex;gap:16px;align-items:center;border-left:3px solid #6366f1;">
-        <span style="color:#6366f1;font-family:monospace;font-weight:700;min-width:70px;">{j['ID']}</span>
-        <span style="color:#e2e8f0;flex:2;">{j['File']}</span>
-        <span style="color:#94a3b8;min-width:60px;">{j['Duration']}</span>
-        <span style="color:#94a3b8;min-width:60px;">{j['Size']}</span>
-        <span style="color:#94a3b8;min-width:55px;">{j['Outputs']} outputs</span>
-        <span style="color:#94a3b8;min-width:70px;">{j['Time']}</span>
-        <span style="color:{status_col};">{j['Status']}</span>
-        </div>""", unsafe_allow_html=True)
-
-    st.divider()
-    st.subheader("Output Profile Specifications")
-    profiles = [
-        ("Broadcast HD",   "MXF",   "H.264",  "50 Mbps",  "1920×1080i 50",  "PCM 48kHz", "NLE + Playout"),
-        ("Broadcast 4K",   "MXF",   "H.265",  "150 Mbps", "3840×2160p 50",  "PCM 48kHz", "4K Playout"),
-        ("OTT HLS",        "fMP4",  "H.264",  "8 Mbps",   "1080p + ABR",    "AAC 192k",  "Streaming CDN"),
-        ("Proxy Edit",     "MOV",   "ProRes", "45 Mbps",  "1920×1080p 25",  "PCM 48kHz", "NLE Editing"),
-        ("Web MP4",        "MP4",   "H.264",  "4 Mbps",   "1280×720p 25",   "AAC 128k",  "Web / Social"),
-        ("Thumbnail",      "JPEG",  "—",      "N/A",      "1920×1080",      "—",          "Archive / CMS"),
-    ]
-    cols_h = st.columns([2, 1, 1, 1, 2, 1, 2])
-    for h, label in zip(cols_h, ["Profile", "Container", "Codec", "Bitrate", "Resolution", "Audio", "Use Case"]):
-        h.markdown(f"**{label}**")
-    for p in profiles:
-        cols_r = st.columns([2, 1, 1, 1, 2, 1, 2])
-        for col, val in zip(cols_r, p):
-            col.caption(val)
-
-
-elif page == "📡 Signal Quality":
-    st.title("📡 Signal Quality Agent")
-    st.caption("EBU R128 / ATSC A/85 Loudness | Black & Freeze Frame Detection | CEA-608/708 Caption Monitoring | 24/7 NOC Alerts")
-
-    with st.expander("**Agent Capabilities** — Click to expand", expanded=False):
-        col1, col2, col3, col4 = st.columns(4)
-        with col1:
-            st.markdown("""
-            **Audio (EBU R128)**
-            - Integrated loudness (I)
-            - True peak (TP) limiter
-            - Loudness range (LRA)
-            - Momentary / Short-term
-            - CALM Act compliance
-            """)
-        with col2:
-            st.markdown("""
-            **Video Analysis**
-            - Black frame detection
-            - Freeze frame detection
-            - Bitrate monitoring
-            - Motion vector analysis
-            - HDR peak luminance
-            """)
-        with col3:
-            st.markdown("""
-            **Caption QC**
-            - CEA-608 / CEA-708
-            - Sync drift alerting
-            - Missing caption detect
-            - Language track count
-            - EIA-608 line 21 verify
-            """)
-        with col4:
-            st.markdown("""
-            **Alerting**
-            - NOC Slack/Teams alert
-            - Auto-hold on critical
-            - Email escalation
-            - Dashboard notification
-            - Log to compliance DB
-            """)
-
-    st.divider()
-
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        st.markdown(f'<span class="realtime-indicator"></span> **Live Monitoring** — {datetime.now().strftime("%I:%M:%S %p")}', unsafe_allow_html=True)
-    with col2:
-        if st.button("🔄 Re-check Now", use_container_width=True):
-            st.rerun()
-
-    # Live metrics
-    st.subheader("WKRN-HD — Current Signal Status")
-    st.success("✅ ALL CLEAR — Signal within broadcast spec")
-
-    col1, col2, col3, col4, col5, col6 = st.columns(6)
-    col1.metric("Integrated Loudness", "−22.8 LUFS", "✅ −23 ±1")
-    col2.metric("True Peak", "−1.4 dBTP", "✅ < −1.0")
-    col3.metric("LRA", "8.2 LU", "✅ < 18 LU")
-    col4.metric("Black Frames", "0", "✅ Clear")
-    col5.metric("Freeze Frames", "0", "✅ Clear")
-    col6.metric("Caption Sync", "±12ms", "✅ < 500ms")
-
-    # Loudness timeline
-    st.subheader("Loudness Timeline (Last 2 Hours)")
-    loudness_samples = [-22.1, -23.4, -22.8, -23.1, -22.5, -23.8, -22.9, -23.2, -22.6, -23.0,
-                        -15.2, -22.8, -23.1, -22.7, -23.3, -22.9, -23.0, -22.4, -23.1, -22.8]
-    import json as _sq_json
-    st.line_chart({"Loudness (LUFS)": loudness_samples, "Target (−23)": [-23.0] * 20, "Upper Limit (−22)": [-22.0] * 20})
-    st.caption("⚠️ Spike at sample 11 = commercial segment loudness violation (auto-logged)")
-
-    # Alert history
-    st.subheader("Alert History — Last 24 Hours")
-    alerts_sq = [
-        ("09:23:45", "⚠️ WARNING",  "WKRN-HD", "Loudness",     "Commercial +8 LUFS above program",     "Logged to compliance DB"),
-        ("08:15:12", "🔴 CRITICAL", "WKRN-SD", "Black Frame",  "3.2s black frame during program break", "NOC alerted via Slack"),
-        ("06:01:00", "ℹ️ INFO",     "WKRN-HD", "Caption",      "Caption track restarted after reboot",  "Auto-recovered"),
-    ]
-    for ts, sev, ch, typ, msg, action in alerts_sq:
-        sev_color = "#ef4444" if "CRITICAL" in sev else "#f59e0b" if "WARNING" in sev else "#3b82f6"
-        st.markdown(f"""
-        <div style="background:rgba(30,35,41,1);padding:10px 14px;border-radius:8px;margin:5px 0;
-        border-left:3px solid {sev_color};display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-        <span style="color:#94a3b8;font-family:monospace;min-width:65px;">{ts}</span>
-        <span style="font-weight:700;color:{sev_color};min-width:90px;">{sev}</span>
-        <span style="color:#6366f1;min-width:70px;">{ch}</span>
-        <span style="color:#94a3b8;min-width:75px;">[{typ}]</span>
-        <span style="color:#e2e8f0;flex:1;">{msg}</span>
-        <span style="color:#22c55e;font-size:12px;">{action}</span>
-        </div>""", unsafe_allow_html=True)
-
-
-elif page == "📋 Playout Scheduling":
-    st.title("📋 Playout Scheduling Agent")
-    st.caption("Harmonic Polaris / GV Maestro Integration | 24h Rundown | SCTE-35 Ad Cue Insertion | Auto-Fill on Gaps")
-
-    with st.expander("**Agent Capabilities** — Click to expand", expanded=False):
-        col1, col2, col3, col4 = st.columns(4)
-        with col1:
-            st.markdown("""
-            **Schedule Management**
-            - 24h rundown import/export
-            - AS-11 / MXF playlist
-            - Secondary event triggers
-            - Pre-roll / post-roll
-            - Filler detection + fill
-            """)
-        with col2:
-            st.markdown("""
-            **SCTE-35 Cuing**
-            - Ad break insertion points
-            - Splice_insert commands
-            - Segmentation descriptors
-            - Out/In timing precision
-            - DAI compatibility
-            """)
-        with col3:
-            st.markdown("""
-            **Automation Systems**
-            - Harmonic Polaris REST API
-            - GV Maestro integration
-            - Ross Overdrive support
-            - Vizrt overlay triggers
-            - Graphics event sync
-            """)
-        with col4:
-            st.markdown("""
-            **Intelligence**
-            - Gap detection + alert
-            - Conflict resolution
-            - Rating compliance check
-            - CPI / rights window verify
-            - On-air confidence monitor
-            """)
-
-    st.divider()
-
-    col1, col2, col3 = st.columns([3, 1, 1])
-    with col1:
-        st.markdown(f'<span class="realtime-indicator"></span> **Live Schedule** — {datetime.now().strftime("%I:%M:%S %p")}', unsafe_allow_html=True)
-    with col2:
-        if st.button("🔄 Sync from Polaris", use_container_width=True):
-            with st.spinner("Syncing from Harmonic Polaris..."):
-                time.sleep(1.5)
-            st.success("Schedule synced!")
-    with col3:
-        if st.button("⚡ Detect Gaps", use_container_width=True):
-            st.info("No gaps detected in next 6 hours")
-
-    # Today's schedule
-    st.subheader("Today's Broadcast Schedule")
-    schedule_full = [
-        ("06:00", "09:00", "WKRN Morning News LIVE",   "news_live",  "aired",     False),
-        ("09:00", "10:00", "Today Show (NBC Feed)",    "network",    "aired",     False),
-        ("10:00", "11:00", "The Price Is Right",       "syndicated", "aired",     False),
-        ("11:00", "12:00", "The Young & the Restless", "syndicated", "aired",     False),
-        ("12:00", "12:30", "WKRN News at Noon",        "news_live",  "aired",     False),
-        ("12:30", "13:00", "Let's Make a Deal",        "syndicated", "aired",     False),
-        ("13:00", "15:00", "Days of Our Lives",        "network",    "aired",     False),
-        ("15:00", "16:00", "The Kelly Clarkson Show",  "syndicated", "airing",    True),
-        ("16:00", "17:00", "Jeopardy!",                "syndicated", "upcoming",  True),
-        ("17:00", "17:30", "WKRN News at 5",           "news_live",  "upcoming",  True),
-        ("18:00", "18:30", "WKRN News at 6",           "news_live",  "upcoming",  True),
-        ("18:30", "19:30", "NBC Nightly News",         "network",    "upcoming",  True),
-        ("19:30", "22:00", "NBC Primetime",             "network",    "upcoming",  True),
-        ("22:00", "22:30", "WKRN News at 10",          "news_live",  "upcoming",  True),
-        ("22:30", "23:30", "The Tonight Show",         "network",    "upcoming",  True),
-        ("23:30", "00:30", "Late Night",               "network",    "upcoming",  True),
-    ]
-    type_colors = {"news_live": "#6366f1", "network": "#0891b2", "syndicated": "#059669"}
-    for s, e, title, t, status, scte in schedule_full:
-        tc = type_colors.get(t, "#475569")
-        status_icon = "🟢" if status == "airing" else "✅" if status == "aired" else "🔵"
-        scte_badge = '<span style="background:#7c3aed;color:#fff;font-size:10px;padding:1px 5px;border-radius:3px;margin-left:6px;">SCTE-35</span>' if scte and "news" in t else ""
-        st.markdown(f"""
-        <div style="display:flex;gap:12px;align-items:center;padding:7px 14px;
-        background:#1e293b;border-radius:6px;margin:3px 0;border-left:3px solid {tc};">
-        <span style="color:#94a3b8;font-family:monospace;min-width:120px;">{s} – {e}</span>
-        <span style="color:#e2e8f0;flex:1;">{title}{scte_badge}</span>
-        <span style="color:#64748b;font-size:12px;min-width:80px;">{t.replace('_',' ')}</span>
-        <span style="font-size:14px;">{status_icon}</span>
-        </div>""", unsafe_allow_html=True)
-
-    st.caption("🟣 SCTE-35 = ad break cue points injected | 🟢 On-Air | ✅ Aired | 🔵 Scheduled")
-
-
-elif page == "🌐 OTT Distribution":
-    st.title("🌐 OTT Distribution Agent")
-    st.caption("HLS / DASH Packaging | ABR Ladder | CloudFront / Akamai CDN | DRM | Live + VOD Origin")
-
-    with st.expander("**Agent Capabilities** — Click to expand", expanded=False):
-        col1, col2, col3, col4 = st.columns(4)
-        with col1:
-            st.markdown("""
-            **Stream Packaging**
-            - HLS (TS + fMP4 segments)
-            - DASH (MPEG-DASH MPD)
-            - CMAF (single-file)
-            - Low-latency HLS (LL-HLS)
-            - 7-rung ABR ladder
-            """)
-        with col2:
-            st.markdown("""
-            **CDN Management**
-            - AWS CloudFront
-            - Akamai Media Delivery
-            - Fastly Streaming
-            - Cache purge on event
-            - Geographic restriction
-            """)
-        with col3:
-            st.markdown("""
-            **DRM & Security**
-            - Widevine (Android/Web)
-            - FairPlay (Apple)
-            - PlayReady (Windows)
-            - Token-based auth
-            - Watermarking (NexGuard)
-            """)
-        with col4:
-            st.markdown("""
-            **Analytics**
-            - Real-time viewer count
-            - Bitrate distribution
-            - Buffer ratio per rung
-            - Geographic heatmap
-            - CDN cost per viewer
-            """)
-
-    st.divider()
-
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        st.markdown(f'<span class="realtime-indicator"></span> **Live OTT Status** — {datetime.now().strftime("%I:%M:%S %p")}', unsafe_allow_html=True)
-    with col2:
-        if st.button("🔄 Refresh CDN", use_container_width=True):
-            st.rerun()
-
-    # CDN health
-    col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Total Viewers", "147,234", "+2.3K/min")
-    col2.metric("CDN Uptime", "99.98%", "CloudFront + Akamai")
-    col3.metric("Avg Bitrate Served", "4.8 Mbps", "+0.3 Mbps vs yesterday")
-    col4.metric("Buffer Ratio", "0.12%", "✅ < 0.5% target")
-
-    # ABR ladder
-    st.subheader("ABR Ladder — Live Viewer Distribution")
-    abr_ladder = [
-        ("4K HDR",    "25 Mbps",  "3840×2160", 12847,  0.9,  "✅"),
-        ("1080p60",   "8 Mbps",   "1920×1080", 89234,  0.7,  "✅"),
-        ("1080p",     "5 Mbps",   "1920×1080", 21043,  0.5,  "✅"),
-        ("720p",      "3 Mbps",   "1280×720",  13892,  0.3,  "✅"),
-        ("480p",      "1.5 Mbps", "854×480",   7218,   0.2,  "✅"),
-        ("360p",      "750 kbps", "640×360",   2941,   0.15, "✅"),
-        ("Audio Only","128 kbps", "—",          59,    0.02, "✅"),
-    ]
-    st.markdown("| Profile | Bitrate | Resolution | Viewers | Buffer Ratio | Status |")
-    st.markdown("|---------|---------|------------|---------|--------------|--------|")
-    for p, br, res, viewers, buf, status in abr_ladder:
-        buf_color = "🟢" if buf < 0.3 else "🟡"
-        st.markdown(f"| **{p}** | {br} | {res} | {viewers:,} | {buf_color} {buf:.2f}% | {status} |")
-
-    # CDN pops
-    st.subheader("CDN Edge Locations — Request Distribution")
-    geo = [("US East",  "43%"), ("US West", "28%"), ("Europe", "16%"), ("APAC", "8%"), ("Other", "5%")]
-    cols_geo = st.columns(5)
-    for col, (region, pct) in zip(cols_geo, geo):
-        col.metric(region, pct)
-
-
-elif page == "📰 Newsroom Integration":
-    st.title("📰 Newsroom Integration Agent")
-    st.caption("iNews / ENPS MOS Sync | AP / Reuters / AFP Wire | Story Status Tracking | Urgent Flag Detection | AI Rundown Assist")
-
-    with st.expander("**Agent Capabilities** — Click to expand", expanded=False):
-        col1, col2, col3, col4 = st.columns(4)
-        with col1:
-            st.markdown("""
-            **MOS Integration**
-            - iNews REST + MOS 2.8
-            - ENPS ActiveX bridge
-            - Rundown sync (3-min)
-            - Story status tracking
-            - Script version control
-            """)
-        with col2:
-            st.markdown("""
-            **Wire Ingestion**
-            - AP (Associated Press)
-            - Reuters News Agency
-            - AFP (Agence France-Presse)
-            - CNN Wire service
-            - AI priority scoring
-            """)
-        with col3:
-            st.markdown("""
-            **AI Assist**
-            - Urgent flag detection
-            - Story duplicate filter
-            - Auto-topic tagging
-            - Source credibility score
-            - Suggested coverage angle
-            """)
-        with col4:
-            st.markdown("""
-            **Alerting**
-            - Breaking wire → Slack
-            - Rundown gap alert
-            - Story conflict detect
-            - Script approval flow
-            - Live show countdown
-            """)
-
-    st.divider()
-
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        st.markdown(f'<span class="realtime-indicator"></span> **iNews Live** — Synced {datetime.now().strftime("%I:%M:%S %p")}', unsafe_allow_html=True)
-    with col2:
-        if st.button("🔄 Sync iNews", use_container_width=True):
-            with st.spinner("Connecting to iNews MOS..."):
-                time.sleep(1.2)
-            st.success("Rundown synced (8 stories)")
-
-    col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Stories in Rundown", "8", "6 ready, 2 editing")
-    col2.metric("Wire Stories Today", "247", "+14 in last hour")
-    col3.metric("Urgent Flags", "2", "AI-detected")
-    col4.metric("MOS Connection", "✅ Live", "iNews 8.6.1")
-
-    # Rundown
-    st.subheader("Live Rundown — WKRN News at 6 (18:00)")
-    rundown_full = [
-        ("FIRE-DOWNTOWN",   "Warehouse Fire Nashville",     "Jake Thompson",   "2:30", "✅ Ready",    "LEAD",   "LIVE PKG"),
-        ("COUNCIL-VOTE",    "City Council Budget Vote",     "Maria Sanchez",   "1:45", "✅ Ready",    "2ND",    "PKG"),
-        ("WEATHER-STORM",   "Severe Storm Watch Tonight",   "Weather Team",    "1:15", "✅ Ready",    "3RD",    "LIVE VOSOT"),
-        ("AI-REGULATION",   "Senate AI Bill Vote",          "David Park",      "2:00", "⏳ Editing",  "4TH",    "PKG"),
-        ("TITANS-WIN",      "Titans Win Playoff Opener",    "Sports Desk",     "1:30", "✅ Ready",    "5TH",    "PKG"),
-        ("FED-RATE",        "Fed Rate Decision Impact",     "Business Desk",   "1:00", "✅ Ready",    "6TH",    "VOSOT"),
-        ("TRAFFIC-I24",     "I-24 Closure Update",          "Traffic Cam",     "0:45", "✅ Ready",    "KICKER", "VO"),
-        ("WEATHER-TAG",     "7-Day Forecast",               "Meteorologist",   "0:30", "✅ Ready",    "TAG",    "LIVE"),
-    ]
-    pos_colors = {"LEAD": "#ef4444", "2ND": "#f59e0b", "3RD": "#6366f1", "4TH": "#6366f1",
-                  "5TH": "#475569", "6TH": "#475569", "KICKER": "#059669", "TAG": "#059669"}
-    for slug, title, reporter, dur, status, pos, story_type in rundown_full:
-        pc = pos_colors.get(pos, "#475569")
-        sc = "#22c55e" if "Ready" in status else "#f59e0b"
-        st.markdown(f"""
-        <div style="display:flex;gap:10px;align-items:center;padding:8px 14px;
-        background:#1e293b;border-radius:6px;margin:4px 0;">
-        <span style="background:{pc};color:#fff;padding:2px 8px;border-radius:4px;
-        font-size:11px;font-weight:700;min-width:58px;text-align:center;">{pos}</span>
-        <span style="color:#94a3b8;font-family:monospace;font-size:11px;min-width:105px;">{slug}</span>
-        <span style="color:#e2e8f0;flex:2;font-weight:500;">{title}</span>
-        <span style="color:#94a3b8;min-width:85px;">{reporter.split()[0]}</span>
-        <span style="background:#334155;color:#94a3b8;padding:2px 7px;border-radius:4px;
-        font-size:11px;min-width:75px;text-align:center;">{story_type}</span>
-        <span style="color:#94a3b8;min-width:35px;">{dur}</span>
-        <span style="color:{sc};">{status}</span>
-        </div>""", unsafe_allow_html=True)
-
-    # Wire stories
-    st.divider()
-    st.subheader("Breaking Wire Stories — Last Hour")
-    wires = [
-        ("🔴 URGENT", "AP",      "Senate Passes AI Safety Regulation Bill 67-33",           "2 min ago",  "Politics"),
-        ("🔴 URGENT", "Reuters", "Gaza Ceasefire Deal Signed — Hostages to be Released",    "8 min ago",  "World"),
-        ("⚠️ HIGH",   "AFP",     "Magnitude 6.1 Earthquake Near Tokyo — No Tsunami Warning","14 min ago", "World"),
-        ("ℹ️ NORMAL", "AP",      "Fed Chair: 'Data-dependent' Rate Path for Q2 2026",       "22 min ago", "Finance"),
-        ("ℹ️ NORMAL", "Reuters", "SpaceX Starship Test Flight 9 Scheduled for Next Week",   "31 min ago", "Tech"),
-    ]
-    for priority, source, headline, timing, category in wires:
-        p_color = "#ef4444" if "URGENT" in priority else "#f59e0b" if "HIGH" in priority else "#3b82f6"
-        st.markdown(f"""
-        <div style="background:#0f172a;padding:10px 14px;border-radius:8px;margin:5px 0;
-        border-left:3px solid {p_color};">
-        <div style="display:flex;gap:10px;align-items:center;">
-        <span style="font-weight:700;color:{p_color};min-width:80px;">{priority}</span>
-        <span style="background:#1e293b;color:#6366f1;padding:2px 7px;border-radius:4px;
-        font-size:11px;font-weight:700;">{source}</span>
-        <span style="color:#e2e8f0;flex:1;font-weight:500;">{headline}</span>
-        <span style="color:#64748b;font-size:12px;">{timing}</span>
-        <span style="color:#94a3b8;font-size:12px;">{category}</span>
-        </div>
-        </div>""", unsafe_allow_html=True)
-
-
 elif page == "Integration Showcase":
     st.title("Integration Showcase")
     st.caption("Enterprise-Grade Connectivity | Industry-Standard Protocols | Production-Ready APIs")
@@ -4786,11 +4163,6 @@ elif page == "🔌 Workspace Integration":
             ("🎥 AI Production Director","🟢","2ms"),
             ("🛡️ Brand Safety",         "🟢", "2ms"),
             ("🌿 Carbon Intelligence",  "🟢", "3ms"),
-            ("📥 Ingest + Transcode",   "🟢", "6ms"),
-            ("📡 Signal Quality",       "🟢", "1ms"),
-            ("📋 Playout Scheduling",   "🟢", "2ms"),
-            ("🌐 OTT Distribution",     "🟢", "4ms"),
-            ("📰 Newsroom Integration", "🟢", "3ms"),
         ]
         rows = "".join(
             f'<div class="sim-slack-status-row">'
@@ -4844,9 +4216,7 @@ elif page == "🔌 Workspace Integration":
     <tr><td style="padding:3px 8px;">⚖️ Compliance Agent</td><td><span class="tbadge-ok">Online</span></td><td style="color:#616161;">1ms</td></tr>
     <tr><td style="padding:3px 8px;">🕵️ Deepfake Detection</td><td><span class="tbadge-ok">Online</span></td><td style="color:#616161;">5ms</td></tr>
     <tr><td style="padding:3px 8px;">📈 Trending Agent</td><td><span class="tbadge-ok">Online</span></td><td style="color:#616161;">1ms</td></tr>
-    <tr><td style="padding:3px 8px;">📡 Signal Quality</td><td><span class="tbadge-ok">Online</span></td><td style="color:#616161;">1ms</td></tr>
-    <tr><td style="padding:3px 8px;">📰 Newsroom Integration</td><td><span class="tbadge-ok">Online</span></td><td style="color:#616161;">3ms</td></tr>
-    <tr><td style="padding:3px 8px;color:#9e9e9e;" colspan="3">+ 13 more agents — all online</td></tr>
+    <tr><td style="padding:3px 8px;color:#9e9e9e;" colspan="3">+ 8 more agents — all online</td></tr>
   </table>
 </div>
 <div class="sim-teams-card-section">
@@ -5036,60 +4406,6 @@ elif page == "🔌 Workspace Integration":
   <span class="sim-teams-btn-sec">🔗 C2PA Certificate</span>
 </div>""")
 
-    def _slack_signal():
-        return _sc("""
-<div class="sim-slack-card-title">📡 Signal Quality — Live Broadcast Monitor</div>
-<div class="sim-slack-card-section">
-  <span class="sbadge-ok">✅ ALL CLEAR</span>
-  <span class="sim-slack-card-muted" style="margin-left:10px;">Channel: WKRN-HD &nbsp;|&nbsp; Checked 14 seconds ago</span>
-</div>
-<div class="sim-slack-card-section">
-  <div class="sim-slack-card-muted" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Audio — EBU R128</div>
-  <div class="sim-slack-status-row"><div class="sim-slack-dot-g"></div><div class="sim-slack-lbl">Integrated loudness</div><div class="sim-slack-val">−22.8 LUFS &nbsp;✅ (target −23 ±1)</div></div>
-  <div class="sim-slack-status-row"><div class="sim-slack-dot-g"></div><div class="sim-slack-lbl">True peak</div><div class="sim-slack-val">−1.4 dBTP &nbsp;✅ (&lt; −1.0 limit)</div></div>
-  <div class="sim-slack-status-row"><div class="sim-slack-dot-g"></div><div class="sim-slack-lbl">Loudness range (LRA)</div><div class="sim-slack-val">8.2 LU &nbsp;✅ (&lt; 18 LU)</div></div>
-</div>
-<div class="sim-slack-card-section">
-  <div class="sim-slack-card-muted" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Video</div>
-  <div class="sim-slack-status-row"><div class="sim-slack-dot-g"></div><div class="sim-slack-lbl">Black frames</div><div class="sim-slack-val">0 detected &nbsp;✅</div></div>
-  <div class="sim-slack-status-row"><div class="sim-slack-dot-g"></div><div class="sim-slack-lbl">Freeze frames</div><div class="sim-slack-val">0 detected &nbsp;✅</div></div>
-  <div class="sim-slack-status-row"><div class="sim-slack-dot-g"></div><div class="sim-slack-lbl">Bitrate</div><div class="sim-slack-val">18.2 Mbps &nbsp;✅ (stable)</div></div>
-</div>
-<div class="sim-slack-card-section">
-  <div class="sim-slack-card-muted" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Captions (CEA-608)</div>
-  <div class="sim-slack-status-row"><div class="sim-slack-dot-g"></div><div class="sim-slack-lbl">Present</div><div class="sim-slack-val">Yes &nbsp;✅</div></div>
-  <div class="sim-slack-status-row"><div class="sim-slack-dot-g"></div><div class="sim-slack-lbl">Sync drift</div><div class="sim-slack-val">±12ms &nbsp;✅ (&lt; 500ms limit)</div></div>
-</div>
-<div style="margin-top:8px;">
-  <span class="sim-slack-btn primary">🔄 Re-check Now</span>
-  <span class="sim-slack-btn">📊 History</span>
-  <span class="sim-slack-btn">🔔 Configure Thresholds</span>
-</div>""")
-
-    def _teams_signal():
-        return _tc("""
-<div class="sim-teams-card-title">📡 Signal Quality — WKRN-HD</div>
-<div class="sim-teams-card-section">
-  <span class="tbadge-ok">✅ ALL CLEAR</span>
-  <span style="color:#616161;font-size:12px;margin-left:8px;">Checked 14s ago</span>
-</div>
-<div class="sim-teams-card-section">
-  <table style="width:100%;border-collapse:collapse;font-size:13px;">
-    <tr><td style="padding:3px 8px;color:#252424;font-weight:600;">Audio (EBU R128)</td><td></td></tr>
-    <tr><td style="padding:2px 16px;color:#616161;">Integrated loudness</td><td style="color:#107c10;font-weight:600;">−22.8 LUFS ✅</td></tr>
-    <tr><td style="padding:2px 16px;color:#616161;">True peak</td><td style="color:#107c10;font-weight:600;">−1.4 dBTP ✅</td></tr>
-    <tr><td style="padding:3px 8px;color:#252424;font-weight:600;">Video</td><td></td></tr>
-    <tr><td style="padding:2px 16px;color:#616161;">Black frames</td><td style="color:#107c10;font-weight:600;">0 detected ✅</td></tr>
-    <tr><td style="padding:2px 16px;color:#616161;">Bitrate</td><td style="color:#107c10;font-weight:600;">18.2 Mbps ✅</td></tr>
-    <tr><td style="padding:3px 8px;color:#252424;font-weight:600;">Captions (CEA-608)</td><td></td></tr>
-    <tr><td style="padding:2px 16px;color:#616161;">Sync drift</td><td style="color:#107c10;font-weight:600;">±12ms ✅</td></tr>
-  </table>
-</div>
-<div>
-  <span class="sim-teams-btn">🔄 Re-check</span>
-  <span class="sim-teams-btn-sec">📊 History</span>
-</div>""")
-
     def _slack_caption():
         captions_preview = [
             ("00:00:00", "00:00:04", "Sarah Mitchell (Anchor)", "Good morning, I'm Sarah Mitchell, and this is WKRN Morning News.", "99%"),
@@ -5256,7 +4572,6 @@ elif page == "🔌 Workspace Integration":
         agent_guess = "Compliance Agent" if any(w in text.lower() for w in ["compliance","fcc","violation"]) else \
                       "Deepfake Detection" if any(w in text.lower() for w in ["deepfake","fake","synthetic"]) else \
                       "Trending Agent" if any(w in text.lower() for w in ["trend","break","news"]) else \
-                      "Signal Quality Agent" if any(w in text.lower() for w in ["signal","loud","ebu"]) else \
                       "Compliance Agent"
         import random as _r; rule_id = f"hope_{_r.randint(100,999)}"
         return _sc(f"""
@@ -5302,7 +4617,6 @@ elif page == "🔌 Workspace Integration":
             ("hope_042", "Compliance Agent",    "ACTIVE",   "HIGH",     "Whenever profanity detected during live broadcast",         "2026-03-04 09:15", "3"),
             ("hope_071", "Deepfake Detection",  "ACTIVE",   "CRITICAL", "Whenever synthetic media confidence > 80%",                 "2026-03-04 08:00", "1"),
             ("hope_103", "Trending Agent",      "ACTIVE",   "NORMAL",   "Every morning at 06:00 — send trending digest",             "2026-03-04 06:00", "7"),
-            ("hope_118", "Signal Quality",      "ACTIVE",   "HIGH",     "Whenever loudness deviation > ±2 LUFS from target",         "2026-03-03 22:45", "5"),
             ("hope_139", "Rights Agent",        "INACTIVE", "NORMAL",   "Whenever a license expires within 7 days",                  "2026-02-28 14:00", "0"),
         ]
         rows = "".join(
@@ -5358,11 +4672,6 @@ elif page == "🔌 Workspace Integration":
       <td style="padding:3px 6px;"><span class="tbadge-info">NORMAL</span></td>
       <td style="padding:3px 6px;"><span class="tbadge-ok">ACTIVE</span></td>
       <td style="padding:3px 6px;color:#107c10;">7×</td></tr>
-    <tr><td style="padding:3px 6px;font-family:monospace;color:#6264A7;">hope_118</td>
-      <td style="padding:3px 6px;">Signal Quality</td>
-      <td style="padding:3px 6px;"><span class="tbadge-warn">HIGH</span></td>
-      <td style="padding:3px 6px;"><span class="tbadge-ok">ACTIVE</span></td>
-      <td style="padding:3px 6px;color:#107c10;">5×</td></tr>
     <tr><td style="padding:3px 6px;font-family:monospace;color:#6264A7;">hope_139</td>
       <td style="padding:3px 6px;">Rights</td>
       <td style="padding:3px 6px;"><span class="tbadge-info">NORMAL</span></td>
@@ -5522,8 +4831,6 @@ elif page == "🔌 Workspace Integration":
             return _slack_compliance() if platform == "slack" else _teams_compliance()
         elif "deepfake" in t or "fake" in t or "forensic" in t or "/miq-deepfake" in t:
             return _slack_deepfake() if platform == "slack" else _teams_deepfake()
-        elif "signal" in t or "loudness" in t or "ebu" in t or "/miq-signal" in t:
-            return _slack_signal() if platform == "slack" else _teams_signal()
         elif "caption" in t or "subtitle" in t or "/miq-caption" in t:
             return _slack_caption() if platform == "slack" else _teams_caption()
         elif "clip" in t or "viral" in t or "/miq-clip" in t:
@@ -6208,41 +5515,6 @@ elif page == "🧠 Agent Memory":
                     "Duration: 1,182 ms"
                 ),
             },
-            "📡 Alert me when signal loudness goes above −20 LUFS": {
-                "instruction": "Notify me whenever broadcast loudness exceeds −20 LUFS",
-                "agent": "signal_quality_agent",
-                "parsed": {
-                    "condition_field": "loudness_lufs",
-                    "operator": ">",
-                    "threshold": -20.0,
-                    "schedule": "IMMEDIATE",
-                    "priority": "HIGH",
-                    "action": "Alert #noc-alerts with loudness reading, timestamp, and CALM Act status",
-                },
-                "hope_id": "hope_118",
-                "runs": [
-                    {"task_id": "task_1035", "ts": "2026-03-04 08:15", "score": -23.1, "fires": False,
-                     "reason": "−23.1 LUFS < −20 threshold — compliant, no alert"},
-                    {"task_id": "task_1040", "ts": "2026-03-04 09:01", "score": -15.2, "fires": True,
-                     "reason": "−15.2 LUFS > −20 — threshold MET → alert fired"},
-                ],
-                "alert_headline": "📡 LOUDNESS VIOLATION — −15.2 LUFS",
-                "alert_level": "HIGH",
-                "alert_badge": "sbadge-warn",
-                "alert_body": (
-                    "Current loudness: <strong>−15.2 LUFS</strong> — target −23 ±1 LUFS (EBU R128)<br>"
-                    "Deviation: <strong>+7.8 LUFS</strong> above target · CALM Act non-compliance risk<br>"
-                    "Segment: commercial break 09:01 AM · Duration: 30s affected"
-                ),
-                "alert_buttons": ["🔧 Auto-Correct", "⏸️ Hold Commercial", "📋 Log Incident"],
-                "memory_entry": (
-                    "2026-03-04 09:01 | task_1040 | SUCCESS\n"
-                    "Input: Live broadcast feed — WKRN-HD1\n"
-                    "Output: loudness=-15.2 LUFS, ebu_r128=NON-COMPLIANT, deviation=+7.8 LUFS\n"
-                    "HOPE: hope_118 FIRED → slack_alert #noc-alerts\n"
-                    "Duration: 218 ms"
-                ),
-            },
         }
 
         # ── Scenario picker ────────────────────────────────────────────────
@@ -6542,19 +5814,6 @@ _Rate limit: max 10 alerts/hr_
                     },
                 ],
             },
-            "signal_quality_agent": {
-                "slug": "signal_quality_agent",
-                "tasks": 156, "success_rate": "97%", "avg_ms": 245,
-                "entries": [
-                    {
-                        "ts": "2026-03-04 09:01:30", "task_id": "task_1040", "status": "SUCCESS", "mode": "demo",
-                        "input": "Live broadcast feed — WKRN-HD1",
-                        "output": "loudness=-15.2 LUFS, ebu_r128=NON-COMPLIANT, deviation=+7.8 LUFS",
-                        "triggered": "hope_118 → [slack_alert #noc-alerts] — loudness violation",
-                        "duration_ms": 218,
-                    },
-                ],
-            },
             "caption_agent": {
                 "slug": "caption_agent",
                 "tasks": 23, "success_rate": "96%", "avg_ms": 2100,
@@ -6610,9 +5869,7 @@ _Rate limit: max 10 alerts/hr_
         st.markdown("**Inter-agent communications log** (`memory/agents/inter_agent_comms.md`)")
         inter_events = [
             ("2026-03-04 09:02", "compliance_agent → social_publishing_agent", "Hold social posts: active compliance violations"),
-            ("2026-03-04 09:01", "signal_quality_agent → playout_scheduling_agent", "Loudness alert: CALM Act non-compliance — check commercial break"),
             ("2026-03-04 08:59", "deepfake_detection_agent → compliance_agent", "Scan complete: LOW RISK — cleared for compliance check"),
-            ("2026-03-04 06:00", "trending_agent → newsroom_integration_agent", "Morning digest ready — 5 topics, push to rundown"),
         ]
         for ts, route, msg in inter_events:
             st.markdown(f"""
@@ -6658,12 +5915,7 @@ _Rate limit: max 10 alerts/hr_
                 "action": "Post top-5 trends + breaking news to #newsroom (Slack + Teams)",
                 "schedule": "DAILY 06:00", "trigger_count": 7, "last_triggered": "2026-03-04 06:00",
             },
-            {
-                "rule_id": "hope_118", "agent": "signal_quality_agent", "status": "ACTIVE", "priority": "HIGH",
-                "condition": "Whenever broadcast loudness deviates more than ±2 LUFS from −23 LUFS target",
-                "action": "Alert #noc-alerts with loudness reading + timestamp",
-                "schedule": "IMMEDIATE", "trigger_count": 5, "last_triggered": "2026-03-04 09:01",
-            },
+
             {
                 "rule_id": "hope_139", "agent": "rights_agent", "status": "INACTIVE", "priority": "NORMAL",
                 "condition": "Whenever a content license expires within the next 7 days",
@@ -6705,7 +5957,7 @@ _Rate limit: max 10 alerts/hr_
             h_c1, h_c2 = st.columns(2)
             h_agent   = h_c1.selectbox("Agent", [
                 "compliance_agent", "deepfake_detection_agent", "trending_agent",
-                "signal_quality_agent", "rights_agent", "caption_agent", "clip_agent",
+                "rights_agent", "caption_agent", "clip_agent",
                 "archive_agent", "brand_safety_agent", "carbon_intelligence_agent",
             ])
             h_priority = h_c2.selectbox("Priority", ["NORMAL", "HIGH", "CRITICAL", "LOW"])
@@ -6725,25 +5977,19 @@ _Rate limit: max 10 alerts/hr_
 
         col_f1, col_f2, col_f3 = st.columns(3)
         filter_agent  = col_f1.selectbox("Filter by Agent", ["All agents", "compliance_agent", "deepfake_detection_agent",
-                                                              "trending_agent", "signal_quality_agent", "caption_agent"])
+                                                              "trending_agent", "caption_agent"])
         filter_status = col_f2.selectbox("Filter by Status", ["All", "SUCCESS", "FAILED"])
         filter_mode   = col_f3.selectbox("Filter by Mode", ["All", "demo", "production"])
 
         all_tasks = [
             ("2026-03-04 09:02:11", "compliance_agent",           "task_1041", "SUCCESS", "demo",       1182),
-            ("2026-03-04 09:01:30", "signal_quality_agent",       "task_1040", "SUCCESS", "demo",        218),
             ("2026-03-04 09:01:00", "deepfake_detection_agent",   "task_1039", "SUCCESS", "demo",       3201),
             ("2026-03-04 08:59:00", "compliance_agent",           "task_1038", "SUCCESS", "demo",        890),
             ("2026-03-04 08:55:00", "rights_agent",               "task_1037", "SUCCESS", "demo",        445),
             ("2026-03-04 08:30:00", "social_publishing_agent",    "task_1036", "SUCCESS", "demo",        678),
             ("2026-03-04 08:00:00", "caption_agent",              "task_1010", "SUCCESS", "demo",       2145),
-            ("2026-03-04 07:45:00", "ott_distribution_agent",     "task_1009", "SUCCESS", "demo",        312),
             ("2026-03-04 07:30:00", "brand_safety_agent",         "task_1008", "SUCCESS", "demo",        891),
-            ("2026-03-04 07:00:00", "ingest_transcode_agent",     "task_1007", "SUCCESS", "demo",       4210),
-            ("2026-03-04 06:01:00", "newsroom_integration_agent", "task_1006", "SUCCESS", "demo",        523),
             ("2026-03-04 06:00:00", "trending_agent",             "task_998",  "SUCCESS", "demo",        388),
-            ("2026-03-03 23:45:00", "playout_scheduling_agent",   "task_997",  "SUCCESS", "demo",        201),
-            ("2026-03-03 22:10:00", "signal_quality_agent",       "task_996",  "FAILED",  "demo",          0),
             ("2026-03-03 21:00:00", "clip_agent",                 "task_995",  "SUCCESS", "demo",       1875),
         ]
 
@@ -6780,7 +6026,7 @@ _Rate limit: max 10 alerts/hr_
         comp_agent = st.selectbox(
             "Select agent:",
             ["compliance_agent", "deepfake_detection_agent", "trending_agent",
-             "signal_quality_agent", "caption_agent", "rights_agent"],
+             "caption_agent", "rights_agent"],
             format_func=lambda x: x.replace("_", " ").title(),
             key="comp_agent_sel"
         )
@@ -6835,17 +6081,11 @@ Direct, factual, no hedging. Risk level + fine range + recommendation.
                 "AGENTS.md": """# compliance_agent — Agent Relationships
 
 ## Sibling Agents (same tier)
-- signal_quality_agent — shares loudness/CALM Act data
 - brand_safety_agent — shares contextual risk scores
 - rights_agent — cross-checks license compliance
 
-## Upstream (feeds data to me)
-- ingest_transcode_agent — provides raw media metadata
-- signal_quality_agent — provides loudness readings
-
 ## Downstream (I feed data to)
 - social_publishing_agent — hold queue if violations active
-- newsroom_integration_agent — flag stories with compliance issues
 - archive_agent — tag archived content with violation history
 
 ## HOPE Alert Targets
@@ -6943,7 +6183,6 @@ _Snapshot: 2026-03-04 09:05:00 | Next update: 09:10:00_
 | Agent | Status | Last Run | Tasks Today | Avg Ms |
 |-------|--------|----------|-------------|--------|
 | compliance_agent | HEALTHY | 09:02:11 | 47 | 1205 |
-| signal_quality_agent | HEALTHY | 09:01:30 | 156 | 245 |
 | deepfake_detection_agent | HEALTHY | 08:59:00 | 12 | 3450 |
 | trending_agent | HEALTHY | 06:00:00 | 84 | 412 |
 | caption_agent | HEALTHY | 08:00:00 | 23 | 2100 |
