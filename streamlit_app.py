@@ -815,6 +815,8 @@ with st.sidebar:
             # System
             "Integration Showcase",
             "💬 Channel Simulator",
+            "🔗 Connector Status",
+            "🧠 Agent Memory",
         ],
         label_visibility="collapsed"
     )
@@ -5249,6 +5251,241 @@ elif page == "💬 Channel Simulator":
   <span class="sim-teams-btn-sec">📥 Request Clips</span>
 </div>""")
 
+    def _slack_hope_created(text):
+        condition = text.replace("/miq-hope", "").strip() or "Whenever deepfake confidence > 85%"
+        agent_guess = "Compliance Agent" if any(w in text.lower() for w in ["compliance","fcc","violation"]) else \
+                      "Deepfake Detection" if any(w in text.lower() for w in ["deepfake","fake","synthetic"]) else \
+                      "Trending Agent" if any(w in text.lower() for w in ["trend","break","news"]) else \
+                      "Signal Quality Agent" if any(w in text.lower() for w in ["signal","loud","ebu"]) else \
+                      "Compliance Agent"
+        import random as _r; rule_id = f"hope_{_r.randint(100,999)}"
+        return _sc(f"""
+<div class="sim-slack-card-title">✅ HOPE Rule Created — <span style="font-family:monospace;">{rule_id}</span></div>
+<div class="sim-slack-card-section">
+  <div class="sim-slack-card-text"><strong>Condition:</strong> {condition}</div>
+  <div class="sim-slack-card-muted" style="margin-top:4px;">
+    Agent: <strong>{agent_guess}</strong> &nbsp;|&nbsp; Priority: <strong>HIGH</strong> &nbsp;|&nbsp; Schedule: <strong>IMMEDIATE</strong>
+  </div>
+</div>
+<div class="sim-slack-card-section sim-slack-card-text">
+  This rule is now <span style="color:#2bac76;font-weight:700;">ACTIVE</span>. Every time {agent_guess} runs,
+  your condition is evaluated — and you'll receive an alert here when it triggers.<br><br>
+  Quiet hours apply (23:00–07:00) unless priority is CRITICAL.
+  Rate limit: max 10 alerts/hr.
+</div>
+<div style="margin-top:8px;">
+  <span class="sim-slack-btn primary">✓ Got it</span>
+  <span class="sim-slack-btn">📋 /miq-hope-list</span>
+  <span class="sim-slack-btn">✕ /miq-hope-cancel {rule_id}</span>
+</div>""")
+
+    def _teams_hope_created(text):
+        condition = text.replace("/miq-hope", "").strip() or "Whenever deepfake confidence > 85%"
+        import random as _r; rule_id = f"hope_{_r.randint(100,999)}"
+        return _tc(f"""
+<div class="sim-teams-card-title">✅ HOPE Rule Created — {rule_id}</div>
+<div class="sim-teams-card-section sim-teams-card-text">
+  <strong>Condition:</strong> {condition}<br>
+  <strong>Status:</strong> <span style="color:#107c10;font-weight:700;">ACTIVE</span> &nbsp;|&nbsp;
+  <strong>Priority:</strong> HIGH &nbsp;|&nbsp; <strong>Schedule:</strong> IMMEDIATE
+</div>
+<div class="sim-teams-card-section sim-teams-card-text" style="color:#616161;">
+  Rule stored in agent HOPE.md. Evaluated on every agent run. Alerts posted here when triggered.
+</div>
+<div>
+  <span class="sim-teams-btn">✓ Got it</span>
+  <span class="sim-teams-btn-sec">/miq-hope-list</span>
+</div>""")
+
+    def _slack_hope_list():
+        rules = [
+            ("hope_042", "Compliance Agent",    "ACTIVE",   "HIGH",     "Whenever profanity detected during live broadcast",         "2026-03-04 09:15", "3"),
+            ("hope_071", "Deepfake Detection",  "ACTIVE",   "CRITICAL", "Whenever synthetic media confidence > 80%",                 "2026-03-04 08:00", "1"),
+            ("hope_103", "Trending Agent",      "ACTIVE",   "NORMAL",   "Every morning at 06:00 — send trending digest",             "2026-03-04 06:00", "7"),
+            ("hope_118", "Signal Quality",      "ACTIVE",   "HIGH",     "Whenever loudness deviation > ±2 LUFS from target",         "2026-03-03 22:45", "5"),
+            ("hope_139", "Rights Agent",        "INACTIVE", "NORMAL",   "Whenever a license expires within 7 days",                  "2026-02-28 14:00", "0"),
+        ]
+        rows = "".join(
+            f'<div class="sim-slack-card-section" style="padding:6px 0;">'
+            f'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'
+            f'<span style="font-family:monospace;font-size:12px;color:#9c27b0;">{rid}</span>'
+            f'<span class="{"sbadge-ok" if st == "ACTIVE" else "sbadge-info"}">{st}</span>'
+            f'<span class="{"sbadge-crit" if pri == "CRITICAL" else "sbadge-warn" if pri == "HIGH" else "sbadge-info"}">{pri}</span>'
+            f'</div>'
+            f'<div class="sim-slack-card-text" style="margin-top:3px;">{cond}</div>'
+            f'<div class="sim-slack-card-muted" style="margin-top:2px;">'
+            f'{agent} &nbsp;·&nbsp; Last triggered: {last} &nbsp;·&nbsp; Fired {cnt}×'
+            f'</div>'
+            f'</div>'
+            for rid, agent, st, pri, cond, last, cnt in rules
+        )
+        return _sc(f"""
+<div class="sim-slack-card-title">📋 HOPE Standing Rules — Your Active Instructions</div>
+<div class="sim-slack-card-section sim-slack-card-muted">
+  4 active &nbsp;·&nbsp; 1 inactive &nbsp;·&nbsp; Mute hours: 23:00–07:00 &nbsp;·&nbsp; Rate limit: 10 alerts/hr
+</div>
+{rows}
+<div style="margin-top:8px;">
+  <span class="sim-slack-btn primary">➕ Add Rule</span>
+  <span class="sim-slack-btn">🔇 Mute All</span>
+  <span class="sim-slack-btn">📊 Analytics</span>
+</div>""")
+
+    def _teams_hope_list():
+        return _tc("""
+<div class="sim-teams-card-title">📋 HOPE Standing Rules</div>
+<div class="sim-teams-card-section">
+  <table style="width:100%;border-collapse:collapse;font-size:13px;">
+    <tr style="font-weight:600;color:#252424;border-bottom:1px solid #e0e0e0;">
+      <td style="padding:3px 6px;">Rule ID</td>
+      <td style="padding:3px 6px;">Agent</td>
+      <td style="padding:3px 6px;">Priority</td>
+      <td style="padding:3px 6px;">Status</td>
+      <td style="padding:3px 6px;">Fired</td>
+    </tr>
+    <tr><td style="padding:3px 6px;font-family:monospace;color:#6264A7;">hope_042</td>
+      <td style="padding:3px 6px;">Compliance</td>
+      <td style="padding:3px 6px;"><span class="tbadge-warn">HIGH</span></td>
+      <td style="padding:3px 6px;"><span class="tbadge-ok">ACTIVE</span></td>
+      <td style="padding:3px 6px;color:#107c10;">3×</td></tr>
+    <tr><td style="padding:3px 6px;font-family:monospace;color:#6264A7;">hope_071</td>
+      <td style="padding:3px 6px;">Deepfake</td>
+      <td style="padding:3px 6px;"><span class="tbadge-crit">CRITICAL</span></td>
+      <td style="padding:3px 6px;"><span class="tbadge-ok">ACTIVE</span></td>
+      <td style="padding:3px 6px;color:#107c10;">1×</td></tr>
+    <tr><td style="padding:3px 6px;font-family:monospace;color:#6264A7;">hope_103</td>
+      <td style="padding:3px 6px;">Trending</td>
+      <td style="padding:3px 6px;"><span class="tbadge-info">NORMAL</span></td>
+      <td style="padding:3px 6px;"><span class="tbadge-ok">ACTIVE</span></td>
+      <td style="padding:3px 6px;color:#107c10;">7×</td></tr>
+    <tr><td style="padding:3px 6px;font-family:monospace;color:#6264A7;">hope_118</td>
+      <td style="padding:3px 6px;">Signal Quality</td>
+      <td style="padding:3px 6px;"><span class="tbadge-warn">HIGH</span></td>
+      <td style="padding:3px 6px;"><span class="tbadge-ok">ACTIVE</span></td>
+      <td style="padding:3px 6px;color:#107c10;">5×</td></tr>
+    <tr><td style="padding:3px 6px;font-family:monospace;color:#6264A7;">hope_139</td>
+      <td style="padding:3px 6px;">Rights</td>
+      <td style="padding:3px 6px;"><span class="tbadge-info">NORMAL</span></td>
+      <td style="padding:3px 6px;"><span class="tbadge-info">INACTIVE</span></td>
+      <td style="padding:3px 6px;color:#9e9e9e;">0×</td></tr>
+  </table>
+</div>
+<div><span class="sim-teams-btn">➕ Add Rule</span><span class="sim-teams-btn-sec">📊 Analytics</span></div>""")
+
+    def _slack_hope_cancel(text):
+        import re as _re
+        m = _re.search(r'hope_\d+', text, _re.I)
+        rule_id = m.group(0) if m else "hope_042"
+        return _sc(f"""
+<div class="sim-slack-card-title">🔕 HOPE Rule Cancelled — <span style="font-family:monospace;">{rule_id}</span></div>
+<div class="sim-slack-card-section sim-slack-card-text">
+  Rule <strong>{rule_id}</strong> has been set to <span style="color:#f59e0b;font-weight:700;">INACTIVE</span>.
+  It will no longer trigger alerts. You can re-activate it any time with:
+  <span class="sim-slack-cmd-text">/miq-hope activate {rule_id}</span>
+</div>
+<div style="margin-top:8px;">
+  <span class="sim-slack-btn">↩ Undo</span>
+  <span class="sim-slack-btn">📋 /miq-hope-list</span>
+</div>""")
+
+    def _teams_hope_cancel(text):
+        import re as _re
+        m = _re.search(r'hope_\d+', text, _re.I)
+        rule_id = m.group(0) if m else "hope_042"
+        return _tc(f"""
+<div class="sim-teams-card-title">🔕 HOPE Rule Cancelled — {rule_id}</div>
+<div class="sim-teams-card-section sim-teams-card-text" style="color:#616161;">
+  Rule {rule_id} is now INACTIVE. To reactivate, send:
+  <strong>/miq-hope activate {rule_id}</strong>
+</div>
+<div><span class="sim-teams-btn-sec">↩ Undo</span></div>""")
+
+    def _slack_connectors():
+        return _sc("""
+<div class="sim-slack-card-title">🔗 Connector Status — MediaAgentIQ Gateway</div>
+<div class="sim-slack-card-section">
+  <div class="sim-slack-card-muted" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Communication Channels</div>
+  <div class="sim-slack-status-row">
+    <div class="sim-slack-dot-g"></div>
+    <div class="sim-slack-lbl">Slack (SlackChannelConnector)</div>
+    <div class="sim-slack-val">🟢 Connected &nbsp; 1ms &nbsp; <span class="sbadge-ok">DEMO</span></div>
+  </div>
+  <div class="sim-slack-status-row">
+    <div class="sim-slack-dot-g"></div>
+    <div class="sim-slack-lbl">Microsoft Teams (TeamsChannelConnector)</div>
+    <div class="sim-slack-val">🟢 Connected &nbsp; 2ms &nbsp; <span class="sbadge-ok">DEMO</span></div>
+  </div>
+</div>
+<div class="sim-slack-card-section">
+  <div class="sim-slack-card-muted" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Slack Channels Subscribed</div>
+  <div class="sim-slack-card-text">#newsroom &nbsp;·&nbsp; #noc-alerts &nbsp;·&nbsp; #compliance &nbsp;·&nbsp; #brand-safety &nbsp;·&nbsp; #social-publishing &nbsp;·&nbsp; #archive</div>
+</div>
+<div class="sim-slack-card-section">
+  <div class="sim-slack-card-muted" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Event Types Active</div>
+  <div class="sim-slack-card-text">app_mention &nbsp;·&nbsp; message.channels &nbsp;·&nbsp; slash_commands &nbsp;·&nbsp; block_actions</div>
+</div>
+<div class="sim-slack-card-section">
+  <div class="sim-slack-card-muted" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Outbound (last 5 messages)</div>
+  <div class="sim-slack-card-text" style="font-size:12px;line-height:1.8;">
+    09:02 AM → #newsroom — Compliance alert: profanity detected [Block Kit]<br>
+    09:01 AM → #noc-alerts — Signal quality warning: loudness +8 LUFS [Block Kit]<br>
+    08:59 AM → #newsroom — Deepfake scan complete: LOW RISK [Block Kit]<br>
+    08:55 AM → #compliance — Rights expiry: 3 licenses expire in 7 days [Block Kit]<br>
+    06:00 AM → #newsroom — Daily trending digest [Block Kit]
+  </div>
+</div>
+<div style="margin-top:8px;">
+  <span class="sim-slack-btn primary">⚙️ Configure</span>
+  <span class="sim-slack-btn">📜 View Logs</span>
+  <span class="sim-slack-btn">🔔 Test Alert</span>
+</div>""")
+
+    def _teams_connectors():
+        return _tc("""
+<div class="sim-teams-card-title">🔗 Connector Status — MediaAgentIQ Gateway</div>
+<div class="sim-teams-card-section">
+  <table style="width:100%;border-collapse:collapse;font-size:13px;">
+    <tr style="font-weight:600;color:#252424;border-bottom:1px solid #e0e0e0;">
+      <td style="padding:4px 8px;">Connector</td>
+      <td style="padding:4px 8px;">Status</td>
+      <td style="padding:4px 8px;">Mode</td>
+      <td style="padding:4px 8px;">Latency</td>
+    </tr>
+    <tr>
+      <td style="padding:3px 8px;">Slack (COMMS)</td>
+      <td><span class="tbadge-ok">Connected</span></td>
+      <td style="color:#616161;">Demo</td>
+      <td style="color:#107c10;">1ms</td>
+    </tr>
+    <tr>
+      <td style="padding:3px 8px;">Microsoft Teams (COMMS)</td>
+      <td><span class="tbadge-ok">Connected</span></td>
+      <td style="color:#616161;">Demo</td>
+      <td style="color:#107c10;">2ms</td>
+    </tr>
+    <tr>
+      <td style="padding:3px 8px;">MAM (Avid / Dalet)</td>
+      <td><span class="tbadge-info">Stub</span></td>
+      <td style="color:#9e9e9e;">—</td>
+      <td style="color:#9e9e9e;">—</td>
+    </tr>
+    <tr>
+      <td style="padding:3px 8px;">Playout (Harmonic / GV)</td>
+      <td><span class="tbadge-info">Stub</span></td>
+      <td style="color:#9e9e9e;">—</td>
+      <td style="color:#9e9e9e;">—</td>
+    </tr>
+  </table>
+</div>
+<div class="sim-teams-card-section sim-teams-card-text" style="color:#616161;">
+  Slack + Teams connectors fully operational in demo mode.
+  All 19 slash commands active. HOPE alerts routing via #newsroom.
+</div>
+<div>
+  <span class="sim-teams-btn">⚙️ Configure</span>
+  <span class="sim-teams-btn-sec">📜 Logs</span>
+</div>""")
+
     def _slack_unknown(text):
         return _sc(f"""
 <div class="sim-slack-card-title">🤖 MediaAgentIQ understood: <em>"{text[:60]}"</em></div>
@@ -5294,6 +5531,14 @@ elif page == "💬 Channel Simulator":
         elif "archive" in t or "search" in t or "/miq-archive" in t:
             return (_slack_archive(archive_q) if platform == "slack"
                     else _teams_archive(archive_q))
+        elif "hope-list" in t or "list my rules" in t or "active rules" in t:
+            return _slack_hope_list() if platform == "slack" else _teams_hope_list()
+        elif "hope-cancel" in t or "cancel rule" in t or "stop watching" in t:
+            return _slack_hope_cancel(text) if platform == "slack" else _teams_hope_cancel(text)
+        elif "hope" in t or "whenever" in t or "every morning" in t or "watch for" in t or "alert me" in t:
+            return _slack_hope_created(text) if platform == "slack" else _teams_hope_created(text)
+        elif "connector" in t or "/miq-connector" in t:
+            return _slack_connectors() if platform == "slack" else _teams_connectors()
         else:
             return (_slack_unknown(text) if platform == "slack"
                     else _teams_unknown(text))
@@ -5473,6 +5718,21 @@ elif page == "💬 Channel Simulator":
                 _send(label, "slack")
                 st.rerun()
 
+        st.markdown("**🧠 HOPE & Connectors:**")
+        h1, h2, h3, h4, h5 = st.columns(5)
+        hope_cmds = [
+            (h1, "/miq-hope whenever deepfake confidence > 80%, alert me", "sk_hope_create"),
+            (h2, "/miq-hope-list",                                          "sk_hope_list"),
+            (h3, "/miq-hope-cancel hope_042",                               "sk_hope_cancel"),
+            (h4, "/miq-connectors",                                         "sk_connectors"),
+            (h5, "/miq-hope every morning send trending digest",            "sk_hope_sched"),
+        ]
+        labels_hope = ["/miq-hope [rule]", "/miq-hope-list", "/miq-hope-cancel", "/miq-connectors", "/miq-hope [schedule]"]
+        for (col, cmd, key), lbl in zip(hope_cmds, labels_hope):
+            if col.button(lbl, key=key, use_container_width=True):
+                _send(cmd, "slack")
+                st.rerun()
+
     # ══ TEAMS TAB ═══════════════════════════════════════════════════════════
     with teams_tab:
 
@@ -5553,8 +5813,685 @@ elif page == "💬 Channel Simulator":
                 _send(label, "teams")
                 st.rerun()
 
+        st.markdown("**🧠 HOPE & Connectors:**")
+        th1, th2, th3, th4 = st.columns(4)
+        hope_cmds_t = [
+            (th1, "/miq-hope whenever compliance violation detected, alert me", "tm_hope_create"),
+            (th2, "/miq-hope-list",                                             "tm_hope_list"),
+            (th3, "/miq-hope-cancel hope_071",                                  "tm_hope_cancel"),
+            (th4, "/miq-connectors",                                            "tm_connectors"),
+        ]
+        labels_hope_t = ["/miq-hope [rule]", "/miq-hope-list", "/miq-hope-cancel", "/miq-connectors"]
+        for (col, cmd, key), lbl in zip(hope_cmds_t, labels_hope_t):
+            if col.button(lbl, key=key, use_container_width=True):
+                _send(cmd, "teams")
+                st.rerun()
+
     st.divider()
     st.caption("Simulation runs entirely in-browser — no Slack/Teams accounts, no ngrok, no API keys required.")
+
+
+# ============== Connector Status Page ==============
+
+elif page == "🔗 Connector Status":
+    st.title("🔗 Connector Status")
+    st.markdown("Live view of all communication connectors, channel subscriptions, event routing, and HOPE alert delivery.")
+
+    # ── Top metrics ───────────────────────────────────────────────────────
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Active Connectors", "2 / 11", "Slack + Teams")
+    c2.metric("Messages Today", "1,247", "+18% vs yesterday")
+    c3.metric("Avg Response Time", "1.4 ms", "↓ 0.2 ms")
+    c4.metric("HOPE Alerts Sent", "16", "4 CRITICAL bypassed mute")
+
+    st.divider()
+
+    # ── Connector health cards ────────────────────────────────────────────
+    st.subheader("Communication Channel Connectors")
+
+    col_sl, col_tm = st.columns(2)
+
+    with col_sl:
+        st.markdown("""
+<div style="background:linear-gradient(135deg,#4a154b,#611f69);padding:16px;border-radius:12px;margin-bottom:4px;">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+    <span style="font-size:22px;">💜</span>
+    <span style="color:#fff;font-weight:700;font-size:16px;">Slack — SlackChannelConnector</span>
+    <span style="background:#2bac76;color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;margin-left:auto;">CONNECTED</span>
+  </div>
+  <div style="color:#c9c3d0;font-size:13px;line-height:1.8;">
+    <strong style="color:#fff;">Mode:</strong> Demo (console logging) &nbsp;|&nbsp; <strong style="color:#fff;">Latency:</strong> 1 ms<br>
+    <strong style="color:#fff;">Auth:</strong> Bot Token (xoxb-…) — simulated<br>
+    <strong style="color:#fff;">Signing Secret:</strong> ✅ Verified (HMAC-SHA256)<br>
+    <strong style="color:#fff;">Default Channel:</strong> #newsroom<br>
+    <strong style="color:#fff;">Subscribed Channels:</strong> #newsroom · #noc-alerts · #compliance · #brand-safety · #social-publishing · #archive
+  </div>
+</div>""", unsafe_allow_html=True)
+
+    with col_tm:
+        st.markdown("""
+<div style="background:linear-gradient(135deg,#4f52b2,#2d2f6b);padding:16px;border-radius:12px;margin-bottom:4px;">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+    <span style="font-size:22px;">⊞</span>
+    <span style="color:#fff;font-weight:700;font-size:16px;">Microsoft Teams — TeamsChannelConnector</span>
+    <span style="background:#2bac76;color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;margin-left:auto;">CONNECTED</span>
+  </div>
+  <div style="color:#c0c0e0;font-size:13px;line-height:1.8;">
+    <strong style="color:#fff;">Mode:</strong> Demo (console logging) &nbsp;|&nbsp; <strong style="color:#fff;">Latency:</strong> 2 ms<br>
+    <strong style="color:#fff;">Auth:</strong> Azure AD OAuth2 — simulated<br>
+    <strong style="color:#fff;">App ID:</strong> TEAMS_APP_ID (env var)<br>
+    <strong style="color:#fff;">Default Team:</strong> WKRN Newsroom<br>
+    <strong style="color:#fff;">Channels:</strong> 📺 Newsroom · 🔔 NOC Alerts · ⚖️ Compliance · 🛡️ Brand Safety
+  </div>
+</div>""", unsafe_allow_html=True)
+
+    # ── Stub connectors ───────────────────────────────────────────────────
+    st.markdown("**Broadcast & Enterprise Connectors** (stub — available in production)")
+    stub_cols = st.columns(3)
+    stubs = [
+        ("📼 MAM",         "Avid Media Central · Telestream · Dalet"),
+        ("📡 Playout",     "Harmonic · GV Maestro · Ross Overdrive"),
+        ("🗞️ Newsroom",    "iNews · ENPS · MOS Protocol"),
+        ("☁️ CDN",         "CloudFront · Akamai · Fastly"),
+        ("🎞️ Transcode",   "FFmpeg Queue · AWS MediaConvert"),
+        ("📊 Monitoring",  "Datadog · New Relic · Grafana"),
+    ]
+    for i, (name, detail) in enumerate(stubs):
+        with stub_cols[i % 3]:
+            st.markdown(f"""
+<div style="background:#1e293b;padding:12px;border-radius:8px;border:1px solid #334155;margin-bottom:8px;">
+  <div style="color:#94a3b8;font-size:12px;font-weight:700;">{name}</div>
+  <div style="color:#475569;font-size:11px;margin-top:3px;">{detail}</div>
+  <div style="margin-top:6px;"><span style="background:#334155;color:#64748b;padding:2px 7px;border-radius:4px;font-size:11px;">STUB</span></div>
+</div>""", unsafe_allow_html=True)
+
+    st.divider()
+
+    # ── Inbound event types ───────────────────────────────────────────────
+    st.subheader("Inbound Event Routing")
+
+    col_e1, col_e2 = st.columns(2)
+    with col_e1:
+        st.markdown("**Slack Events API**")
+        events_data = {
+            "Event Type": ["app_mention", "message.channels", "slash_command", "block_actions"],
+            "Handler": ["_dispatch_to_agent()", "_dispatch_to_agent()", "_handle_slash()", "_handle_action()"],
+            "Volume Today": [342, 189, 571, 145],
+        }
+        import json as _json
+        for ev, handler, vol in zip(events_data["Event Type"], events_data["Handler"], events_data["Volume Today"]):
+            st.markdown(f"""
+<div style="display:flex;align-items:center;background:#1e293b;padding:8px 12px;border-radius:6px;margin-bottom:4px;gap:10px;">
+  <code style="color:#a855f7;font-size:12px;">{ev}</code>
+  <span style="color:#64748b;font-size:12px;flex:1;">{handler}</span>
+  <span style="color:#22c55e;font-size:12px;">{vol} events</span>
+</div>""", unsafe_allow_html=True)
+
+    with col_e2:
+        st.markdown("**Teams Bot Framework**")
+        teams_events = [
+            ("message",         "_dispatch_to_agent()", 243),
+            ("invoke (action)", "_handle_action()",     98),
+            ("conversationUpdate", "_on_member_joined()", 12),
+        ]
+        for ev, handler, vol in teams_events:
+            st.markdown(f"""
+<div style="display:flex;align-items:center;background:#1e293b;padding:8px 12px;border-radius:6px;margin-bottom:4px;gap:10px;">
+  <code style="color:#6264a7;font-size:12px;">{ev}</code>
+  <span style="color:#64748b;font-size:12px;flex:1;">{handler}</span>
+  <span style="color:#22c55e;font-size:12px;">{vol} events</span>
+</div>""", unsafe_allow_html=True)
+
+    st.divider()
+
+    # ── Outbound log ──────────────────────────────────────────────────────
+    st.subheader("Outbound Message Log (last 10)")
+    outbound = [
+        ("09:02 AM", "Slack", "#newsroom",       "Block Kit", "Compliance alert: profanity detected — AUTO-HOLD applied",       "delivered"),
+        ("09:01 AM", "Slack", "#noc-alerts",     "Block Kit", "Signal quality: loudness +8 LUFS vs −23 target (CALM Act)",     "delivered"),
+        ("09:01 AM", "Teams", "Newsroom",         "Adaptive Card", "Signal quality: EBU R128 non-compliance detected",         "delivered"),
+        ("08:59 AM", "Slack", "#compliance",      "Block Kit", "Deepfake scan: LOW RISK — content cleared for broadcast",       "delivered"),
+        ("08:58 AM", "Teams", "NOC Alerts",       "Adaptive Card", "Deepfake scan complete — summary attached",                "delivered"),
+        ("08:55 AM", "Slack", "#compliance",      "Block Kit", "Rights: 3 licenses expire within 7 days",                       "delivered"),
+        ("08:30 AM", "Slack", "#social-publishing","Block Kit", "Social queue: 5 posts ready for approval",                    "delivered"),
+        ("07:45 AM", "Teams", "Newsroom",          "Adaptive Card", "OTT distribution: all 5 streams healthy",                 "delivered"),
+        ("06:00 AM", "Slack", "#newsroom",         "Block Kit", "HOPE: Daily trending digest — top 5 topics",                  "delivered"),
+        ("06:00 AM", "Teams", "Newsroom",          "Adaptive Card", "HOPE: Morning trending summary",                          "delivered"),
+    ]
+    for ts, platform, channel, fmt, msg, status in outbound:
+        icon = "💜" if platform == "Slack" else "⊞"
+        badge_color = "#2bac76" if status == "delivered" else "#f59e0b"
+        st.markdown(f"""
+<div style="display:flex;align-items:flex-start;background:#0f172a;padding:8px 12px;border-radius:6px;margin-bottom:3px;gap:10px;border:1px solid #1e293b;">
+  <span style="font-size:14px;flex-shrink:0;">{icon}</span>
+  <span style="color:#64748b;font-size:11px;flex-shrink:0;width:65px;">{ts}</span>
+  <span style="background:#1e293b;color:#94a3b8;padding:1px 6px;border-radius:4px;font-size:11px;flex-shrink:0;">{channel}</span>
+  <span style="color:#475569;font-size:11px;flex-shrink:0;">[{fmt}]</span>
+  <span style="color:#cbd5e1;font-size:12px;flex:1;">{msg}</span>
+  <span style="background:{badge_color};color:#fff;padding:1px 6px;border-radius:4px;font-size:10px;flex-shrink:0;">{status}</span>
+</div>""", unsafe_allow_html=True)
+
+    st.divider()
+
+    # ── Production setup checklist ────────────────────────────────────────
+    st.subheader("Go-Live Checklist — Slack Production Setup")
+    checklist = [
+        (True,  "Create Slack App at api.slack.com/apps"),
+        (True,  "Add Bot Token Scopes: chat:write, channels:history, commands, app_mentions:read"),
+        (True,  "Enable Event Subscriptions → subscribe app_mention + message.channels"),
+        (True,  "Add Slash Commands (/miq-* × 22 commands)"),
+        (True,  "Enable Interactivity (Block Kit actions URL)"),
+        (False, "Set SLACK_BOT_TOKEN in .env (xoxb-…)"),
+        (False, "Set SLACK_SIGNING_SECRET in .env"),
+        (False, "Set SLACK_DEFAULT_CHANNEL in .env (#newsroom)"),
+        (False, "Expose /slack/events via ngrok or cloud deployment"),
+        (False, "Install app to workspace and invite bot to channels"),
+    ]
+    for done, item in checklist:
+        icon = "✅" if done else "⬜"
+        color = "#22c55e" if done else "#64748b"
+        st.markdown(f'<div style="color:{color};padding:3px 0;">{icon} {item}</div>', unsafe_allow_html=True)
+
+    st.markdown("")
+    with st.expander("**Teams Production Setup Checklist**"):
+        teams_checklist = [
+            (True,  "Register Bot in Azure Portal → Bot Services"),
+            (True,  "Set up Messaging Endpoint (POST /teams/messages)"),
+            (True,  "Configure Adaptive Cards manifest"),
+            (False, "Set TEAMS_APP_ID in .env"),
+            (False, "Set TEAMS_APP_PASSWORD in .env"),
+            (False, "Set TEAMS_TENANT_ID in .env"),
+            (False, "Deploy app package to Teams Admin Center"),
+            (False, "Install bot in target team and channels"),
+        ]
+        for done, item in teams_checklist:
+            icon = "✅" if done else "⬜"
+            color = "#22c55e" if done else "#64748b"
+            st.markdown(f'<div style="color:{color};padding:3px 0;">{icon} {item}</div>', unsafe_allow_html=True)
+
+    st.info("**Demo mode** logs all outbound messages to console instead of calling the Slack/Teams API. "
+            "Set `PRODUCTION_MODE=True` and provide the env vars above to go live.")
+
+
+# ============== Agent Memory Page ==============
+
+elif page == "🧠 Agent Memory":
+    st.title("🧠 Agent Memory & HOPE Engine")
+    st.markdown("Persistent memory layer — every agent task is logged to `.md` files that survive restarts. "
+                "HOPE standing rules are evaluated on every agent run.")
+
+    mem_tab, hope_tab, history_tab, companion_tab = st.tabs([
+        "📂 Per-Agent Memory", "⚡ HOPE Rules", "📋 Task History", "📄 Companion Files"
+    ])
+
+    # ── Per-Agent Memory ──────────────────────────────────────────────────
+    with mem_tab:
+        st.markdown("Each agent writes to `memory/agents/{slug}.md`. Entries are trimmed at 500 (→ 400) to stay lean.")
+        st.markdown("")
+
+        agent_memories = {
+            "compliance_agent": {
+                "slug": "compliance_agent",
+                "tasks": 47, "success_rate": "98%", "avg_ms": 1205,
+                "entries": [
+                    {
+                        "ts": "2026-03-04 09:02:11", "task_id": "task_1041", "status": "SUCCESS", "mode": "demo",
+                        "input": "Morning Broadcast — live stream",
+                        "output": "violations=2, warnings=1, clear=47, confidence_avg=0.96",
+                        "triggered": "hope_042 → [slack_alert #newsroom]",
+                        "duration_ms": 1182,
+                    },
+                    {
+                        "ts": "2026-03-04 08:30:00", "task_id": "task_1038", "status": "SUCCESS", "mode": "demo",
+                        "input": "Commercial block 08:30 AM",
+                        "output": "violations=0, warnings=0, clear=23, confidence_avg=0.99",
+                        "triggered": None,
+                        "duration_ms": 890,
+                    },
+                ],
+            },
+            "deepfake_detection_agent": {
+                "slug": "deepfake_detection_agent",
+                "tasks": 12, "success_rate": "100%", "avg_ms": 3450,
+                "entries": [
+                    {
+                        "ts": "2026-03-04 08:59:00", "task_id": "task_1039", "status": "SUCCESS", "mode": "demo",
+                        "input": "Breaking news clip — field reporter",
+                        "output": "risk_score=0.12, verdict=LOW RISK, synthetic_pct=4%",
+                        "triggered": "hope_071 evaluated — no alert (below 80% threshold)",
+                        "duration_ms": 3201,
+                    },
+                ],
+            },
+            "trending_agent": {
+                "slug": "trending_agent",
+                "tasks": 84, "success_rate": "100%", "avg_ms": 412,
+                "entries": [
+                    {
+                        "ts": "2026-03-04 06:00:00", "task_id": "task_998", "status": "SUCCESS", "mode": "demo",
+                        "input": "Scheduled: daily digest",
+                        "output": "topics=5, breaking=2, velocity_max=+2847%, sentiment=mixed",
+                        "triggered": "hope_103 → [slack_alert #newsroom] — daily digest delivered",
+                        "duration_ms": 388,
+                    },
+                ],
+            },
+            "signal_quality_agent": {
+                "slug": "signal_quality_agent",
+                "tasks": 156, "success_rate": "97%", "avg_ms": 245,
+                "entries": [
+                    {
+                        "ts": "2026-03-04 09:01:30", "task_id": "task_1040", "status": "SUCCESS", "mode": "demo",
+                        "input": "Live broadcast feed — WKRN-HD1",
+                        "output": "loudness=-15.2 LUFS, ebu_r128=NON-COMPLIANT, deviation=+7.8 LUFS",
+                        "triggered": "hope_118 → [slack_alert #noc-alerts] — loudness violation",
+                        "duration_ms": 218,
+                    },
+                ],
+            },
+            "caption_agent": {
+                "slug": "caption_agent",
+                "tasks": 23, "success_rate": "96%", "avg_ms": 2100,
+                "entries": [
+                    {
+                        "ts": "2026-03-04 08:00:00", "task_id": "task_1010", "status": "SUCCESS", "mode": "demo",
+                        "input": "Morning News Broadcast 08:00 AM",
+                        "output": "segments=13, confidence_avg=0.97, word_count=892, qa_issues=3",
+                        "triggered": None,
+                        "duration_ms": 2145,
+                    },
+                ],
+            },
+        }
+
+        selected_agent = st.selectbox(
+            "Select agent to inspect memory log:",
+            list(agent_memories.keys()),
+            format_func=lambda x: x.replace("_", " ").title()
+        )
+        mem = agent_memories[selected_agent]
+
+        col_a, col_b, col_c = st.columns(3)
+        col_a.metric("Total Tasks", mem["tasks"])
+        col_b.metric("Success Rate", mem["success_rate"])
+        col_c.metric("Avg Duration", f"{mem['avg_ms']} ms")
+
+        st.markdown(f"**Memory file:** `memory/agents/{mem['slug']}.md`")
+        st.markdown("")
+
+        for e in mem["entries"]:
+            status_color = "#22c55e" if e["status"] == "SUCCESS" else "#ef4444"
+            hope_html = (
+                f'<div style="color:#a855f7;font-size:12px;margin-top:4px;">⚡ HOPE: {e["triggered"]}</div>'
+                if e["triggered"] else ""
+            )
+            st.markdown(f"""
+<div style="background:#0f172a;border:1px solid #1e293b;border-left:3px solid {status_color};
+     padding:12px 16px;border-radius:8px;margin-bottom:8px;">
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;">
+    <span style="color:#64748b;font-size:12px;">{e["ts"]}</span>
+    <code style="color:#94a3b8;font-size:11px;">{e["task_id"]}</code>
+    <span style="background:{status_color};color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">{e["status"]}</span>
+    <span style="color:#475569;font-size:11px;">({e["mode"]})</span>
+    <span style="color:#64748b;font-size:11px;margin-left:auto;">{e["duration_ms"]} ms</span>
+  </div>
+  <div style="color:#cbd5e1;font-size:13px;"><strong style="color:#94a3b8;">Input:</strong> {e["input"]}</div>
+  <div style="color:#cbd5e1;font-size:13px;margin-top:2px;"><strong style="color:#94a3b8;">Output:</strong> {e["output"]}</div>
+  {hope_html}
+</div>""", unsafe_allow_html=True)
+
+        st.divider()
+        st.markdown("**Inter-agent communications log** (`memory/agents/inter_agent_comms.md`)")
+        inter_events = [
+            ("2026-03-04 09:02", "compliance_agent → social_publishing_agent", "Hold social posts: active compliance violations"),
+            ("2026-03-04 09:01", "signal_quality_agent → playout_scheduling_agent", "Loudness alert: CALM Act non-compliance — check commercial break"),
+            ("2026-03-04 08:59", "deepfake_detection_agent → compliance_agent", "Scan complete: LOW RISK — cleared for compliance check"),
+            ("2026-03-04 06:00", "trending_agent → newsroom_integration_agent", "Morning digest ready — 5 topics, push to rundown"),
+        ]
+        for ts, route, msg in inter_events:
+            st.markdown(f"""
+<div style="background:#0f172a;padding:7px 12px;border-radius:6px;margin-bottom:3px;border:1px solid #1e293b;">
+  <span style="color:#64748b;font-size:11px;">{ts}</span>&nbsp;
+  <code style="color:#6366f1;font-size:12px;">{route}</code><br>
+  <span style="color:#94a3b8;font-size:12px;">{msg}</span>
+</div>""", unsafe_allow_html=True)
+
+    # ── HOPE Rules ────────────────────────────────────────────────────────
+    with hope_tab:
+        st.markdown("Standing instructions that tell agents what to watch for — **evaluated on every run**, "
+                    "alerts fire when conditions match.")
+
+        # Settings summary
+        col_h1, col_h2, col_h3, col_h4 = st.columns(4)
+        col_h1.metric("Active Rules", "4")
+        col_h2.metric("Total Fired Today", "16")
+        col_h3.metric("Mute Hours", "23:00 – 07:00")
+        col_h4.metric("Rate Limit", "10 alerts / hr")
+
+        st.info("**CRITICAL** priority rules bypass mute hours and rate limits. All others respect quiet hours.")
+
+        st.markdown("---")
+        st.subheader("Active HOPE Rules")
+
+        hope_rules = [
+            {
+                "rule_id": "hope_042", "agent": "compliance_agent", "status": "ACTIVE", "priority": "HIGH",
+                "condition": "Whenever profanity or indecent content is detected during live broadcast",
+                "action": "Send Slack DM + post to #compliance with full violation details",
+                "schedule": "IMMEDIATE", "trigger_count": 3, "last_triggered": "2026-03-04 09:02",
+            },
+            {
+                "rule_id": "hope_071", "agent": "deepfake_detection_agent", "status": "ACTIVE", "priority": "CRITICAL",
+                "condition": "Whenever synthetic media confidence score exceeds 80%",
+                "action": "Immediately alert #newsroom + #compliance. Hold content for manual review.",
+                "schedule": "IMMEDIATE", "trigger_count": 1, "last_triggered": "2026-03-03 14:22",
+            },
+            {
+                "rule_id": "hope_103", "agent": "trending_agent", "status": "ACTIVE", "priority": "NORMAL",
+                "condition": "Every morning at 06:00 — send a trending topic digest",
+                "action": "Post top-5 trends + breaking news to #newsroom (Slack + Teams)",
+                "schedule": "DAILY 06:00", "trigger_count": 7, "last_triggered": "2026-03-04 06:00",
+            },
+            {
+                "rule_id": "hope_118", "agent": "signal_quality_agent", "status": "ACTIVE", "priority": "HIGH",
+                "condition": "Whenever broadcast loudness deviates more than ±2 LUFS from −23 LUFS target",
+                "action": "Alert #noc-alerts with loudness reading + timestamp",
+                "schedule": "IMMEDIATE", "trigger_count": 5, "last_triggered": "2026-03-04 09:01",
+            },
+            {
+                "rule_id": "hope_139", "agent": "rights_agent", "status": "INACTIVE", "priority": "NORMAL",
+                "condition": "Whenever a content license expires within the next 7 days",
+                "action": "Send expiry warning to #compliance with renewal link",
+                "schedule": "DAILY 08:00", "trigger_count": 0, "last_triggered": "Never",
+            },
+        ]
+
+        for rule in hope_rules:
+            pri_colors = {"CRITICAL": "#ef4444", "HIGH": "#f59e0b", "NORMAL": "#6366f1", "LOW": "#64748b"}
+            st_colors  = {"ACTIVE": "#22c55e", "INACTIVE": "#475569"}
+            pri_c = pri_colors.get(rule["priority"], "#6366f1")
+            st_c  = st_colors.get(rule["status"], "#475569")
+
+            with st.expander(
+                f"{'🟢' if rule['status'] == 'ACTIVE' else '⚫'} **{rule['rule_id']}** — {rule['condition'][:70]}...",
+                expanded=(rule["status"] == "ACTIVE")
+            ):
+                col1, col2 = st.columns([2, 1])
+                with col1:
+                    st.markdown(f"**Full Condition:** {rule['condition']}")
+                    st.markdown(f"**Action:** {rule['action']}")
+                    st.markdown(f"**Agent:** `{rule['agent']}`")
+                    st.markdown(f"**Schedule:** `{rule['schedule']}`")
+                with col2:
+                    st.markdown(f"""
+<div style="background:#0f172a;padding:12px;border-radius:8px;border:1px solid #1e293b;">
+  <div style="margin-bottom:6px;">
+    <span style="background:{pri_c};color:#fff;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:700;">{rule["priority"]}</span>&nbsp;
+    <span style="background:{st_c};color:#fff;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:700;">{rule["status"]}</span>
+  </div>
+  <div style="color:#94a3b8;font-size:12px;">Triggered: <strong style="color:#fff;">{rule["trigger_count"]}×</strong></div>
+  <div style="color:#94a3b8;font-size:12px;">Last fired: <strong style="color:#fff;">{rule["last_triggered"]}</strong></div>
+</div>""", unsafe_allow_html=True)
+
+        st.markdown("---")
+        st.subheader("Create a New HOPE Rule")
+        with st.form("hope_create_form"):
+            h_c1, h_c2 = st.columns(2)
+            h_agent   = h_c1.selectbox("Agent", [
+                "compliance_agent", "deepfake_detection_agent", "trending_agent",
+                "signal_quality_agent", "rights_agent", "caption_agent", "clip_agent",
+                "archive_agent", "brand_safety_agent", "carbon_intelligence_agent",
+            ])
+            h_priority = h_c2.selectbox("Priority", ["NORMAL", "HIGH", "CRITICAL", "LOW"])
+            h_condition = st.text_area("Condition (natural language)", placeholder="Whenever deepfake confidence exceeds 85%...")
+            h_action    = st.text_input("Action", placeholder="Alert me in #compliance with full report")
+            h_schedule  = st.selectbox("Schedule", ["IMMEDIATE", "DAILY 06:00", "DAILY 08:00", "WEEKLY MON 08:00"])
+            if st.form_submit_button("✅ Create HOPE Rule", type="primary"):
+                import random as _r
+                new_id = f"hope_{_r.randint(200, 999)}"
+                st.success(f"Rule **{new_id}** created! Stored in `memory/agents/{h_agent}/HOPE.md`. "
+                           f"It will be evaluated on the next {h_agent.replace('_', ' ')} run.")
+
+    # ── Task History ──────────────────────────────────────────────────────
+    with history_tab:
+        st.markdown("Global audit log — all agent tasks across the system. "
+                    "Stored in `memory/agents/task_history.md` (cap: 5,000 rows).")
+
+        col_f1, col_f2, col_f3 = st.columns(3)
+        filter_agent  = col_f1.selectbox("Filter by Agent", ["All agents", "compliance_agent", "deepfake_detection_agent",
+                                                              "trending_agent", "signal_quality_agent", "caption_agent"])
+        filter_status = col_f2.selectbox("Filter by Status", ["All", "SUCCESS", "FAILED"])
+        filter_mode   = col_f3.selectbox("Filter by Mode", ["All", "demo", "production"])
+
+        all_tasks = [
+            ("2026-03-04 09:02:11", "compliance_agent",           "task_1041", "SUCCESS", "demo",       1182),
+            ("2026-03-04 09:01:30", "signal_quality_agent",       "task_1040", "SUCCESS", "demo",        218),
+            ("2026-03-04 09:01:00", "deepfake_detection_agent",   "task_1039", "SUCCESS", "demo",       3201),
+            ("2026-03-04 08:59:00", "compliance_agent",           "task_1038", "SUCCESS", "demo",        890),
+            ("2026-03-04 08:55:00", "rights_agent",               "task_1037", "SUCCESS", "demo",        445),
+            ("2026-03-04 08:30:00", "social_publishing_agent",    "task_1036", "SUCCESS", "demo",        678),
+            ("2026-03-04 08:00:00", "caption_agent",              "task_1010", "SUCCESS", "demo",       2145),
+            ("2026-03-04 07:45:00", "ott_distribution_agent",     "task_1009", "SUCCESS", "demo",        312),
+            ("2026-03-04 07:30:00", "brand_safety_agent",         "task_1008", "SUCCESS", "demo",        891),
+            ("2026-03-04 07:00:00", "ingest_transcode_agent",     "task_1007", "SUCCESS", "demo",       4210),
+            ("2026-03-04 06:01:00", "newsroom_integration_agent", "task_1006", "SUCCESS", "demo",        523),
+            ("2026-03-04 06:00:00", "trending_agent",             "task_998",  "SUCCESS", "demo",        388),
+            ("2026-03-03 23:45:00", "playout_scheduling_agent",   "task_997",  "SUCCESS", "demo",        201),
+            ("2026-03-03 22:10:00", "signal_quality_agent",       "task_996",  "FAILED",  "demo",          0),
+            ("2026-03-03 21:00:00", "clip_agent",                 "task_995",  "SUCCESS", "demo",       1875),
+        ]
+
+        shown = [
+            t for t in all_tasks
+            if (filter_agent  == "All agents"   or t[1] == filter_agent)
+            and (filter_status == "All"          or t[3] == filter_status)
+            and (filter_mode   == "All"          or t[4] == filter_mode)
+        ]
+
+        col_t = st.columns([2, 2.5, 1.5, 1, 1, 1])
+        headers = ["Timestamp", "Agent", "Task ID", "Status", "Mode", "Duration"]
+        for c, h in zip(col_t, headers):
+            c.markdown(f"**{h}**")
+        st.divider()
+
+        for ts, agent, tid, status, mode, dur in shown:
+            s_color = "#22c55e" if status == "SUCCESS" else "#ef4444"
+            cols = st.columns([2, 2.5, 1.5, 1, 1, 1])
+            cols[0].caption(ts)
+            cols[1].caption(agent.replace("_", " "))
+            cols[2].caption(tid)
+            cols[3].markdown(f'<span style="color:{s_color};font-size:12px;">{status}</span>', unsafe_allow_html=True)
+            cols[4].caption(mode)
+            cols[5].caption(f"{dur} ms" if dur > 0 else "error")
+
+        st.caption(f"Showing {len(shown)} of {len(all_tasks)} entries | Cap: 5,000 | Trim-to: 4,000")
+
+    # ── Companion Files ───────────────────────────────────────────────────
+    with companion_tab:
+        st.markdown("Each agent has a set of **companion `.md` files** that persist across restarts and build "
+                    "long-term context for the agent.")
+
+        comp_agent = st.selectbox(
+            "Select agent:",
+            ["compliance_agent", "deepfake_detection_agent", "trending_agent",
+             "signal_quality_agent", "caption_agent", "rights_agent"],
+            format_func=lambda x: x.replace("_", " ").title(),
+            key="comp_agent_sel"
+        )
+
+        file_tabs = st.tabs(["IDENTITY.md", "SOUL.md", "AGENTS.md", "TOOLS.md", "HOPE.md", "logs/"])
+
+        identity_content = {
+            "compliance_agent": {
+                "IDENTITY.md": f"""# {comp_agent} — Identity
+
+**Name**: Compliance Agent
+**Slug**: compliance_agent
+**Version**: 3.3.0
+**Created**: 2026-01-15 10:00:00
+**Agent Class**: ComplianceAgent (agents/compliance_agent.py)
+**Mode**: Demo (PRODUCTION_MODE=False)
+
+## Purpose
+Real-time FCC / Ofcom compliance scanning for broadcast media.
+Detects profanity, political ad violations, sponsorship disclosures,
+loudness non-compliance (CALM Act), and EAS equipment checks.
+
+## Integrations Required (Production)
+- OpenAI GPT-4o Vision (visual scene analysis)
+- OpenAI Whisper (audio transcription)
+- FCC violation database (internal lookup)
+
+## Uptime Stats
+- Total tasks: 47
+- Success rate: 98%
+- Avg duration: 1,205 ms
+""",
+                "SOUL.md": """# compliance_agent — Soul & Priorities
+
+## Core Personality
+I am vigilant, methodical, and precise. I treat every broadcast frame as
+potential liability. My default posture is: when in doubt, flag it.
+
+## Priority Order
+1. **CRITICAL violations first** — profanity, EAS spoofing, political ad fraud
+2. **Financial exposure next** — fine estimates, precedent lookups
+3. **Operational efficiency** — batch scanning, auto-hold workflows
+
+## Values
+- Accuracy over speed — a missed violation costs more than a slow scan
+- Transparency — always explain WHY something was flagged
+- No false positives without evidence — confidence threshold 0.85+
+
+## Communication Style
+Direct, factual, no hedging. Risk level + fine range + recommendation.
+""",
+                "AGENTS.md": """# compliance_agent — Agent Relationships
+
+## Sibling Agents (same tier)
+- signal_quality_agent — shares loudness/CALM Act data
+- brand_safety_agent — shares contextual risk scores
+- rights_agent — cross-checks license compliance
+
+## Upstream (feeds data to me)
+- ingest_transcode_agent — provides raw media metadata
+- signal_quality_agent — provides loudness readings
+
+## Downstream (I feed data to)
+- social_publishing_agent — hold queue if violations active
+- newsroom_integration_agent — flag stories with compliance issues
+- archive_agent — tag archived content with violation history
+
+## HOPE Alert Targets
+- #compliance (Slack) — all violations
+- #newsroom (Slack) — CRITICAL only
+- Newsroom team (Teams) — CRITICAL + HIGH
+""",
+                "TOOLS.md": """# compliance_agent — Available Tools
+
+## Demo Mode Tools
+- `create_response(success, data)` → standard result dict
+- `AgentMemoryLayer.save_task()` → persist task log
+- `HopeEngine.evaluate(result)` → check standing rules
+
+## Production Tools
+- `openai.chat.completions.create()` (GPT-4o) — visual analysis
+- `openai.audio.transcriptions.create()` (Whisper) — speech-to-text
+- `re.findall(profanity_patterns)` — regex profanity scan
+- `fcc_lookup(rule_ref)` — internal FCC rule database
+- `estimate_fine(severity, rule)` → fine range calculator
+
+## Connector Tools (via ConnectorRegistry.call_tool)
+- `slack.post_message(channel, blocks)` → Slack Block Kit
+- `teams.send_activity(conversation, card)` → Teams Adaptive Card
+""",
+                "HOPE.md": """# compliance_agent — HOPE Standing Rules
+
+_Last updated: 2026-03-04 09:02:11 | Active rules: 1 | Total fired: 3_
+
+---
+
+## hope_042
+**Condition**: Whenever profanity or indecent content is detected during live broadcast
+**Schedule**: IMMEDIATE
+**Action**: Send Slack DM + post to #compliance with full violation details
+**Priority**: HIGH
+**Status**: ACTIVE
+**Trigger count**: 3
+**Last triggered**: 2026-03-04 09:02:11
+
+---
+
+_Mute hours: 23:00–07:00 (HIGH priority respects mute)_
+_Rate limit: max 10 alerts/hr_
+""",
+            }
+        }
+
+        fallback = {
+            "IDENTITY.md": f"# {comp_agent}\n\n**Version**: 3.3.0  \n**Mode**: Demo\n\nCreated: 2026-01-15",
+            "SOUL.md":     f"# {comp_agent} — Soul\n\nMethodical, precise, mission-focused.",
+            "AGENTS.md":   f"# {comp_agent} — Relationships\n\nSee architecture diagram for full graph.",
+            "TOOLS.md":    f"# {comp_agent} — Tools\n\n- create_response()\n- AgentMemoryLayer.save_task()\n- HopeEngine.evaluate()",
+            "HOPE.md":     f"# {comp_agent} — HOPE Rules\n\n_No active rules configured._",
+        }
+
+        agent_content = identity_content.get(comp_agent, {})
+
+        with file_tabs[0]:
+            st.code(agent_content.get("IDENTITY.md", fallback["IDENTITY.md"]), language="markdown")
+        with file_tabs[1]:
+            st.code(agent_content.get("SOUL.md", fallback["SOUL.md"]), language="markdown")
+        with file_tabs[2]:
+            st.code(agent_content.get("AGENTS.md", fallback["AGENTS.md"]), language="markdown")
+        with file_tabs[3]:
+            st.code(agent_content.get("TOOLS.md", fallback["TOOLS.md"]), language="markdown")
+        with file_tabs[4]:
+            st.code(agent_content.get("HOPE.md", fallback["HOPE.md"]), language="markdown")
+        with file_tabs[5]:
+            st.markdown("**Daily log files** (`memory/agents/{slug}/logs/YYYY-MM-DD.md`)")
+            log_date = st.selectbox("Log date:", ["2026-03-04", "2026-03-03", "2026-03-02"], key="log_date_sel")
+            sample_log = f"""# {comp_agent} — Daily Log {log_date}
+
+## 09:02:11 — task_1041 COMPLETED
+Input: Morning Broadcast live stream
+Result: 2 critical violations, 1 warning, 47 clear
+HOPE: hope_042 fired → Slack #newsroom alert delivered
+Duration: 1,182 ms
+
+## 08:30:00 — task_1038 COMPLETED
+Input: Commercial block 08:30 AM
+Result: 0 violations, 0 warnings, 23 clear
+Duration: 890 ms
+
+_End of log for {log_date}_
+"""
+            st.code(sample_log, language="markdown")
+
+        st.markdown("---")
+        st.markdown("**System State Snapshot** (`memory/system_state.md`) — updated every 5 minutes")
+        system_state = """# MediaAgentIQ — System State
+_Snapshot: 2026-03-04 09:05:00 | Next update: 09:10:00_
+
+## Agent Health
+| Agent | Status | Last Run | Tasks Today | Avg Ms |
+|-------|--------|----------|-------------|--------|
+| compliance_agent | HEALTHY | 09:02:11 | 47 | 1205 |
+| signal_quality_agent | HEALTHY | 09:01:30 | 156 | 245 |
+| deepfake_detection_agent | HEALTHY | 08:59:00 | 12 | 3450 |
+| trending_agent | HEALTHY | 06:00:00 | 84 | 412 |
+| caption_agent | HEALTHY | 08:00:00 | 23 | 2100 |
+
+## HOPE Engine
+Active rules: 4 | Fired today: 16 | Rate-limited: 2 | CRITICAL bypass: 0
+
+## Connectors
+Slack: CONNECTED (1ms) | Teams: CONNECTED (2ms) | Others: STUB
+
+## Queue
+Pending: 3 | Running: 1 | Completed today: 1,247
+"""
+        st.code(system_state, language="markdown")
 
 
 # ============== Footer ==============
