@@ -351,6 +351,56 @@ class Settings(BaseSettings):
     HOPE_MUTE_START_HOUR: int = Field(default=23, description="Start of quiet hours (local time, 24h)")
     HOPE_MUTE_END_HOUR: int = Field(default=7, description="End of quiet hours (local time, 24h)")
 
+    # ==================== Runtime Layer ====================
+    REDIS_URL: str = Field(
+        default="redis://localhost:6379/0",
+        description="Redis connection URL for task queue and pub/sub"
+    )
+    RUNTIME_DATABASE_URL: str = Field(
+        default="sqlite+aiosqlite:///runtime.db",
+        description="SQLAlchemy async DB URL for runtime layer (SQLite or PostgreSQL)"
+    )
+    TASK_RETRY_BACKOFF_SECONDS: int = Field(
+        default=5,
+        description="Base backoff seconds between task retries"
+    )
+    TASK_MAX_RETRIES: int = Field(
+        default=3,
+        description="Maximum retry attempts before moving task to dead-letter queue"
+    )
+    AGENT_TIMEOUT_JSON: str = Field(
+        default="{}",
+        description='Per-agent timeout overrides as JSON, e.g. {"caption": 120, "deepfake": 90}'
+    )
+    WORKER_CONCURRENCY: int = Field(
+        default=4,
+        description="Number of tasks the worker processes concurrently"
+    )
+    WORKER_HEARTBEAT_INTERVAL_SECS: int = Field(
+        default=30,
+        description="Interval in seconds between worker heartbeat writes"
+    )
+    WORKER_QUEUE_POLL_TIMEOUT_SECS: int = Field(
+        default=5,
+        description="BRPOP block timeout in seconds"
+    )
+    RUNTIME_SSE_KEEPALIVE_SECS: int = Field(
+        default=15,
+        description="SSE keepalive ping interval in seconds"
+    )
+    RUNTIME_DLQ_MAX_AGE_DAYS: int = Field(
+        default=30,
+        description="Days to retain dead-letter queue entries before cleanup"
+    )
+    RUNTIME_ENABLED: bool = Field(
+        default=True,
+        description="Enable the Redis-backed runtime layer (set False to run demo-only)"
+    )
+    RUNTIME_LOG_LEVEL: str = Field(
+        default="INFO",
+        description="Log level for runtime layer components"
+    )
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

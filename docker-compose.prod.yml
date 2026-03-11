@@ -1,0 +1,134 @@
+version: "3.9"
+
+# MediaAgentIQ — Production Docker Compose
+# Usage:
+#   cp .env.example .env   # fill in real values
+#   docker compose -f docker-compose.prod.yml up -d
+
+services:
+
+  # ────────────────────────────────────────────
+  # PostgreSQL — runtime persistence
+  # ────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-mediaagentiq}
+      POSTGRES_USER: ${POSTGRES_USER:-miq}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-miq}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - miq_net
+
+  # ────────────────────────────────────────────
+  # Redis — task queue + pub/sub
+  # ────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - miq_net
+
+  # ────────────────────────────────────────────
+  # API — FastAPI application server
+  # ────────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      RUNTIME_DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-miq}:${POSTGRES_PASSWORD:-changeme}@postgres:5432/${POSTGRES_DB:-mediaagentiq}
+      REDIS_URL: redis://redis:6379/0
+    ports:
+      - "8000:8000"
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn app:app --host 0.0.0.0 --port 8000 --workers 2"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - uploads_data:/app/uploads
+      - outputs_data:/app/outputs
+      - memory_data:/app/memory
+    networks:
+      - miq_net
+
+  # ────────────────────────────────────────────
+  # Worker — Redis BRPOP task processor
+  # ────────────────────────────────────────────
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      RUNTIME_DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-miq}:${POSTGRES_PASSWORD:-changeme}@postgres:5432/${POSTGRES_DB:-mediaagentiq}
+      REDIS_URL: redis://redis:6379/0
+    command: python worker_runtime.py
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    deploy:
+      replicas: 1
+    volumes:
+      - uploads_data:/app/uploads
+      - outputs_data:/app/outputs
+      - memory_data:/app/memory
+    networks:
+      - miq_net
+
+  # ────────────────────────────────────────────
+  # Watchdog — monitors worker heartbeats
+  # (simple curl-based health alerter)
+  # ────────────────────────────────────────────
+  watchdog:
+    image: curlimages/curl:8.5.0
+    restart: unless-stopped
+    entrypoint: >
+      sh -c "while true; do
+        STATUS=$$(curl -sf http://api:8000/ops/health | grep -c '\"status\": *\"healthy\"');
+        if [ \"$$STATUS\" -eq 0 ]; then
+          echo '[WATCHDOG] $(date) — health check FAILED';
+        fi;
+        sleep 30;
+      done"
+    depends_on:
+      - api
+    networks:
+      - miq_net
+
+
+volumes:
+  postgres_data:
+  redis_data:
+  uploads_data:
+  outputs_data:
+  memory_data:
+
+networks:
+  miq_net:
+    driver: bridge

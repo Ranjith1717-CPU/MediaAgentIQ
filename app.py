@@ -37,6 +37,20 @@ except Exception as _e:
     import logging as _logging
     _logging.getLogger("app").warning(f"Gateway router not loaded: {_e}")
 
+# Mount runtime API routers (additive — existing routes unaffected)
+try:
+    from api.tasks import router as tasks_router
+    from api.realtime import router as realtime_router
+    from api.ops import router as ops_router
+    from api.health import router as health_router
+    app.include_router(tasks_router)
+    app.include_router(realtime_router)
+    app.include_router(ops_router)
+    app.include_router(health_router)
+except Exception as _e:
+    import logging as _logging
+    _logging.getLogger("app").warning(f"Runtime API routers not loaded: {_e}")
+
 # Startup: initialise connectors (Slack/Teams) based on settings
 @app.on_event("startup")
 async def startup_connectors():
@@ -151,6 +165,13 @@ AGENTS_INFO = [
 async def startup():
     """Initialize database on startup."""
     await database.init_database()
+    # Also initialise runtime tables (idempotent; no-op when Redis/PG not configured)
+    try:
+        import db as db_module
+        await db_module.create_runtime_tables()
+    except Exception as _e:
+        import logging as _logging
+        _logging.getLogger("app").warning(f"Runtime table init skipped: {_e}")
     print("✅ MediaAgentIQ started successfully!")
     print(f"🌐 Dashboard: http://127.0.0.1:8000")
 
