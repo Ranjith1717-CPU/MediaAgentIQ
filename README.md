@@ -4,9 +4,21 @@
 
 19 specialized AI agents running **autonomously 24/7** across the full broadcast pipeline — from ingest to playout, captioning to compliance, deepfake detection to carbon intelligence. Agents are now reachable directly from **Slack and Microsoft Teams**.
 
-![Version](https://img.shields.io/badge/Version-3.3.0-blue) ![Python](https://img.shields.io/badge/Python-3.9+-green) ![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen) ![Agents](https://img.shields.io/badge/Agents-19-purple) ![Channels](https://img.shields.io/badge/Channels-Slack%20%7C%20Teams-orange) ![Memory](https://img.shields.io/badge/Memory-Persistent%20.md%20Logs-teal) ![HOPE](https://img.shields.io/badge/HOPE-Standing%20Instructions-red)
+![Version](https://img.shields.io/badge/Version-4.0.0-blue) ![Python](https://img.shields.io/badge/Python-3.9+-green) ![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen) ![Agents](https://img.shields.io/badge/Agents-19-purple) ![Channels](https://img.shields.io/badge/Channels-Slack%20%7C%20Teams-orange) ![Memory](https://img.shields.io/badge/Memory-Persistent%20.md%20Logs-teal) ![HOPE](https://img.shields.io/badge/HOPE-Standing%20Instructions-red) ![Queue](https://img.shields.io/badge/Queue-Redis%20Runtime-red) ![DB](https://img.shields.io/badge/DB-SQLite%20%7C%20PostgreSQL-lightgrey)
 
 ---
+
+## ✨ What's New in v4.0 — Live Runtime Edition
+
+- **⚡ Redis-Backed Task Queue** — Production-grade async task queue with 4 priority lanes (CRITICAL → HIGH → NORMAL → LOW). Durable, restartable Redis BRPOP worker — no task lost on process restart
+- **🔄 Auto-Retry with DLQ** — Tasks retry up to 3× with exponential backoff. Exhausted tasks land in a Dead Letter Queue with replay via `POST /ops/replay/{id}`
+- **📡 Server-Sent Events (SSE)** — Real-time task event streaming at `/api/realtime/events?task_id=`. Clients see `queued → running → completed` without polling
+- **🩺 /ops/health Endpoint** — Redis + DB check + live worker count in one call. Ready for load balancers and Docker healthchecks
+- **🗄️ SQLAlchemy Async ORM** — `runtime.db` (SQLite default, PostgreSQL in production). Fully separate from `mediaagentiq.db`
+- **🐳 Docker Compose Production Stack** — `docker-compose.prod.yml` wires postgres + redis + api + worker + watchdog. One command to production
+- **⚡ Live Runtime page in Streamlit** — New sidebar page: task submission, status polling, DLQ viewer, and health dashboard — all in demo mode with no Redis required
+- **📋 Alembic Migrations** — `alembic upgrade head` creates `tasks`, `task_events`, `dead_letters`, `worker_heartbeats`
+- **🔒 Full backward compatibility** — `database.py`, `orchestrator.py`, `streamlit_app.py`, and all existing routes untouched
 
 ## ✨ What's New in v3.3 — HOPE Engine Edition
 
@@ -283,7 +295,29 @@ uvicorn app:app --reload
 ```
 Open: **http://localhost:8000**  |  API Docs: **http://localhost:8000/docs**
 
-### Option 3: Autonomous Mode (19 agents running 24/7)
+### Option 3: Live Runtime (Redis queue + worker)
+```bash
+pip install -r requirements.txt
+docker run -d -p 6379:6379 redis:7-alpine
+alembic upgrade head
+uvicorn app:app --reload        # terminal 1
+python worker_runtime.py        # terminal 2
+```
+Submit a task:
+```bash
+curl -X POST http://localhost:8000/api/tasks/submit \
+  -H "Content-Type: application/json" \
+  -d '{"agent_key":"compliance","input_data":{"mode":"monitor"},"priority":"HIGH"}'
+```
+
+### Option 4: Full Production Stack (Docker)
+```bash
+cp .env.example .env
+docker compose -f docker-compose.prod.yml up -d
+curl http://localhost:8000/ops/health
+```
+
+### Option 5: Autonomous Mode (19 agents running 24/7)
 ```bash
 python orchestrator.py
 ```
@@ -428,6 +462,21 @@ MediaAgentIQ/
 │   ├── avid/                     #    Avid Media Central
 │   └── grass_valley/             #    NMOS IS-04/IS-05
 │
+├── db.py                          # 🗄️  SQLAlchemy async ORM — runtime persistence
+├── worker_runtime.py              # ⚡ Redis BRPOP worker — retry, DLQ, heartbeat
+├── alembic.ini                    # 📋 Alembic config
+├── alembic/                       # 📋 DB migrations (async-compatible)
+│   └── versions/001_task_runtime.py #  4 runtime tables
+├── repositories/                  # 🗄️  TaskRepository, EventRepository, DLQRepository
+├── queue/                         # ⚡ Redis broker, events, tasks, dispatcher
+├── api/                           # 🌐 Runtime API routers (additive)
+│   ├── tasks.py                   #    POST /api/tasks/submit, GET /api/tasks/{id}
+│   ├── realtime.py                #    GET /api/realtime/events (SSE)
+│   ├── ops.py                     #    /ops/cancel, /ops/replay, /ops/dlq
+│   └── health.py                  #    GET /ops/health
+├── docker-compose.prod.yml        # 🐳 Production: postgres+redis+api+worker+watchdog
+├── GO-LIVE.md                     # 📖 Startup guide + smoke test
+├── STAKEHOLDER_BRIEF.md           # 📄 Executive / investor brief
 └── .env.example                   # 🔑 Environment variables template
 ```
 
@@ -450,6 +499,14 @@ MEMORY_RECENT_CONTEXT_ENTRIES=5            # Entries injected into LLM prompts
 MEMORY_INTER_AGENT_MAX_ENTRIES=2000        # Max entries in inter_agent_comms.md
 MEMORY_TASK_HISTORY_MAX_ENTRIES=5000       # Max rows in task_history.md
 MEMORY_SYSTEM_STATE_INTERVAL_SECS=300      # system_state.md rewrite interval
+
+# Runtime Layer (NEW v4.0)
+REDIS_URL=redis://localhost:6379/0
+RUNTIME_DATABASE_URL=sqlite+aiosqlite:///runtime.db
+TASK_MAX_RETRIES=3
+TASK_RETRY_BACKOFF_SECONDS=5
+WORKER_CONCURRENCY=4
+AGENT_TIMEOUT_JSON={}
 
 # HOPE Engine (enabled by default — no API keys needed)
 HOPE_ENABLED=true                          # Set false to disable standing-instruction engine
@@ -579,7 +636,10 @@ tools = connector_registry.get_all_tool_definitions()
 | **CDN** | Akamai, CloudFront, Fastly |
 | **Newsroom** | iNews REST API, MOS Protocol |
 | **Playout** | Harmonic Polaris, GV Maestro REST |
-| **Database** | SQLite (async) |
+| **Database** | SQLite async (dev), PostgreSQL (production) |
+| **Task Queue** | Redis BRPOP, 4 priority lanes |
+| **Migrations** | Alembic (async-compatible) |
+| **Real-time** | Server-Sent Events (SSE), Redis pub/sub |
 | **Orchestration** | AsyncIO, Custom Scheduler |
 | **Agent Memory** | Persistent `.md` logs, per-agent + global audit, LLM context injection |
 | **HOPE Engine** | Standing-instruction `.md` rules, mute hours, rate limiting, daily digest |
@@ -596,7 +656,24 @@ tools = connector_registry.get_all_tool_definitions()
 
 ## 📈 Changelog
 
-### v3.3.0 (Latest) — HOPE Engine Edition
+### v4.0.0 (Latest) — Live Runtime Edition
+- ✅ `db.py` — SQLAlchemy async ORM, 4 models, SQLite/PostgreSQL, `create_runtime_tables()`
+- ✅ `repositories/` — TaskRepository (7 ops), EventRepository, DLQRepository (4 ops)
+- ✅ `queue/broker.py` — Redis client, TASK_QUEUES dict, CANCEL_SET, ping_redis()
+- ✅ `queue/events.py` — publish_event() to per-task + broadcast pub/sub channels
+- ✅ `queue/dispatcher.py` — 19-agent lazy singleton registry, execute_agent_task()
+- ✅ `worker_runtime.py` — BRPOP loop, semaphore concurrency, retry/backoff/DLQ, heartbeat
+- ✅ `api/tasks.py` — POST /api/tasks/submit + GET /api/tasks/{id}
+- ✅ `api/realtime.py` — SSE stream, keepalive ping, auto-close on terminal events
+- ✅ `api/ops.py` — cancel (Redis set + DB), replay (new task row), DLQ list
+- ✅ `api/health.py` — Redis ping + SELECT 1 + 60s heartbeat worker count
+- ✅ `alembic/` — async env.py + 001_task_runtime.py migration
+- ✅ `docker-compose.prod.yml` — 5 services with healthchecks + shared volumes
+- ✅ `GO-LIVE.md` + `STAKEHOLDER_BRIEF.md` — operations guide + executive brief
+- ✅ `settings.py` — 12 new runtime fields
+- ✅ `streamlit_app.py` — ⚡ Live Runtime page (4 tabs), sidebar runtime status badge
+
+### v3.3.0 — HOPE Engine Edition
 - ✅ `memory/hope_engine.py` — `HopeRule` dataclass + `HopeEngine` class (add/cancel/list/evaluate/fire)
 - ✅ `memory/user_profile.py` — `UserProfile` reads `memory/system/USER.md` for Slack channel routing
 - ✅ `memory/system/USER.md` + `IDENTITY.md` — OpenClaw-style platform identity + user preference files
@@ -665,10 +742,15 @@ tools = connector_registry.get_all_tool_definitions()
 - [ ] Graphics Automation Agent (Vizrt / Chyron integration)
 - [ ] Revenue Intelligence Agent
 - [ ] NOC Monitoring Agent
-- [ ] WebSocket real-time updates
+- [x] Redis-backed durable task queue with priority routing
+- [x] Server-Sent Events (SSE) real-time task streaming
+- [x] Dead Letter Queue with replay API
+- [x] Alembic database migrations
+- [x] Docker Compose production stack
+- [ ] WebSocket bi-directional channels
 - [ ] User authentication
 - [ ] Kubernetes deployment
 
 ---
 
-**MediaAgentIQ v3.3.0** | AI-Powered Broadcast Operations Platform — HOPE Engine Edition
+**MediaAgentIQ v4.0.0** | AI-Powered Broadcast Operations Platform — Live Runtime Edition

@@ -813,6 +813,8 @@ with st.sidebar:
             "🔌 Workspace Integration",
             "🔗 Connector Status",
             "🧠 Agent Memory",
+            # Runtime
+            "⚡ Live Runtime",
         ],
         label_visibility="collapsed"
     )
@@ -828,6 +830,17 @@ with st.sidebar:
 
     st.success("All 14 Agents Online")
     st.info("💬 Slack + Teams Gateway Active")
+    # Runtime layer status (graceful if Redis not running)
+    try:
+        import asyncio as _asyncio
+        from queue.broker import ping_redis as _ping_redis
+        _redis_ok = _asyncio.run(_ping_redis()) if not _asyncio.get_event_loop().is_running() else False
+    except Exception:
+        _redis_ok = False
+    if _redis_ok:
+        st.success("⚡ Runtime Queue Active")
+    else:
+        st.warning("⚡ Runtime Queue: offline")
 
     # Mode selector
     st.markdown("**Processing Mode**")
@@ -6199,12 +6212,357 @@ Pending: 3 | Running: 1 | Completed today: 1,247
         st.code(system_state, language="markdown")
 
 
+# ============== Live Runtime Page ==============
+
+elif page == "⚡ Live Runtime":
+    st.markdown("## ⚡ Live Runtime")
+    st.markdown("Redis-backed task queue with priority routing, SSE event streaming, and dead-letter management.")
+
+    # --- Check runtime availability ---
+    _runtime_available = False
+    _redis_status = "unreachable"
+    _db_status = "unknown"
+    _worker_count = 0
+    try:
+        import asyncio as _rt_asyncio
+        import httpx as _rt_httpx
+        async def _health_check():
+            try:
+                async with _rt_httpx.AsyncClient(timeout=2.0) as c:
+                    r = await c.get("http://127.0.0.1:8000/ops/health")
+                    return r.json()
+            except Exception:
+                return None
+        try:
+            _loop = _rt_asyncio.get_event_loop()
+            if _loop.is_running():
+                _hdata = None
+            else:
+                _hdata = _loop.run_until_complete(_health_check())
+        except RuntimeError:
+            _hdata = None
+        if _hdata:
+            _redis_status = _hdata.get("redis", "unreachable")
+            _db_status = _hdata.get("db", "unknown")
+            _worker_count = _hdata.get("worker_count", 0)
+            _runtime_available = _hdata.get("status") == "healthy"
+    except Exception:
+        pass
+
+    if not _runtime_available:
+        st.info(
+            "**Runtime API not reachable.** Start the FastAPI server to enable live queueing:\n\n"
+            "```bash\nuvicorn app:app --reload          # terminal 1\n"
+            "python worker_runtime.py           # terminal 2\n"
+            "```\n\nShowing demo data below."
+        )
+
+    rt_tab1, rt_tab2, rt_tab3, rt_tab4 = st.tabs([
+        "📤 Submit Task", "📊 Task Status", "☠️ Dead Letter Queue", "🩺 Health & Workers"
+    ])
+
+    # ── Tab 1: Submit Task ──────────────────────────────────────────
+    with rt_tab1:
+        st.markdown("### Submit an Agent Task")
+        _AGENT_KEYS = [
+            "compliance", "caption", "clip", "archive", "social", "localization",
+            "rights", "trending", "deepfake", "fact_check", "audience",
+            "production_director", "brand_safety", "carbon",
+            "ingest_transcode", "signal_quality", "playout_scheduling",
+            "ott_distribution", "newsroom_integration",
+        ]
+        _AGENT_LABELS = {
+            "compliance": "⚖️ Compliance", "caption": "📝 Caption", "clip": "🎬 Clip",
+            "archive": "🔍 Archive", "social": "📱 Social Publishing",
+            "localization": "🌍 Localization", "rights": "📜 Rights",
+            "trending": "📈 Trending", "deepfake": "🕵️ Deepfake Detection",
+            "fact_check": "✅ Live Fact-Check", "audience": "📊 Audience Intelligence",
+            "production_director": "🎬 AI Production Director",
+            "brand_safety": "🛡️ Brand Safety", "carbon": "🌿 Carbon Intelligence",
+            "ingest_transcode": "📥 Ingest & Transcode",
+            "signal_quality": "📡 Signal Quality", "playout_scheduling": "📺 Playout Scheduling",
+            "ott_distribution": "🌐 OTT Distribution", "newsroom_integration": "📰 Newsroom Integration",
+        }
+        _DEMO_INPUTS = {
+            "compliance": '{"mode": "monitor", "transcript": "Breaking news coverage"}',
+            "caption": '{"file": "demo_broadcast.mp4"}',
+            "clip": '{"file": "live_stream.mp4", "duration": 30}',
+            "deepfake": '{"file": "interview_clip.mp4", "sensitivity": "balanced"}',
+            "trending": '{"topics": ["elections", "AI", "climate"]}',
+            "brand_safety": '{"content_id": "ad_slot_0930", "advertiser": "TechCorp"}',
+        }
+
+        col_a, col_b = st.columns(2)
+        with col_a:
+            _sel_agent_label = st.selectbox(
+                "Agent",
+                [_AGENT_LABELS[k] for k in _AGENT_KEYS],
+                key="rt_agent_select",
+            )
+            _sel_agent_key = _AGENT_KEYS[[_AGENT_LABELS[k] for k in _AGENT_KEYS].index(_sel_agent_label)]
+        with col_b:
+            _sel_priority = st.selectbox(
+                "Priority",
+                ["NORMAL", "HIGH", "CRITICAL", "LOW"],
+                key="rt_priority_select",
+            )
+
+        _default_input = _DEMO_INPUTS.get(_sel_agent_key, '{"mode": "demo"}')
+        _input_json = st.text_area(
+            "Input JSON",
+            value=_default_input,
+            height=100,
+            key="rt_input_json",
+        )
+
+        if st.button("📤 Submit Task", key="rt_submit_btn", type="primary"):
+            import json as _json
+            if not _runtime_available:
+                # Demo mode — simulate response
+                import uuid as _uuid
+                _fake_id = str(_uuid.uuid4())
+                st.success(f"**Task submitted (demo):** `{_fake_id}`")
+                st.json({"task_id": _fake_id, "status": "QUEUED", "agent_key": _sel_agent_key, "priority": _sel_priority})
+                st.session_state["rt_last_task_id"] = _fake_id
+                st.info("ℹ️ Demo mode — no real worker is processing this task.")
+            else:
+                try:
+                    import httpx as _httpx
+                    import asyncio as _rt_asyncio2
+                    _payload = {"agent_key": _sel_agent_key, "input_data": _json.loads(_input_json), "priority": _sel_priority}
+                    async def _submit():
+                        async with _httpx.AsyncClient(timeout=5.0) as c:
+                            return (await c.post("http://127.0.0.1:8000/api/tasks/submit", json=_payload)).json()
+                    try:
+                        _result = _rt_asyncio2.get_event_loop().run_until_complete(_submit())
+                    except RuntimeError:
+                        _result = {"error": "Could not run async call from Streamlit context"}
+                    if "task_id" in _result:
+                        st.success(f"**Task submitted:** `{_result['task_id']}`")
+                        st.json(_result)
+                        st.session_state["rt_last_task_id"] = _result["task_id"]
+                    else:
+                        st.error(f"Submission failed: {_result}")
+                except Exception as _e:
+                    st.error(f"Error: {_e}")
+
+        if "rt_last_task_id" in st.session_state:
+            st.caption(f"Last task ID: `{st.session_state['rt_last_task_id']}`")
+
+    # ── Tab 2: Task Status ──────────────────────────────────────────
+    with rt_tab2:
+        st.markdown("### Task Status")
+
+        _default_tid = st.session_state.get("rt_last_task_id", "")
+        _poll_task_id = st.text_input("Task ID", value=_default_tid, placeholder="Paste task UUID here", key="rt_poll_id")
+
+        col_p1, col_p2 = st.columns([1, 4])
+        with col_p1:
+            _do_poll = st.button("🔄 Refresh", key="rt_poll_btn")
+        with col_p2:
+            st.caption("Polls the runtime DB for current status")
+
+        if _do_poll and _poll_task_id:
+            if not _runtime_available:
+                # Demo response
+                import random as _random
+                import uuid as _uuid2
+                _demo_status = _random.choice(["QUEUED", "RUNNING", "COMPLETED"])
+                st.json({
+                    "task_id": _poll_task_id,
+                    "agent_key": "compliance",
+                    "priority": "NORMAL",
+                    "status": _demo_status,
+                    "retries": 0,
+                    "max_retries": 3,
+                    "worker_id": "worker-demo-1234" if _demo_status != "QUEUED" else None,
+                    "created_at": "2026-03-11T07:38:00",
+                    "started_at": "2026-03-11T07:38:01" if _demo_status != "QUEUED" else None,
+                    "completed_at": "2026-03-11T07:38:04" if _demo_status == "COMPLETED" else None,
+                    "output_data": {"success": True, "data": {"issues": [], "score": 12}} if _demo_status == "COMPLETED" else None,
+                })
+                _badge = {"QUEUED": "🟡 QUEUED", "RUNNING": "🔵 RUNNING", "COMPLETED": "✅ COMPLETED"}.get(_demo_status, _demo_status)
+                st.markdown(f"**Status:** {_badge}")
+            else:
+                try:
+                    import httpx as _httpx2
+                    import asyncio as _rt_asyncio3
+                    async def _poll():
+                        async with _httpx2.AsyncClient(timeout=5.0) as c:
+                            r = await c.get(f"http://127.0.0.1:8000/api/tasks/{_poll_task_id}")
+                            return r.json()
+                    try:
+                        _task_data = _rt_asyncio3.get_event_loop().run_until_complete(_poll())
+                    except RuntimeError:
+                        _task_data = {"error": "Could not run async call"}
+                    if "error" not in _task_data:
+                        _s = _task_data.get("status", "")
+                        _badge = {"QUEUED": "🟡 QUEUED", "RUNNING": "🔵 RUNNING", "COMPLETED": "✅ COMPLETED", "FAILED": "🔴 FAILED", "CANCELLED": "⚫ CANCELLED"}.get(_s, _s)
+                        st.markdown(f"**Status:** {_badge}")
+                        st.json(_task_data)
+                    else:
+                        st.error(str(_task_data))
+                except Exception as _e:
+                    st.error(f"Error: {_e}")
+
+        st.divider()
+        st.markdown("**SSE Event Stream** — watch live events from the terminal:")
+        if _poll_task_id:
+            st.code(f"curl -N 'http://127.0.0.1:8000/api/realtime/events?task_id={_poll_task_id}'", language="bash")
+        else:
+            st.code("curl -N 'http://127.0.0.1:8000/api/realtime/events?task_id=<your-task-id>'", language="bash")
+        st.caption("Stream auto-closes when task reaches COMPLETED / FAILED / CANCELLED.")
+
+    # ── Tab 3: Dead Letter Queue ────────────────────────────────────
+    with rt_tab3:
+        st.markdown("### Dead Letter Queue")
+        st.caption("Tasks that exhausted all retries are moved here. You can inspect and replay them.")
+
+        if st.button("🔄 Refresh DLQ", key="rt_dlq_refresh"):
+            if not _runtime_available:
+                _dlq_data = [
+                    {"id": 1, "task_id": "aaa-111", "agent_key": "deepfake", "error_message": "Timeout after 30s", "retries": 3, "replayed": False, "created_at": "2026-03-11T06:15:00"},
+                    {"id": 2, "task_id": "bbb-222", "agent_key": "caption", "error_message": "Connection refused", "retries": 3, "replayed": True, "created_at": "2026-03-11T05:30:00"},
+                ]
+            else:
+                try:
+                    import httpx as _httpx3
+                    import asyncio as _rt_asyncio4
+                    async def _dlq():
+                        async with _httpx3.AsyncClient(timeout=5.0) as c:
+                            return (await c.get("http://127.0.0.1:8000/ops/dlq")).json()
+                    try:
+                        _dlq_data = _rt_asyncio4.get_event_loop().run_until_complete(_dlq())
+                    except RuntimeError:
+                        _dlq_data = []
+                except Exception:
+                    _dlq_data = []
+            st.session_state["rt_dlq_data"] = _dlq_data
+
+        _dlq_rows = st.session_state.get("rt_dlq_data", [
+            {"id": 1, "task_id": "aaa-111-bbb-222", "agent_key": "deepfake", "error_message": "Timeout after 30s", "retries": 3, "replayed": False, "created_at": "2026-03-11T06:15:00"},
+            {"id": 2, "task_id": "ccc-333-ddd-444", "agent_key": "caption", "error_message": "Connection refused", "retries": 3, "replayed": True, "created_at": "2026-03-11T05:30:00"},
+        ])
+
+        if not _dlq_rows:
+            st.success("✅ Dead letter queue is empty.")
+        else:
+            for _dlq_entry in _dlq_rows:
+                _replayed_badge = "✅ Replayed" if _dlq_entry.get("replayed") else "⏳ Pending"
+                with st.expander(f"**DLQ #{_dlq_entry['id']}** — `{_dlq_entry['agent_key']}` — {_dlq_entry['error_message'][:50]} — {_replayed_badge}"):
+                    col_d1, col_d2 = st.columns(2)
+                    with col_d1:
+                        st.markdown(f"**Task ID:** `{_dlq_entry['task_id']}`")
+                        st.markdown(f"**Agent:** `{_dlq_entry['agent_key']}`")
+                        st.markdown(f"**Retries:** {_dlq_entry['retries']}")
+                    with col_d2:
+                        st.markdown(f"**Error:** {_dlq_entry['error_message']}")
+                        st.markdown(f"**Created:** {_dlq_entry['created_at']}")
+                        st.markdown(f"**Status:** {_replayed_badge}")
+                    if not _dlq_entry.get("replayed"):
+                        if st.button(f"↺ Replay DLQ #{_dlq_entry['id']}", key=f"rt_replay_{_dlq_entry['id']}"):
+                            if not _runtime_available:
+                                st.info(f"Demo mode — DLQ #{_dlq_entry['id']} would be replayed as a new task.")
+                            else:
+                                try:
+                                    import httpx as _httpx4
+                                    import asyncio as _rt_asyncio5
+                                    async def _replay(_did):
+                                        async with _httpx4.AsyncClient(timeout=5.0) as c:
+                                            return (await c.post(f"http://127.0.0.1:8000/ops/replay/{_did}")).json()
+                                    try:
+                                        _rr = _rt_asyncio5.get_event_loop().run_until_complete(_replay(_dlq_entry["id"]))
+                                    except RuntimeError:
+                                        _rr = {"error": "async error"}
+                                    if _rr.get("replayed"):
+                                        st.success(f"Replayed → new task `{_rr.get('new_task_id')}`")
+                                    else:
+                                        st.error(str(_rr))
+                                except Exception as _e:
+                                    st.error(str(_e))
+
+    # ── Tab 4: Health & Workers ─────────────────────────────────────
+    with rt_tab4:
+        st.markdown("### System Health")
+
+        if st.button("🔄 Refresh Health", key="rt_health_refresh"):
+            try:
+                import httpx as _httpx5
+                import asyncio as _rt_asyncio6
+                async def _health2():
+                    async with _httpx5.AsyncClient(timeout=3.0) as c:
+                        return (await c.get("http://127.0.0.1:8000/ops/health")).json()
+                try:
+                    _live_health = _rt_asyncio6.get_event_loop().run_until_complete(_health2())
+                except RuntimeError:
+                    _live_health = None
+            except Exception:
+                _live_health = None
+            if _live_health:
+                st.session_state["rt_health_data"] = _live_health
+
+        _hd = st.session_state.get("rt_health_data", {
+            "redis": _redis_status, "db": _db_status,
+            "worker_count": _worker_count,
+            "status": "healthy" if _runtime_available else "degraded",
+        })
+
+        col_h1, col_h2, col_h3, col_h4 = st.columns(4)
+        with col_h1:
+            _r_icon = "✅" if _hd.get("redis") == "ok" else "🔴"
+            st.metric("Redis", f"{_r_icon} {_hd.get('redis', 'unknown')}")
+        with col_h2:
+            _d_icon = "✅" if _hd.get("db") == "ok" else "🔴"
+            st.metric("Database", f"{_d_icon} {_hd.get('db', 'unknown')}")
+        with col_h3:
+            _w = _hd.get("worker_count", 0)
+            _w_icon = "🟢" if _w > 0 else "🟡"
+            st.metric("Workers", f"{_w_icon} {_w} active")
+        with col_h4:
+            _s_icon = "✅" if _hd.get("status") == "healthy" else "⚠️"
+            st.metric("Status", f"{_s_icon} {_hd.get('status', 'unknown')}")
+
+        st.divider()
+        st.markdown("**Quick Start Commands**")
+        st.code(
+            "# Terminal 1 — API server\nuvicorn app:app --reload\n\n"
+            "# Terminal 2 — Worker\npython worker_runtime.py\n\n"
+            "# Run migrations (first time only)\nalembic upgrade head",
+            language="bash",
+        )
+
+        st.markdown("**Priority Queue Keys**")
+        _queue_info = {
+            "CRITICAL": "miq:queue:critical",
+            "HIGH":     "miq:queue:high",
+            "NORMAL":   "miq:queue:normal",
+            "LOW":      "miq:queue:low",
+        }
+        for _p, _k in _queue_info.items():
+            st.markdown(f"- `{_p}` → `{_k}`")
+
+        st.divider()
+        st.markdown("**Runtime API Reference**")
+        _api_ref = [
+            ("POST", "/api/tasks/submit", "Submit a new agent task"),
+            ("GET",  "/api/tasks/{id}", "Poll task status"),
+            ("GET",  "/api/realtime/events?task_id=", "SSE event stream"),
+            ("POST", "/ops/cancel/{task_id}", "Cancel a task"),
+            ("GET",  "/ops/dlq", "List dead-letter entries"),
+            ("POST", "/ops/replay/{dlq_id}", "Replay a dead-letter entry"),
+            ("GET",  "/ops/health", "System health check"),
+        ]
+        import pandas as _pd
+        _df_api = _pd.DataFrame(_api_ref, columns=["Method", "Path", "Description"])
+        st.dataframe(_df_api, use_container_width=True, hide_index=True)
+
+
 # ============== Footer ==============
 
 st.divider()
 col1, col2, col3 = st.columns(3)
 with col1:
-    st.caption("MediaAgentIQ v3.1.0 | Enterprise Edition")
+    st.caption("MediaAgentIQ v4.0.0 | Live Runtime Edition")
 with col2:
     st.caption("AI-Powered Media Operations Platform")
 with col3:

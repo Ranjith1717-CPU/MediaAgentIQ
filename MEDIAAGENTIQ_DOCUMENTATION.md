@@ -1,4 +1,4 @@
-# MediaAgentIQ v3.3 — Complete Documentation
+# MediaAgentIQ v4.0 — Complete Documentation
 
 ## 📋 Overview
 
@@ -13,6 +13,7 @@ MediaAgentIQ is an enterprise AI-powered agent platform for media and broadcast 
 - 🔌 **MCP Connector Framework** — Plugin architecture. Any external system exposed as a tool agents can discover and call
 - 🚀 **All-in-One Workflow** — Process content through all 19 agents simultaneously
 - 🛡️ **Future-Ready** — 6 market-gap agents solving problems no broadcast vendor has tackled
+- ⚡ **Live Runtime Layer** — Redis-backed task queue, SSE streaming, DLQ, health endpoints — production durability without touching existing code
 
 ---
 
@@ -1099,9 +1100,86 @@ CMD ["sh", "-c", "streamlit run streamlit_app.py & uvicorn app:app --host 0.0.0.
 
 ---
 
+
+---
+
+## ⚡ Runtime Layer — Live Task Queue (v4.0)
+
+### Architecture
+
+```
+Client → POST /api/tasks/submit
+              │
+     Redis Priority Queue
+   CRITICAL → HIGH → NORMAL → LOW
+              │ BRPOP
+     worker_runtime.py
+   claim → execute → complete / retry → DLQ
+              │
+      DB rows + SSE pub/sub + heartbeat
+```
+
+### Priority Queues
+
+| Priority | Redis Key | Use Case |
+|----------|-----------|----------|
+| CRITICAL | `miq:queue:critical` | Breaking news, deepfake alerts |
+| HIGH | `miq:queue:high` | Live fact-check, signal quality NOC |
+| NORMAL | `miq:queue:normal` | Caption, clip, archive tasks |
+| LOW | `miq:queue:low` | Carbon reporting, background analytics |
+
+### Task Lifecycle
+```
+QUEUED → RUNNING → COMPLETED
+                 ↘ FAILED → retry 1 (5s) → retry 2 (10s) → retry 3 (15s) → DeadLetter
+QUEUED → CANCELLED (via /ops/cancel)
+```
+
+### API Reference
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/tasks/submit` | `{agent_key, input_data, priority}` → `{task_id, status}` |
+| GET | `/api/tasks/{task_id}` | Status poll |
+| GET | `/api/realtime/events?task_id=` | SSE stream |
+| POST | `/ops/cancel/{task_id}` | Cancel task |
+| GET | `/ops/dlq` | List dead letters |
+| POST | `/ops/replay/{dlq_id}` | Replay dead letter |
+| GET | `/ops/health` | Redis + DB + workers |
+
+### Key Settings
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `REDIS_URL` | `redis://localhost:6379/0` | Redis connection |
+| `RUNTIME_DATABASE_URL` | `sqlite+aiosqlite:///runtime.db` | Async DB URL |
+| `TASK_MAX_RETRIES` | `3` | Retries before DLQ |
+| `WORKER_CONCURRENCY` | `4` | Parallel tasks per worker |
+| `AGENT_TIMEOUT_JSON` | `{}` | Per-agent timeout overrides |
+
+### Backward Compatibility
+- `database.py`, `orchestrator.py`, `streamlit_app.py` — all untouched
+- New routes mount alongside existing ones under `/api/tasks/` and `/ops/`
+- Demo mode works fully with no Redis (routers degrade gracefully)
+
+---
+
 ## 📈 Changelog
 
-### v3.3.0 (Latest) — HOPE Engine Edition
+### v4.0.0 (Latest) — Live Runtime Edition
+- ✅ `db.py` — SQLAlchemy async ORM, 4 models, SQLite/PostgreSQL, idempotent table creation
+- ✅ `repositories/` — TaskRepository (create/claim/complete/fail/cancel/retry), EventRepository, DLQRepository
+- ✅ `queue/` — broker (TASK_QUEUES, CANCEL_SET), events (pub/sub publisher), tasks (enqueue), dispatcher (19 agents)
+- ✅ `worker_runtime.py` — BRPOP, semaphore concurrency, cancel check, retry/backoff/DLQ, 30s heartbeat
+- ✅ `api/` — tasks (submit/poll), realtime (SSE), ops (cancel/replay/dlq), health
+- ✅ `alembic/` — async-compatible migrations, 001_task_runtime.py
+- ✅ `docker-compose.prod.yml` — 5 services (postgres, redis, api, worker, watchdog)
+- ✅ `GO-LIVE.md` + `STAKEHOLDER_BRIEF.md`
+- ✅ `settings.py` — 12 new runtime fields
+- ✅ `streamlit_app.py` — ⚡ Live Runtime page (submit, status, DLQ, health tabs)
+- ✅ Full backward compatibility across all existing code paths
+
+### v3.3.0 — HOPE Engine Edition
 - ✅ `memory/hope_engine.py` — `HopeRule` dataclass + `HopeEngine` with full rule lifecycle
 - ✅ `memory/user_profile.py` — `UserProfile` parses `USER.md` for per-priority Slack channel routing
 - ✅ `memory/system/USER.md` + `IDENTITY.md` — OpenClaw-style companion files
@@ -1154,4 +1232,4 @@ CMD ["sh", "-c", "streamlit run streamlit_app.py & uvicorn app:app --host 0.0.0.
 
 ---
 
-*Last Updated: February 2026 | MediaAgentIQ v3.3.0 — HOPE Engine Edition*
+*Last Updated: March 2026 | MediaAgentIQ v4.0.0 — Live Runtime Edition*
