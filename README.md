@@ -649,8 +649,137 @@ tools = connector_registry.get_all_tool_definitions()
 ## 📖 Documentation
 
 - [Full Documentation](MEDIAAGENTIQ_DOCUMENTATION.md)
+- [Stakeholder Brief](STAKEHOLDER_BRIEF.md)
+- [Go-Live Guide](GO-LIVE.md)
 - API Reference: `http://localhost:8000/docs`
 - Gateway Health: `http://localhost:8000/gateway/health`
+
+---
+
+## 🔑 Production API & Third-Party Requirements
+
+### Tier 1 — Required for production mode (all agents)
+
+#### AI / LLM
+| Service | Agents that use it | Key / Secret | Where to get it |
+|---------|-------------------|-------------|-----------------|
+| **OpenAI** | Caption (Whisper), Clip, Compliance, Deepfake, Fact-Check, Brand Safety, Archive, Production Director | `OPENAI_API_KEY` | platform.openai.com |
+| **ElevenLabs** | Localization (voice dubbing) | `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID` | elevenlabs.io |
+
+#### Runtime Infrastructure
+| Service | Purpose | Env var |
+|---------|---------|---------|
+| **Redis ≥ 7** | Task queue (BRPOP), SSE pub/sub, cancel set | `REDIS_URL` |
+| **PostgreSQL ≥ 15** | Runtime DB — tasks, events, DLQ, heartbeats | `RUNTIME_DATABASE_URL` |
+
+---
+
+### Tier 2 — Required for Slack / Teams channels
+
+| Service | Purpose | Env vars |
+|---------|---------|---------|
+| **Slack** | `/miq-*` slash commands, HOPE alerts, Block Kit cards | `SLACK_BOT_TOKEN` (xoxb-...), `SLACK_SIGNING_SECRET`, `SLACK_DEFAULT_CHANNEL` |
+| **Microsoft Teams** | Adaptive Cards, proactive agent alerts | `TEAMS_APP_ID`, `TEAMS_APP_PASSWORD`, `TEAMS_TENANT_ID` |
+
+**Slack setup:** api.slack.com → Bot Token scopes: `chat:write`, `channels:history`, `commands` → public HTTPS URL for webhooks
+**Teams setup:** Azure Bot Service → App ID + Password from Azure AD → set messaging endpoint to `https://your-domain/teams/messages`
+
+---
+
+### Tier 3 — Required for broadcast pipeline agents
+
+#### Cloud Transcoding & Packaging (Ingest + OTT agents)
+| Service | Purpose | Env vars |
+|---------|---------|---------|
+| **AWS MediaConvert** | Professional video transcoding | `AWS_MEDIACONVERT_ENDPOINT`, `AWS_MEDIACONVERT_ROLE_ARN` |
+| **AWS MediaPackage** | HLS/DASH stream packaging | `AWS_MEDIAPACKAGE_CHANNEL_ID` |
+| **FFmpeg** | Local transcoding fallback (no key needed) | `INGEST_USE_CLOUD=false` |
+
+#### CDN / Distribution (OTT Distribution Agent)
+| Service | Env var |
+|---------|---------|
+| **CloudFront** (default) | `CDN_PROVIDER=cloudfront`, `CDN_ORIGIN_URL` |
+| **Akamai** | `CDN_PROVIDER=akamai` |
+| **Fastly** | `CDN_PROVIDER=fastly` |
+
+#### Broadcast Automation (Playout Agent)
+| Service | Purpose | Env vars |
+|---------|---------|---------|
+| **Harmonic Polaris** | Playout scheduling, SCTE-35 break injection | `AUTOMATION_SERVER_URL`, `AUTOMATION_SERVER_TYPE=harmonic` |
+| **GV Maestro** | Playout automation | `AUTOMATION_SERVER_TYPE=gv_maestro` |
+| **Ross OverDrive** | Playout automation | `AUTOMATION_SERVER_TYPE=ross_overdrive` |
+
+#### Newsroom (Newsroom Integration Agent)
+| Service | Purpose | Env var |
+|---------|---------|---------|
+| **iNews** | Rundown sync, MOS protocol, wire ingestion | `INEWS_API_URL` |
+| **AP ENPS** | Alternative newsroom system | `ENPS_API_URL` |
+
+#### Media Asset Management (Archive + Rights agents)
+| Service | Purpose | Env vars |
+|---------|---------|---------|
+| **Avid Media Central** | MAM queries, asset metadata | `AVID_HOST`, `AVID_USERNAME`, `AVID_PASSWORD`, `AVID_WORKSPACE` |
+| **NMOS IS-04/IS-05** | Grass Valley signal routing | `NMOS_REGISTRY_URL`, `NMOS_NODE_ID` |
+
+---
+
+### Tier 4 — Scale-up infrastructure (not in settings.py)
+
+| Service | Why you need it | When to add |
+|---------|----------------|-------------|
+| **AWS S3 / GCS** | Store uploaded media, outputs, memory archives | Day 1 in production |
+| **Upstash Redis** | Managed Redis, serverless pricing | Easy alternative to self-hosted |
+| **Supabase / Neon** | Managed PostgreSQL | Easy alternative to self-hosted |
+| **Cloudflare / AWS ALB** | HTTPS + load balancer (required for Slack/Teams webhooks) | Before going public |
+| **Datadog / Grafana Cloud** | Worker heartbeat monitoring, queue depth metrics | When workers > 2 |
+| **PagerDuty / OpsGenie** | Alert on `/ops/health` degraded | NOC integration |
+| **AWS Elemental** | Broadcast-grade transcoding at scale | 24/7 live channel ops |
+| **Kubernetes + Helm** | Scale workers to N replicas with HPA | Multi-channel scale |
+
+---
+
+### Minimum viable production `.env`
+
+```bash
+# ── AI (required for PRODUCTION_MODE=true) ──────────────────────
+OPENAI_API_KEY=sk-...
+ELEVENLABS_API_KEY=...
+
+# ── Runtime queue ────────────────────────────────────────────────
+REDIS_URL=redis://your-redis-host:6379/0
+RUNTIME_DATABASE_URL=postgresql+asyncpg://user:pass@db-host/mediaagentiq
+
+# ── Channels ─────────────────────────────────────────────────────
+SLACK_BOT_TOKEN=xoxb-...
+SLACK_SIGNING_SECRET=...
+TEAMS_APP_ID=...
+TEAMS_APP_PASSWORD=...
+
+# ── Broadcast pipeline (add only what applies) ───────────────────
+AWS_MEDIACONVERT_ENDPOINT=https://....mediaconvert.us-east-1.amazonaws.com
+AWS_MEDIACONVERT_ROLE_ARN=arn:aws:iam::123456789:role/MediaConvertRole
+CDN_PROVIDER=cloudfront
+CDN_ORIGIN_URL=https://origin.yournetwork.com
+AUTOMATION_SERVER_URL=http://harmonic-server:8080/api
+AUTOMATION_SERVER_TYPE=harmonic
+INEWS_API_URL=http://inews-server/api
+
+# ── MAM (if using Avid) ──────────────────────────────────────────
+AVID_HOST=https://mediacentral.yournetwork.com
+AVID_USERNAME=miq-service
+AVID_PASSWORD=...
+AVID_MOCK_MODE=false
+
+# ── Mode ─────────────────────────────────────────────────────────
+PRODUCTION_MODE=true
+
+# ── Runtime tuning ───────────────────────────────────────────────
+TASK_MAX_RETRIES=3
+WORKER_CONCURRENCY=4
+AGENT_TIMEOUT_JSON={"deepfake": 90, "caption": 120, "ingest_transcode": 300}
+```
+
+> **Demo mode:** Set `PRODUCTION_MODE=false` — all 19 agents return mock data, the full Streamlit UI works, HOPE Engine runs, and the Live Runtime page operates in demo mode. Redis is the only dependency you cannot mock.
 
 ---
 

@@ -1164,6 +1164,207 @@ QUEUED → CANCELLED (via /ops/cancel)
 
 ---
 
+## 🔑 Production API & Third-Party Requirements
+
+### Tier 1 — Required for production mode
+
+#### AI / LLM APIs
+
+| Service | Agents that use it | Credential env vars | Notes |
+|---------|-------------------|--------------------|----|
+| **OpenAI** | Caption (Whisper transcription), Clip (GPT-4 Vision), Compliance, Deepfake Detection, Live Fact-Check, Brand Safety, Archive, AI Production Director | `OPENAI_API_KEY` | `OPENAI_MODEL` defaults to `gpt-4-turbo-preview`; `OPENAI_WHISPER_MODEL` defaults to `whisper-1` |
+| **ElevenLabs** | Localization Agent — voice dubbing into target languages | `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID` | Voice ID `21m00Tcm4TlvDq8ikWAM` is default Rachel voice |
+
+#### Runtime Infrastructure
+
+| Service | Purpose | Env var | Notes |
+|---------|---------|---------|-------|
+| **Redis ≥ 7** | Task queue BRPOP, SSE pub/sub channels, cancel set | `REDIS_URL` | `redis://localhost:6379/0` default. Managed: Upstash, Redis Cloud, AWS ElastiCache |
+| **PostgreSQL ≥ 15** | Runtime DB (tasks, events, DLQ, heartbeats) | `RUNTIME_DATABASE_URL` | `postgresql+asyncpg://user:pass@host/db`. SQLite used in dev |
+
+---
+
+### Tier 2 — Slack & Teams channels
+
+| Service | Purpose | Credential env vars | Setup |
+|---------|---------|--------------------|----|
+| **Slack** | `/miq-*` slash commands, HOPE alerts, Block Kit cards, interactive buttons | `SLACK_BOT_TOKEN` (xoxb-...), `SLACK_SIGNING_SECRET`, `SLACK_DEFAULT_CHANNEL` | api.slack.com → Bot scopes: `chat:write`, `channels:history`, `commands` |
+| **Microsoft Teams** | Adaptive Cards, proactive agent alerts, Bot Framework auth | `TEAMS_APP_ID`, `TEAMS_APP_PASSWORD`, `TEAMS_TENANT_ID` | Azure Bot Service registration → set messaging endpoint to `/teams/messages` |
+
+Both require a **public HTTPS endpoint** — use Cloudflare Tunnel, ngrok (dev), or a cloud-hosted deployment.
+
+---
+
+### Tier 3 — Broadcast pipeline agents
+
+#### Transcoding & Packaging
+
+| Service | Agent | Env vars | Alt |
+|---------|-------|---------|-----|
+| **AWS MediaConvert** | Ingest & Transcode | `AWS_MEDIACONVERT_ENDPOINT`, `AWS_MEDIACONVERT_ROLE_ARN` | Set `INGEST_USE_CLOUD=false` to use local FFmpeg instead |
+| **AWS MediaPackage** | OTT Distribution | `AWS_MEDIAPACKAGE_CHANNEL_ID` | Required for HLS/DASH origin packaging |
+| **FFmpeg** | Ingest & Transcode, Signal Quality | No key — binary on PATH | `ffmpeg`, `ffprobe` must be installed |
+
+#### CDN / Distribution
+
+| Provider | Env vars | Notes |
+|---------|---------|-------|
+| **CloudFront** (default) | `CDN_PROVIDER=cloudfront`, `CDN_ORIGIN_URL` | AWS credentials via IAM role or `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` |
+| **Akamai** | `CDN_PROVIDER=akamai`, `CDN_ORIGIN_URL` | Requires Akamai Fast Purge API key |
+| **Fastly** | `CDN_PROVIDER=fastly`, `CDN_ORIGIN_URL` | Requires Fastly API token |
+
+#### Playout Automation
+
+| System | Env vars | Notes |
+|--------|---------|-------|
+| **Harmonic Polaris** (default) | `AUTOMATION_SERVER_URL`, `AUTOMATION_SERVER_TYPE=harmonic` | REST API on port 8080 by default |
+| **GV Maestro** | `AUTOMATION_SERVER_TYPE=gv_maestro` | Same URL var |
+| **Ross OverDrive** | `AUTOMATION_SERVER_TYPE=ross_overdrive` | Same URL var |
+
+#### Newsroom Systems
+
+| System | Env var | Notes |
+|--------|---------|-------|
+| **iNews** (AP) | `INEWS_API_URL` | REST API base URL; uses NEWSROOM_SYNC_INTERVAL_SECS (default 180s) |
+| **ENPS** (AP) | `ENPS_API_URL` | Alternative to iNews — set one or the other |
+
+#### Media Asset Management
+
+| System | Env vars | Notes |
+|--------|---------|-------|
+| **Avid Media Central** | `AVID_HOST`, `AVID_USERNAME`, `AVID_PASSWORD`, `AVID_WORKSPACE` | Set `AVID_MOCK_MODE=false` for real API calls |
+| **NMOS IS-04/IS-05** (Grass Valley) | `NMOS_REGISTRY_URL`, `NMOS_NODE_ID` | Set `NMOS_ENABLED=true` |
+
+---
+
+### Tier 4 — Scale-up infrastructure
+
+These are not configured in `settings.py` but required at production scale:
+
+| Service | Purpose | When to add |
+|---------|---------|-------------|
+| **AWS S3 / GCS** | Persistent storage for uploads, outputs, memory archives | Day 1 in production |
+| **Upstash Redis** | Managed Redis, per-request pricing, zero ops | Alternative to self-hosted Redis |
+| **Supabase / Neon / RDS** | Managed PostgreSQL | Alternative to self-hosted Postgres |
+| **Cloudflare / AWS ALB** | HTTPS termination + load balancer — required for Slack/Teams webhooks | Before going public |
+| **Datadog / Grafana Cloud** | Worker heartbeat monitoring, queue depth, agent success rate | When running > 2 workers |
+| **PagerDuty / OpsGenie** | Alert when `/ops/health` returns degraded | NOC / on-call integration |
+| **AWS Elemental / Harmonic VOS** | Broadcast-grade transcoding at scale | 24/7 live channel operations |
+| **Kubernetes + Helm** | Scale worker replicas independently with HPA | Multi-channel / multi-tenant scale |
+
+---
+
+### Complete `.env` Reference
+
+```bash
+# ══════════════════════════════════════════════
+# MODE
+# ══════════════════════════════════════════════
+PRODUCTION_MODE=true           # false = demo mode, no API keys needed
+
+# ══════════════════════════════════════════════
+# TIER 1 — AI & Runtime (always required)
+# ══════════════════════════════════════════════
+OPENAI_API_KEY=sk-...
+OPENAI_MODEL=gpt-4-turbo-preview
+OPENAI_WHISPER_MODEL=whisper-1
+
+ELEVENLABS_API_KEY=...
+ELEVENLABS_VOICE_ID=21m00Tcm4TlvDq8ikWAM
+
+REDIS_URL=redis://localhost:6379/0
+RUNTIME_DATABASE_URL=postgresql+asyncpg://user:pass@db-host:5432/mediaagentiq
+TASK_MAX_RETRIES=3
+TASK_RETRY_BACKOFF_SECONDS=5
+WORKER_CONCURRENCY=4
+WORKER_HEARTBEAT_INTERVAL_SECS=30
+AGENT_TIMEOUT_JSON={"deepfake": 90, "caption": 120, "ingest_transcode": 300}
+
+# ══════════════════════════════════════════════
+# TIER 2 — Channels
+# ══════════════════════════════════════════════
+SLACK_BOT_TOKEN=xoxb-...
+SLACK_SIGNING_SECRET=...
+SLACK_DEFAULT_CHANNEL=#mediaagentiq
+
+TEAMS_APP_ID=...
+TEAMS_APP_PASSWORD=...
+TEAMS_TENANT_ID=your-azure-tenant-id
+
+# ══════════════════════════════════════════════
+# TIER 3 — Broadcast Pipeline
+# ══════════════════════════════════════════════
+
+# Transcoding
+INGEST_USE_CLOUD=true
+AWS_MEDIACONVERT_ENDPOINT=https://xyz.mediaconvert.us-east-1.amazonaws.com
+AWS_MEDIACONVERT_ROLE_ARN=arn:aws:iam::123456789:role/MediaConvertRole
+AWS_MEDIAPACKAGE_CHANNEL_ID=miq-live-channel
+
+# CDN
+CDN_PROVIDER=cloudfront
+CDN_ORIGIN_URL=https://origin.yournetwork.com
+OTT_DRM_ENABLED=false
+
+# Playout
+AUTOMATION_SERVER_URL=http://harmonic-server:8080/api
+AUTOMATION_SERVER_TYPE=harmonic          # harmonic | gv_maestro | ross_overdrive
+
+# Newsroom
+INEWS_API_URL=http://inews-server/api
+NEWSROOM_SYNC_INTERVAL_SECS=180
+
+# MAM
+AVID_HOST=https://mediacentral.yournetwork.com
+AVID_USERNAME=miq-service
+AVID_PASSWORD=...
+AVID_WORKSPACE=Production
+AVID_MOCK_MODE=false
+
+# Signal routing (Grass Valley)
+NMOS_REGISTRY_URL=http://nmos-registry:3211
+NMOS_NODE_ID=miq-node-01
+NMOS_ENABLED=true
+
+# ══════════════════════════════════════════════
+# AGENT SETTINGS
+# ══════════════════════════════════════════════
+DEEPFAKE_RISK_THRESHOLD=0.60
+DEEPFAKE_AUTO_HOLD=true
+DEEPFAKE_SENSITIVITY=balanced
+
+FACT_CHECK_AUTO_ALERT=true
+FACT_CHECK_CLAIM_MIN_CONFIDENCE=0.70
+
+BRAND_SAFETY_DEFAULT_FLOOR=70
+BRAND_SAFETY_AUTO_BLOCK=true
+
+PRODUCTION_DIRECTOR_AUTO_ACCEPT=false
+
+CARBON_GRID_REGION=US_Northeast
+CARBON_ESG_REPORT_ENABLED=true
+
+# ══════════════════════════════════════════════
+# HOPE ENGINE
+# ══════════════════════════════════════════════
+HOPE_ENABLED=true
+HOPE_MAX_ALERTS_PER_HOUR=10
+HOPE_MUTE_START_HOUR=23
+HOPE_MUTE_END_HOUR=7
+
+# ══════════════════════════════════════════════
+# MEMORY
+# ══════════════════════════════════════════════
+MEMORY_ENABLED=true
+MEMORY_MAX_ENTRIES_PER_AGENT=500
+MEMORY_TRIM_TO=400
+MEMORY_RECENT_CONTEXT_ENTRIES=5
+```
+
+> **Demo mode:** Set `PRODUCTION_MODE=false` — all 19 agents return realistic mock data, the full Streamlit UI works including the ⚡ Live Runtime page. Redis is the only dependency you cannot mock.
+
+---
+
 ## 📈 Changelog
 
 ### v4.0.0 (Latest) — Live Runtime Edition
